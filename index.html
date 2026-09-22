@@ -1,0 +1,3250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一次関数マスタートレーナー</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX CSS & JS for Math Formula Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'M PLUS Rounded 1c', 'Inter', sans-serif;
+    }
+    .katex {
+      font-size: 1.1em;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+      70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+    .pulse-ring {
+      animation: pulseRing 2s infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .shimmer-badge {
+      background: linear-gradient(90deg, rgba(255,215,0,0.15) 0%, rgba(255,255,255,0.4) 50%, rgba(255,215,0,0.15) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 3s infinite;
+    }
+    @keyframes confettiDrop {
+      0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(120px) rotate(360deg); opacity: 0; }
+    }
+    .confetti-piece {
+      position: absolute;
+      animation: confettiDrop 2.2s ease-out infinite;
+    }
+    @keyframes floatHolo {
+      0%, 100% { transform: translateY(0px); filter: drop-shadow(0 10px 20px rgba(234, 179, 8, 0.35)); }
+      50% { transform: translateY(-6px); filter: drop-shadow(0 16px 28px rgba(234, 179, 8, 0.55)); }
+    }
+    .animate-badge-float {
+      animation: floatHolo 3.2s ease-in-out infinite;
+    }
+    @keyframes electricPulse {
+      0%, 100% { opacity: 0.85; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.03); }
+    }
+    .electric-glow {
+      animation: electricPulse 2s ease-in-out infinite;
+    }
+    @keyframes dragonGlow {
+      0%, 100% { box-shadow: 0 0 25px rgba(234, 179, 8, 0.4), 0 0 50px rgba(16, 185, 129, 0.2); }
+      50% { box-shadow: 0 0 40px rgba(234, 179, 8, 0.7), 0 0 80px rgba(16, 185, 129, 0.4); }
+    }
+    .dragon-aura {
+      animation: dragonGlow 3s ease-in-out infinite;
+    }
+    .badge-locked {
+      filter: grayscale(1) opacity(0.35);
+    }
+    .badge-unlocked {
+      filter: drop-shadow(0 2px 6px rgba(255, 215, 0, 0.4));
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-4 py-3 sm:px-6">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-2.5 cursor-pointer" onclick="app.showHome()">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30 text-white font-bold text-lg">
+          $f$
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
+            一次関数 <span class="text-xs bg-indigo-500/20 text-indigo-300 font-semibold px-2 py-0.5 rounded-full border border-indigo-500/30">Master</span>
+          </h1>
+          <p class="text-xs text-slate-400 hidden sm:block">傾き・切片・変化の割合・増加量の完全定着</p>
+        </div>
+      </div>
+
+      <!-- Center / Header Badges: Displays 5-streak and 10-streak badges for each difficulty -->
+      <div id="headerBadges" onclick="app.onHeaderBadgesClick()" class="flex items-center gap-1.5 sm:gap-2.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-slate-800/90 border border-slate-700/80 hover:border-amber-400/50 cursor-pointer text-[11px] transition shadow-sm" title="バッジコレクション（クリックで確認）">
+        <!-- Standard Streak Group -->
+        <div class="flex items-center gap-1 bg-slate-900/60 px-1.5 py-1 rounded-lg border border-slate-700/50">
+          <span class="text-[10px] font-bold text-amber-500/90 hidden md:inline">標準</span>
+          <div id="badge-standard-5" class="w-5 h-5 flex items-center justify-center badge-locked cursor-pointer transition transform hover:scale-110" title="標準 5連勝：未獲得"></div>
+          <div id="badge-standard-10" class="w-5 h-5 flex items-center justify-center badge-locked cursor-pointer transition transform hover:scale-110" title="標準 10連勝：未獲得"></div>
+        </div>
+        <!-- Advanced Streak Group -->
+        <div class="flex items-center gap-1 bg-slate-900/60 px-1.5 py-1 rounded-lg border border-slate-700/50">
+          <span class="text-[10px] font-bold text-cyan-400/90 hidden md:inline">発展</span>
+          <div id="badge-advanced-5" class="w-5 h-5 flex items-center justify-center badge-locked cursor-pointer transition transform hover:scale-110" title="発展 5連勝：未獲得"></div>
+          <div id="badge-advanced-10" class="w-5 h-5 flex items-center justify-center badge-locked cursor-pointer transition transform hover:scale-110" title="発展 10連勝：未獲得"></div>
+        </div>
+        <!-- Expert Streak Group -->
+        <div class="flex items-center gap-1 bg-slate-900/60 px-1.5 py-1 rounded-lg border border-slate-700/50">
+          <span class="text-[10px] font-bold text-yellow-400/90 hidden md:inline">超発展</span>
+          <div id="badge-expert-5" class="w-5 h-5 flex items-center justify-center badge-locked cursor-pointer transition transform hover:scale-110" title="超発展 5連勝：未獲得"></div>
+          <div id="badge-expert-10" class="w-5 h-5 flex items-center justify-center badge-locked cursor-pointer transition transform hover:scale-110" title="超発展 10連勝：未獲得"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <!-- Sound Toggle Button -->
+        <button id="soundToggleBtn" onclick="sound.toggle()" class="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition">
+          <span id="soundIcon">🔊</span>
+          <span class="hidden xs:inline" id="soundText">音: ON</span>
+        </button>
+
+        <!-- Wrong Questions Review Badge -->
+        <button onclick="app.showMistakesModal()" class="px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition">
+          <span>📝 復習帳</span>
+          <span id="mistakeBadge" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content View Area -->
+  <main class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+
+    <!-- VIEW 1: HOME / DIFFICULTY SELECTION -->
+    <div id="homeView" class="w-full space-y-6 animate-pop">
+      <div class="text-center space-y-2 mb-6">
+        <span class="inline-block text-xs font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full uppercase tracking-wider">
+          高校入試・定期テスト対策
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">挑戦する難易度を選んでください</h2>
+        <p class="text-sm text-slate-400 max-w-lg mx-auto">
+          設定した連続正解数を達成すると即時で合格！合格バッジを獲得できます。
+        </p>
+      </div>
+
+      <!-- Target Streak Selector Box -->
+      <div class="bg-gradient-to-r from-slate-800/90 via-indigo-950/40 to-slate-800/90 rounded-2xl p-4 sm:p-5 border border-indigo-500/30 shadow-lg max-w-2xl mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🎯</span>
+            <div>
+              <h3 class="text-sm font-bold text-white">合格目標：連続正解数を設定</h3>
+              <p class="text-[11px] text-slate-400">ミスせずに目標数連続で正解すると合格となります</p>
+            </div>
+          </div>
+          <div class="text-xs font-semibold text-indigo-300">
+            現在の目標: <span id="currentTargetDisplay" class="text-base font-extrabold text-amber-300">10</span> 問連続
+          </div>
+        </div>
+        
+        <!-- Target Streak Buttons (5問 / 10問) -->
+        <div class="grid grid-cols-2 gap-3 text-xs sm:text-sm font-bold max-w-md mx-auto" id="targetStreakBtnGroup">
+          <button type="button" onclick="app.setTargetStreak(5)" class="target-btn py-2.5 px-4 rounded-xl border border-slate-700 bg-slate-800/90 text-slate-300 hover:border-indigo-400 hover:text-white transition flex items-center justify-center gap-1.5" data-target="5">
+            <span>5問連続</span>
+          </button>
+          <button type="button" onclick="app.setTargetStreak(10)" class="target-btn py-2.5 px-4 rounded-xl border-2 border-indigo-500 bg-indigo-600/30 text-indigo-200 shadow-md transition flex items-center justify-center gap-1.5" data-target="10">
+            <span>10問連続</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Difficulty Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        
+        <!-- Standard Mode Card -->
+        <div class="relative bg-slate-800/90 rounded-2xl p-5 border border-emerald-500/30 hover:border-emerald-400 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                基礎固め
+              </span>
+              <span class="text-xs text-slate-400">全30問</span>
+            </div>
+            <h3 class="text-xl font-bold text-white group-hover:text-emerald-300 transition flex items-center gap-1.5">
+              <span>標準</span>
+            </h3>
+            
+            <!-- Streak Badges Container in Standard Card -->
+            <div class="flex items-center gap-2 mt-2 mb-3 p-2 rounded-xl bg-slate-900/60 border border-slate-700/60">
+              <div class="flex items-center gap-1.5 flex-1">
+                <div id="cardBadge-standard-5" class="w-7 h-7 flex-shrink-0 flex items-center justify-center badge-locked"></div>
+                <div class="text-left">
+                  <div class="text-[10px] text-slate-400 font-bold">5連勝</div>
+                  <div id="cardStatus-standard-5" class="text-[9px] text-slate-500 font-medium">未獲得</div>
+                </div>
+              </div>
+              <div class="w-px h-6 bg-slate-700"></div>
+              <div class="flex items-center gap-1.5 flex-1">
+                <div id="cardBadge-standard-10" class="w-7 h-7 flex-shrink-0 flex items-center justify-center badge-locked"></div>
+                <div class="text-left">
+                  <div class="text-[10px] text-slate-400 font-bold">10連勝</div>
+                  <div id="cardStatus-standard-10" class="text-[9px] text-slate-500 font-medium">未獲得</div>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-400 mb-4">問1, 2, 3, 5, 6, 7 ＆ 変化の割合の増減計算</p>
+            <ul class="text-xs text-slate-300 space-y-1.5 mb-6">
+              <li class="flex items-center gap-1.5"><span class="text-emerald-400">✔</span> 式からの傾き・切片の即答</li>
+              <li class="flex items-center gap-1.5"><span class="text-emerald-400">✔</span> $ax + by = c$ の基本変形</li>
+              <li class="flex items-center gap-1.5"><span class="text-emerald-400">✔</span> $x$の増加・$y$の減少から変化の割合</li>
+            </ul>
+          </div>
+          <button onclick="app.startQuiz('standard')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
+            <span>標準をスタート</span>
+            <span>→</span>
+          </button>
+        </div>
+
+        <!-- Advanced Mode Card -->
+        <div class="relative bg-slate-800/90 rounded-2xl p-5 border border-blue-500/30 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                実力養成
+              </span>
+              <span class="text-xs text-slate-400">全45問</span>
+            </div>
+            <h3 class="text-xl font-bold text-white group-hover:text-blue-300 transition flex items-center gap-1.5">
+              <span>発展</span>
+            </h3>
+
+            <!-- Streak Badges Container in Advanced Card -->
+            <div class="flex items-center gap-2 mt-2 mb-3 p-2 rounded-xl bg-slate-900/60 border border-slate-700/60">
+              <div class="flex items-center gap-1.5 flex-1">
+                <div id="cardBadge-advanced-5" class="w-7 h-7 flex-shrink-0 flex items-center justify-center badge-locked"></div>
+                <div class="text-left">
+                  <div class="text-[10px] text-slate-400 font-bold">5連勝</div>
+                  <div id="cardStatus-advanced-5" class="text-[9px] text-slate-500 font-medium">未獲得</div>
+                </div>
+              </div>
+              <div class="w-px h-6 bg-slate-700"></div>
+              <div class="flex items-center gap-1.5 flex-1">
+                <div id="cardBadge-advanced-10" class="w-7 h-7 flex-shrink-0 flex items-center justify-center badge-locked"></div>
+                <div class="text-left">
+                  <div class="text-[10px] text-slate-400 font-bold">10連勝</div>
+                  <div id="cardStatus-advanced-10" class="text-[9px] text-slate-500 font-medium">未獲得</div>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-400 mb-4">問8〜10, 14〜17 ＆ 分数式・平行移動・グラフの性質</p>
+            <ul class="text-xs text-slate-300 space-y-1.5 mb-6">
+              <li class="flex items-center gap-1.5"><span class="text-blue-400">✔</span> $y$ 軸の正・負への平行移動の式・空欄補充</li>
+              <li class="flex items-center gap-1.5"><span class="text-blue-400">✔</span> $y = -\frac{3x-5}{4}$ の傾き・切片・増加量</li>
+              <li class="flex items-center gap-1.5"><span class="text-blue-400">✔</span> 2点を通る直線の式・増加量の逆算</li>
+            </ul>
+          </div>
+          <button onclick="app.startQuiz('advanced')" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2">
+            <span>発展をスタート</span>
+            <span>→</span>
+          </button>
+        </div>
+
+        <!-- Super Advanced Mode Card -->
+        <div class="relative bg-slate-800/90 rounded-2xl p-5 border border-purple-500/30 hover:border-purple-400 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                難関・応用
+              </span>
+              <span class="text-xs text-slate-400">全25問</span>
+            </div>
+            <h3 class="text-xl font-bold text-white group-hover:text-purple-300 transition flex items-center gap-1.5">
+              <span>超発展</span>
+            </h3>
+
+            <!-- Streak Badges Container in Expert Card -->
+            <div class="flex items-center gap-2 mt-2 mb-3 p-2 rounded-xl bg-slate-900/60 border border-slate-700/60">
+              <div class="flex items-center gap-1.5 flex-1">
+                <div id="cardBadge-expert-5" class="w-7 h-7 flex-shrink-0 flex items-center justify-center badge-locked"></div>
+                <div class="text-left">
+                  <div class="text-[10px] text-slate-400 font-bold">5連勝</div>
+                  <div id="cardStatus-expert-5" class="text-[9px] text-slate-500 font-medium">未獲得</div>
+                </div>
+              </div>
+              <div class="w-px h-6 bg-slate-700"></div>
+              <div class="flex items-center gap-1.5 flex-1">
+                <div id="cardBadge-expert-10" class="w-7 h-7 flex-shrink-0 flex items-center justify-center badge-locked"></div>
+                <div class="text-left">
+                  <div class="text-[10px] text-slate-400 font-bold">10連勝</div>
+                  <div id="cardStatus-expert-10" class="text-[9px] text-slate-500 font-medium">未獲得</div>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-400 mb-4">問11, 12, 13, 18 ＆ 反比例の変化の割合</p>
+            <ul class="text-xs text-slate-300 space-y-1.5 mb-6">
+              <li class="flex items-center gap-1.5"><span class="text-purple-400">✔</span> 増加量から傾き $a$ の逆算</li>
+              <li class="flex items-center gap-1.5"><span class="text-purple-400">✔</span> 変域からの定数 $a, b$ の特定</li>
+              <li class="flex items-center gap-1.5"><span class="text-purple-400">✔</span> $y = -\frac{a}{x}$ の変化の割合の計算</li>
+            </ul>
+          </div>
+          <button onclick="app.startQuiz('expert')" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-lg shadow-purple-600/30 transition flex items-center justify-center gap-2">
+            <span>超発展をスタート</span>
+            <span>→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Formula Review Accordion/Bar -->
+      <div class="bg-slate-800/60 rounded-2xl p-4 border border-slate-700/80">
+        <details class="group cursor-pointer">
+          <summary class="flex items-center justify-between font-semibold text-sm text-slate-300 group-hover:text-white transition">
+            <span class="flex items-center gap-2">
+              <span>💡</span>
+              <span>一次関数の最重要公式まとめ（解く前の確認）</span>
+            </span>
+            <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="mt-4 pt-3 border-t border-slate-700 text-xs text-slate-300 grid grid-cols-1 sm:grid-cols-2 gap-3 leading-relaxed">
+            <div class="bg-slate-900/50 p-2.5 rounded-xl border border-slate-700/50">
+              <p class="font-bold text-indigo-300">① 基本の式</p>
+              <p>$y = ax + b$ （$a$：傾き・変化の割合, $b$：切片）</p>
+            </div>
+            <div class="bg-slate-900/50 p-2.5 rounded-xl border border-slate-700/50">
+              <p class="font-bold text-indigo-300">② 変化の割合の公式</p>
+              <p>$\text{変化の割合} = \dfrac{y\text{の増加量}}{x\text{の増加量}} = a$ （常に一定）</p>
+            </div>
+            <div class="bg-slate-900/50 p-2.5 rounded-xl border border-slate-700/50">
+              <p class="font-bold text-indigo-300">③ 増加量の計算</p>
+              <p>$y\text{の増加量} = a \times (x\text{の増加量})$</p>
+            </div>
+            <div class="bg-slate-900/50 p-2.5 rounded-xl border border-slate-700/50">
+              <p class="font-bold text-indigo-300">④ 増加量の定義</p>
+              <p>増加量 = $(\text{変化後の値}) - (\text{変化前の値})$</p>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Reset Data Area (Small and discrete at the bottom of the home view) -->
+      <div class="pt-2 pb-2 text-center flex flex-col items-center justify-center">
+        <!-- Confirmation Box (Displayed upon clicking the reset trigger) -->
+        <div id="resetConfirmGroup" class="hidden flex-wrap items-center justify-center gap-2 p-2.5 px-3.5 rounded-xl bg-slate-900/90 border border-rose-500/40 text-xs shadow-lg animate-pop">
+          <span class="text-rose-300 font-medium">⚠️ 全難易度のバッジと復習履歴を初期化しますか？</span>
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="app.executeFullReset()" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg shadow transition">
+              リセット実行
+            </button>
+            <button type="button" onclick="app.cancelFullReset()" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition">
+              キャンセル
+            </button>
+          </div>
+        </div>
+
+        <!-- Frieza Saga Unlock Banner (Visible when all 6 badges are acquired) -->
+        <div id="friezaSecretBanner" class="hidden mb-4 p-5 rounded-2xl bg-gradient-to-r from-purple-950 via-fuchsia-950 to-slate-950 border-2 border-fuchsia-500/80 shadow-2xl shadow-fuchsia-500/20 text-center animate-pop relative overflow-hidden">
+          <div class="relative z-10 space-y-2">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-black bg-fuchsia-500 text-slate-950 tracking-wider">
+              ★ EXTREME SECRET MODE UNLOCKED ★
+            </span>
+            <h3 class="text-xl sm:text-2xl font-black text-white tracking-wide">
+              宇宙の帝王降臨！【フリーザ編】解放！！
+            </h3>
+            <p class="text-xs text-purple-200 max-w-md mx-auto">
+              全6種類の勲章を獲得した貴様なら、私の一次関数にも耐えられるはずですね…？
+            </p>
+            <div class="pt-2 flex flex-wrap justify-center gap-3">
+              <button onclick="app.showSpecialGrandClearScreen()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-amber-500/20 transition transform hover:scale-105 inline-flex items-center gap-1.5">
+                <span>🏆 バッジ完全制覇の画面へ</span>
+              </button>
+              <button onclick="app.showFriezaLobby()" class="px-6 py-2.5 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-extrabold text-sm rounded-xl shadow-lg shadow-fuchsia-600/30 transition transform hover:scale-105 inline-flex items-center gap-2">
+                <span>👽 フリーザ編に挑む</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Initial Small Trigger Button -->
+          <button id="resetInitBtn" type="button" onclick="app.promptFullReset()" class="text-[11px] text-slate-500 hover:text-rose-400 transition inline-flex items-center gap-1 py-1 px-2.5 rounded-lg hover:bg-slate-800/60">
+            <span>⚙️ バッジと履歴をリセット</span>
+          </button>
+          <!-- Password Input Trigger Button -->
+          <button type="button" onclick="app.showPasswordModal()" class="text-[11px] text-indigo-400 hover:text-indigo-300 transition inline-flex items-center gap-1 py-1 px-2.5 rounded-lg hover:bg-purple-950/40">
+            <span>🔑 パスワード入力</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: FRIEZA LOBBY SCREEN -->
+    <div id="friezaLobbyView" class="hidden w-full max-w-xl mx-auto space-y-6 animate-pop">
+      <div class="bg-slate-950 border-2 border-fuchsia-500/80 rounded-3xl p-6 sm:p-8 text-center shadow-2xl shadow-fuchsia-500/20 relative overflow-hidden">
+        <div class="w-16 h-16 mx-auto rounded-full bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40 flex items-center justify-center text-3xl mb-3">
+          👽
+        </div>
+        <span class="inline-block px-3 py-1 rounded-full text-[11px] font-black bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40 tracking-wider mb-2">
+          LORD FRIEZA SAGA
+        </span>
+        <h2 class="text-2xl font-black text-white mb-2">
+          私の戦闘力は53万です
+        </h2>
+        <p class="text-xs text-purple-300 mb-8 leading-relaxed">
+          「ぜったいに許さんぞ虫ケラども…！じわじわとなぶり殺しにしてくれる！！<br>
+          目標の<span class="font-bold text-fuchsia-400 text-sm">5</span>問連続正解、果たして耐えられますかな？」
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button onclick="app.startFriezaBattle()" class="px-6 py-3 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white text-sm font-black rounded-xl shadow-lg shadow-fuchsia-600/30 transition flex items-center justify-center gap-2">
+            <span>🔥 戦闘開始</span>
+            <span>→</span>
+          </button>
+          <button onclick="app.showHome()" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold rounded-xl transition">
+            🏠 難易度選択に戻る
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 2: QUIZ PLAY SCREEN -->
+    <div id="quizView" class="hidden w-full space-y-4 animate-pop">
+      
+      <!-- Quiz Header & Progress -->
+      <div id="quizHeaderContainer" class="bg-slate-800/80 rounded-2xl p-4 border border-slate-700/80 shadow-md">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span id="quizDiffBadge" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full uppercase bg-blue-500/20 text-blue-300 border border-blue-500/30">
+              標準
+            </span>
+            <span class="text-xs text-slate-400 font-medium">
+              第 <span id="currentQNum" class="text-white font-bold text-sm">1</span> / <span id="totalQNum">20</span> 問
+            </span>
+            <span id="friezaPowerDisplay" class="text-[11px] font-mono font-bold text-emerald-400 ml-2 hidden sm:inline"></span>
+          </div>
+
+          <!-- Streak & Score Counter -->
+          <div class="flex items-center gap-3 text-xs">
+            <div class="flex items-center gap-1 text-amber-400 font-bold bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/20">
+              <span>🔥 連続:</span>
+              <span id="streakCount" class="text-amber-300 text-sm">0</span>
+              <span class="text-slate-400 font-normal">/ 目標 <span id="quizTargetDisplay">10</span></span>
+            </div>
+            <div class="text-slate-300 font-medium hidden sm:block">
+              正解数: <span id="correctScore" class="text-emerald-400 font-bold text-sm">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
+          <div id="quizProgressBar" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full w-0 transition-all duration-300"></div>
+        </div>
+      </div>
+
+      <!-- Frieza Dialog Box -->
+      <div id="friezaSpeechBox" class="hidden bg-slate-950/90 border border-fuchsia-500/60 rounded-2xl p-3 sm:p-4 shadow-lg text-xs sm:text-sm text-fuchsia-200 animate-pop flex items-start gap-3">
+        <span class="text-2xl flex-shrink-0">👽</span>
+        <div class="leading-relaxed font-medium">
+          <p id="friezaSpeechText">「ホッホッホ…さあ、私の一次関数に答えられますか？」</p>
+        </div>
+      </div>
+
+      <!-- Question Card -->
+      <div id="questionCard" class="bg-slate-800 rounded-2xl p-5 sm:p-7 border border-slate-700 shadow-xl relative overflow-hidden transition-all duration-300">
+        <div class="flex items-start justify-between gap-4 mb-4">
+          <span class="text-xs font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-lg">
+            問題
+          </span>
+          <button onclick="app.exitQuiz()" class="text-xs text-slate-400 hover:text-slate-200 transition">
+            ✕ 中断して戻る
+          </button>
+        </div>
+
+        <!-- Question Text (KaTeX target) -->
+        <div id="questionText" class="text-base sm:text-lg text-slate-100 font-semibold leading-relaxed mb-2 min-h-[50px]">
+          <!-- Dynamic Content -->
+        </div>
+
+        <!-- Sub text / Note if needed -->
+        <div id="questionSubtext" class="text-xs text-slate-400 hidden mb-4"></div>
+      </div>
+
+      <!-- 4 Options Grid -->
+      <div id="optionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <!-- 4 buttons dynamically inserted here -->
+      </div>
+
+      <!-- Answer Feedback & Explanation Box -->
+      <div id="feedbackBox" class="hidden rounded-2xl p-5 border transition-all duration-300 animate-pop">
+        <div class="flex items-center justify-between mb-3">
+          <div id="feedbackHeader" class="flex items-center gap-2 text-base font-bold">
+            <!-- Correct/Wrong message with icon -->
+          </div>
+          <button id="nextBtn" onclick="app.nextQuestion()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition flex items-center gap-1">
+            <span>次へ進む</span>
+            <span>→</span>
+          </button>
+        </div>
+        <div class="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-slate-700/60 pt-3" id="explanationText">
+          <!-- KaTeX-rendered explanation -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- VIEW 3: RESULTS SCREEN -->
+    <div id="resultView" class="hidden w-full max-w-xl mx-auto space-y-6 animate-pop">
+      <div class="bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-700 text-center shadow-2xl relative overflow-hidden">
+        <div class="w-16 h-16 mx-auto rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center justify-center text-3xl mb-4">
+          🏆
+        </div>
+        <h2 class="text-2xl font-extrabold text-white mb-1">演習終了！お疲れ様でした</h2>
+        <p class="text-xs text-slate-400 mb-6">今回の難易度での理解度をチェックしましょう</p>
+
+        <!-- Score Ring / Box -->
+        <div class="bg-slate-900/70 rounded-2xl p-5 border border-slate-700/70 max-w-xs mx-auto mb-6">
+          <p class="text-xs text-slate-400 font-medium mb-1">正解数</p>
+          <div class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400">
+            <span id="finalScore">18</span> <span class="text-slate-400 text-2xl">/ 20</span>
+          </div>
+          <p id="gradeComment" class="text-xs font-bold text-emerald-400 mt-2">素晴らしい理解度です！</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button onclick="app.retryCurrentQuiz()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-500/20 transition flex items-center justify-center gap-1.5">
+            <span>🔄 もう一度挑戦</span>
+          </button>
+          <button onclick="app.showHome()" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-bold rounded-xl transition flex items-center justify-center gap-1.5">
+            <span>🏠 難易度選択に戻る</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mistake Review Trigger in Result Screen -->
+      <div id="resultMistakesSummary" class="hidden bg-slate-800/80 rounded-2xl p-4 border border-rose-500/30">
+        <div class="flex items-center justify-between">
+          <div class="text-xs text-slate-300">
+            <span class="font-bold text-rose-400">間違えた問題が保存されました</span>（復習帳でいつでも再復習できます）
+          </div>
+          <button onclick="app.showMistakesModal()" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold rounded-lg transition">
+            間違えた問題を見る
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: VICTORY / PASSED SCREEN (For standard, advanced, expert) -->
+    <div id="victoryView" class="hidden w-full max-w-xl mx-auto space-y-6 animate-pop">
+      <div class="relative bg-gradient-to-b from-slate-800 via-indigo-950/70 to-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-amber-400/60 text-center shadow-2xl overflow-hidden">
+        
+        <!-- Subtle Confetti Elements -->
+        <div class="absolute inset-0 pointer-events-none overflow-hidden" id="confettiContainer">
+          <div class="confetti-piece w-2 h-3 bg-amber-400 rounded-sm left-[15%] top-2"></div>
+          <div class="confetti-piece w-2.5 h-2.5 bg-rose-400 rounded-full left-[35%] top-6" style="animation-delay: 0.4s;"></div>
+          <div class="confetti-piece w-3 h-2 bg-emerald-400 rounded-sm left-[60%] top-3" style="animation-delay: 0.7s;"></div>
+          <div class="confetti-piece w-2 h-2.5 bg-blue-400 rounded-full left-[80%] top-5" style="animation-delay: 0.2s;"></div>
+          <div class="confetti-piece w-2 h-3 bg-purple-400 rounded-sm left-[50%] top-1" style="animation-delay: 0.9s;"></div>
+        </div>
+
+        <div class="w-32 h-32 mx-auto relative mb-4 flex items-center justify-center">
+          <!-- Hologram Platform Rings -->
+          <div class="absolute -bottom-2 w-28 h-6 rounded-[100%] bg-amber-500/20 blur-[3px] border border-amber-400/40"></div>
+          <div class="absolute -bottom-3 w-36 h-7 rounded-[100%] bg-indigo-500/15 blur-[6px]"></div>
+          
+          <!-- Dynamic 3D Badge Holder -->
+          <div id="victoryBadgeHero" class="w-28 h-28 relative z-10 animate-badge-float">
+            <!-- Dynamic SVG inserted here -->
+          </div>
+        </div>
+
+        <span class="inline-block text-xs font-extrabold text-amber-300 bg-amber-500/20 border border-amber-500/40 px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+          TARGET ACCOMPLISHED!
+        </span>
+        
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">
+          合格おめでとうございます！
+        </h2>
+
+        <p class="text-xs sm:text-sm text-slate-300 mb-6 leading-relaxed max-w-md mx-auto">
+          難易度【<span id="victoryDiffName" class="font-bold text-amber-300">標準</span>】で、目標の<span id="victoryTargetStreakNum" class="font-bold text-amber-300">10</span>問連続正解を達成しました！
+        </p>
+
+        <!-- Acquired Badge Display -->
+        <div class="bg-slate-900/80 rounded-2xl p-4 sm:p-5 border border-amber-400/30 max-w-sm mx-auto mb-6 shadow-inner shimmer-badge">
+          <p class="text-[11px] text-amber-300 font-bold mb-1.5 uppercase tracking-wider">ACQUIRED DIGITAL EMBLEM</p>
+          <div class="flex items-center justify-center gap-3">
+            <div id="victoryBadgeThumb" class="w-10 h-10 flex-shrink-0"></div>
+            <div class="text-left">
+              <div id="victoryBadgeTitle" class="text-lg font-black text-white leading-tight">標準マスター</div>
+              <div id="victoryBadgeSubtitle" class="text-[11px] text-amber-300/90 font-mono font-bold">STANDARD LEVEL</div>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">画面上部の合格勲章バーに正式登録されました！</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button onclick="app.continueQuizAfterVictory()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-500/30 transition flex items-center justify-center gap-1.5">
+            <span>⏩ このまま演習を最後まで続ける</span>
+          </button>
+          <button onclick="app.showHome()" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-bold rounded-xl transition flex items-center justify-center gap-1.5">
+            <span>🏠 難易度選択に戻る</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- VIEW 5: FRIEZA SAGA CLEARED - SHENRON ENDING VIEW (神龍出現・終了画面) -->
+    <div id="shenronView" class="hidden w-full max-w-2xl mx-auto space-y-6 animate-pop">
+      <div class="relative bg-gradient-to-b from-slate-950 via-slate-900 to-amber-950/40 rounded-3xl p-5 sm:p-8 border-2 border-amber-400/80 text-center shadow-2xl overflow-hidden dragon-aura">
+        
+        <!-- Header Tag -->
+        <div class="mb-3">
+          <span class="inline-block px-4 py-1.5 rounded-full text-xs sm:text-sm font-black bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 uppercase tracking-widest shadow-lg shadow-amber-400/30">
+            ★ MISSION ACCOMPLISHED ★
+          </span>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-orange-400 mb-2">
+          神龍（シェンロン）出現！一次関数完全制覇！
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 mb-5 leading-relaxed max-w-lg mx-auto">
+          宇宙の帝王フリーザを撃破し、ついに7つのドラゴンボールが集まった！
+        </p>
+
+        <!-- Shenron Image Display -->
+        <div class="relative max-w-xl mx-auto rounded-2xl overflow-hidden border-2 border-amber-400/70 shadow-2xl mb-6 bg-black/60 group">
+          <img 
+            id="shenronImage" 
+            src="shenron.jpg" 
+            onerror="this.onerror=null; this.src='C:/Users/mari/.gemini/antigravity/brain/681ce89e-89ee-4e57-8b37-fbb1d0d68be7/.user_uploaded/media_1789439261600.jpg';"
+            alt="神龍出現" 
+            class="w-full h-auto object-contain block transition duration-700 hover:scale-[1.02]"
+          />
+        </div>
+
+        <!-- Shenron Dialogue Box -->
+        <div class="bg-slate-950/90 rounded-2xl p-4 sm:p-5 border border-amber-400/40 max-w-lg mx-auto mb-6 text-left shadow-lg">
+          <div class="flex items-center gap-2 mb-2 text-amber-300 font-extrabold text-sm">
+            <span>🐉</span>
+            <span>神龍：</span>
+          </div>
+          <p class="text-xs sm:text-sm text-amber-100 font-bold leading-relaxed">
+            「さあ、願いを言え……<br>
+            どんな願いも、ひとつだけ かなえてやろう……！」
+          </p>
+          <div class="mt-3 pt-3 border-t border-slate-800 text-[11px] sm:text-xs text-slate-400 leading-relaxed">
+            おめでとうございます！あなたは一次関数の全関門（標準・発展・超発展・フリーザ編）を完璧にマスターしました！この画面で演習は終了となります。
+          </div>
+        </div>
+
+        <!-- Finish / Exit Actions -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          <button onclick="app.showHome()" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 text-sm font-black rounded-xl shadow-lg shadow-amber-500/30 transition flex items-center justify-center gap-2 transform hover:scale-105">
+            <span>🏠 終了してタイトル画面に戻る</span>
+          </button>
+          <button onclick="app.exitAppWindow()" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold rounded-xl transition flex items-center justify-center gap-2 border border-slate-700">
+            <span>✕ アプリを閉じる</span>
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-3">※「アプリを閉じる」で閉じない場合は、ブラウザのタブを閉じて終了してください。</p>
+
+      </div>
+    </div>
+
+    <!-- VIEW 6: SPECIAL GRAND CLEAR VIEW (全6バッジ制覇 特別合格画面 ＆ 3秒後にフリーザ出現) -->
+    <div id="specialClearView" class="hidden w-full max-w-2xl mx-auto space-y-6 animate-pop">
+      
+      <!-- STEP 1: 特別に豪華な全バッジ制覇 合格画面 -->
+      <div id="grandVictoryStep" class="relative bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-amber-400 text-center shadow-2xl overflow-hidden shimmer-badge">
+        <div class="mb-3">
+          <span class="inline-block px-4 py-1.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-slate-950 uppercase tracking-widest shadow-lg shadow-amber-400/30">
+            ★ GRAND MASTER UNLOCKED ★
+          </span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-400 mb-2">
+          全6種の合格勲章 完全制覇！
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 mb-6">
+          標準・発展・超発展、すべての試練を突破しました！
+        </p>
+
+        <!-- 6 Badges Display Grid -->
+        <div id="grandBadgesContainer" class="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 p-4 rounded-2xl bg-slate-950/70 border border-amber-400/40 max-w-lg mx-auto mb-6 shadow-inner">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div class="p-3 bg-slate-900/80 rounded-xl border border-indigo-500/40 max-w-sm mx-auto">
+          <p class="text-xs text-indigo-300 font-bold flex items-center justify-center gap-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+            <span>異次元から巨大な気配が接近中…… (3秒後)</span>
+          </p>
+        </div>
+
+        <div class="mt-3 flex justify-center">
+          <button onclick="app.skipToFriezaInvasion()" class="text-xs text-indigo-300/80 hover:text-white underline transition">
+            ▶ 待たずに進む
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: 3秒後に出現する frieza.png とパスワード表示 -->
+      <div id="friezaInvasionStep" class="hidden relative bg-gradient-to-b from-purple-950 via-slate-950 to-purple-950 rounded-3xl p-5 sm:p-8 border-2 border-fuchsia-500 text-center shadow-2xl overflow-hidden animate-pop">
+        <div class="mb-3">
+          <span class="inline-block px-4 py-1.5 rounded-full text-xs font-black bg-fuchsia-500 text-slate-950 uppercase tracking-widest shadow-lg shadow-fuchsia-500/50 animate-pulse">
+            ⚠️ WARNING: LORD FRIEZA INVASION ⚠️
+          </span>
+        </div>
+        
+        <!-- frieza.png Display -->
+        <div class="relative max-w-xl mx-auto rounded-2xl overflow-hidden border-2 border-fuchsia-500/80 shadow-2xl mb-5 bg-black">
+          <img 
+            id="friezaImage" 
+            src="frieza.png" 
+            alt="フリーザ降臨" 
+            class="w-full h-auto object-contain block"
+          />
+        </div>
+
+        <!-- Password Display Box -->
+        <div class="bg-purple-950/90 rounded-2xl p-4 sm:p-5 border-2 border-fuchsia-400/80 max-w-md mx-auto mb-6 shadow-xl">
+          <div class="text-[11px] text-fuchsia-300 font-bold uppercase tracking-widest mb-1">
+            SECRET PASSCODE (解除コード)
+          </div>
+          <div class="text-2xl sm:text-3xl font-black font-mono text-yellow-300 tracking-widest selection:bg-fuchsia-500 py-1">
+            141421356
+          </div>
+          <p class="text-xs text-purple-200 mt-2 font-medium">
+            「ホッホッホ…私の一次関数に耐えられるかな？」<br>
+            極限の隠し難易度【フリーザ編】が解放されました！
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button onclick="app.showFriezaLobby()" class="px-6 py-3 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white text-sm font-black rounded-xl shadow-lg shadow-fuchsia-600/30 transition transform hover:scale-105 flex items-center justify-center gap-2">
+            <span>👽 フリーザ編に挑む</span>
+            <span>→</span>
+          </button>
+          <button onclick="app.showHome()" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold rounded-xl transition border border-slate-700">
+            <span>🏠 難易度選択に戻る</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MODAL: MISTAKE HISTORY & REVIEW -->
+  <div id="mistakesModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-pop">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-800/40">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">📝</span>
+          <h3 class="text-base font-bold text-white">間違えた問題の復習帳</h3>
+        </div>
+        <button onclick="app.closeMistakesModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Body (List of mistakes) -->
+      <div id="mistakesList" class="p-6 overflow-y-auto space-y-4 flex-grow text-xs sm:text-sm">
+        <!-- Dynamically rendered wrong questions -->
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div class="px-6 py-3 border-t border-slate-800 bg-slate-800/40 flex items-center justify-between">
+        <button onclick="app.clearMistakesHistory()" class="text-xs text-rose-400 hover:text-rose-300 transition">
+          🗑 履歴をリセット
+        </button>
+        <button onclick="app.startMistakesReviewQuiz()" id="startReviewBtn" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-600/20 transition disabled:opacity-40 disabled:cursor-not-allowed">
+          間違えた問題だけで特訓（<span id="reviewCountSpan">0</span>問）
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: SECRET PASSWORD INPUT -->
+  <div id="passwordModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-indigo-500/50 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl animate-pop">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center justify-center text-2xl mb-3">
+        🔑
+      </div>
+      <h3 class="text-base font-bold text-white mb-1">シークレットパスワード入力</h3>
+      <p class="text-xs text-slate-400 mb-4">解除コードを入力してください</p>
+      
+      <form onsubmit="event.preventDefault(); app.submitPassword();">
+        <input 
+          type="text" 
+          id="secretPasswordInput" 
+          autocomplete="off" 
+          placeholder="パスワードを入力" 
+          class="w-full bg-slate-950 border border-slate-700 focus:border-indigo-500 text-white text-center font-mono text-lg tracking-widest rounded-xl py-2.5 px-3 mb-1 focus:outline-none transition shadow-inner"
+        />
+        <p id="passwordErrorMsg" class="text-xs text-rose-400 font-bold min-h-[20px] mb-3"></p>
+
+        <div class="flex gap-2">
+          <button type="button" onclick="app.closePasswordModal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">
+            キャンセル
+          </button>
+          <button type="submit" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition">
+            決定
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom Alert Toast Box -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 border border-slate-700 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl z-50 opacity-0 pointer-events-none transition-all duration-300">
+    Notification
+  </div>
+
+  <!-- Footer Info -->
+  <footer class="border-t border-slate-800/80 py-3 text-center text-xs text-slate-400">
+    <p>© 一次関数マスター トレーナー | Web Audio & KaTeX Powered</p>
+  </footer>
+
+  <script>
+    /**
+     * Web Audio API Synthesizer for UI sound effects (No external audio file dependencies)
+     */
+    class SoundManager {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      initCtx() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggle() {
+        this.enabled = !this.enabled;
+        const soundIcon = document.getElementById('soundIcon');
+        const soundText = document.getElementById('soundText');
+        if (this.enabled) {
+          soundIcon.innerText = '🔊';
+          soundText.innerText = '音: ON';
+          this.playCorrect();
+        } else {
+          soundIcon.innerText = '🔇';
+          soundText.innerText = '音: OFF';
+        }
+      }
+
+      // Pleasant bright chord for Correct Answer
+      playCorrect() {
+        if (!this.enabled) return;
+        this.initCtx();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+
+        notes.forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + i * 0.08);
+
+          gain.gain.setValueAtTime(0, now + i * 0.08);
+          gain.gain.linearRampToValueAtTime(0.15, now + i * 0.08 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.4);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now + i * 0.08);
+          osc.stop(now + i * 0.08 + 0.45);
+        });
+      }
+
+      // Dull low buzzer for Incorrect Answer
+      playWrong() {
+        if (!this.enabled) return;
+        this.initCtx();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.linearRampToValueAtTime(140, now + 0.28);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.32);
+      }
+
+      // Soft button click sound
+      playClick() {
+        if (!this.enabled) return;
+        this.initCtx();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
+
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+
+      // Bright triumphant fanfare chord for Victory / Pass Target
+      playVictory() {
+        if (!this.enabled) return;
+        this.initCtx();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+
+        const fanfareNotes = [
+          { freq: 523.25, start: 0, dur: 0.12 },     // C5
+          { freq: 659.25, start: 0.12, dur: 0.12 },  // E5
+          { freq: 783.99, start: 0.24, dur: 0.12 },  // G5
+          { freq: 1046.50, start: 0.36, dur: 0.35 }  // C6
+        ];
+
+        fanfareNotes.forEach(item => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(item.freq, now + item.start);
+
+          gain.gain.setValueAtTime(0, now + item.start);
+          gain.gain.linearRampToValueAtTime(0.2, now + item.start + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + item.start + item.dur);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now + item.start);
+          osc.stop(now + item.start + item.dur);
+        });
+
+        const chordNotes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+        chordNotes.forEach(freq => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + 0.45);
+
+          gain.gain.setValueAtTime(0, now + 0.45);
+          gain.gain.linearRampToValueAtTime(0.12, now + 0.49);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now + 0.45);
+          osc.stop(now + 1.65);
+        });
+      }
+
+      // Bright, sparkling, triumphant Fanfare for Frieza Defeat & Shenron Ending
+      playShenronSummon() {
+        if (!this.enabled) return;
+        this.initCtx();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+
+        // 1. Brilliant, sparkling chime arpeggio (Glittering dragon ball magic)
+        const chimeNotes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98, 2093.00]; // C5 to C7
+        chimeNotes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          const noteStart = now + idx * 0.08;
+          osc.frequency.setValueAtTime(freq, noteStart);
+
+          gain.gain.setValueAtTime(0, noteStart);
+          gain.gain.linearRampToValueAtTime(0.18, noteStart + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, noteStart + 0.5);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(noteStart);
+          osc.stop(noteStart + 0.55);
+        });
+
+        // 2. Bright celebratory melodic fanfare (High triumphant brass lead)
+        const melody = [
+          { freq: 783.99,  time: 0.58, dur: 0.16 }, // G5
+          { freq: 1046.50, time: 0.74, dur: 0.16 }, // C6
+          { freq: 1318.51, time: 0.90, dur: 0.20 }, // E6
+          { freq: 1567.98, time: 1.10, dur: 0.55 }  // G6 (High glorious peak!)
+        ];
+
+        melody.forEach(m => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          const t = now + m.time;
+          osc.frequency.setValueAtTime(m.freq, t);
+
+          gain.gain.setValueAtTime(0, t);
+          gain.gain.linearRampToValueAtTime(0.22, t + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + m.dur);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t);
+          osc.stop(t + m.dur + 0.05);
+        });
+
+        // 3. Resonant Grand Master Chord (Bright Major Harmony ringing out)
+        const grandHarmony = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+        grandHarmony.forEach(freq => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          const chordStart = now + 1.10;
+          osc.frequency.setValueAtTime(freq, chordStart);
+
+          gain.gain.setValueAtTime(0, chordStart);
+          gain.gain.linearRampToValueAtTime(0.13, chordStart + 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.0001, chordStart + 2.5);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(chordStart);
+          osc.stop(chordStart + 2.6);
+        });
+      }
+
+      // Sharp Death Beam sound for Frieza attack
+      playDeathBeam() {
+        if (!this.enabled) return;
+        this.initCtx();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(1400, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.35);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.36);
+      }
+
+      // High-pitched Scouter beep sound
+      playScouterBeep() {
+        if (!this.enabled) return;
+        this.initCtx();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        [0, 0.08, 0.16].forEach(offset => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1900, now + offset);
+          gain.gain.setValueAtTime(0.08, now + offset);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.05);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + offset);
+          osc.stop(now + offset + 0.06);
+        });
+      }
+    }
+
+    const sound = new SoundManager();
+
+    const BADGE_ASSETS = {
+      standard: {
+        5: (size = 100) => `
+          <svg viewBox="0 0 100 100" width="${size}" height="${size}" class="w-full h-full drop-shadow-md">
+            <defs>
+              <linearGradient id="bronzeBorder5" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f6ad55"/><stop offset="35%" stop-color="#c05621"/>
+                <stop offset="70%" stop-color="#dd6b20"/><stop offset="100%" stop-color="#7b341e"/>
+              </linearGradient>
+              <linearGradient id="bronzeInner5" x1="20%" y1="10%" x2="80%" y2="90%">
+                <stop offset="0%" stop-color="#9c4221"/><stop offset="50%" stop-color="#652b19"/><stop offset="100%" stop-color="#3d180f"/>
+              </linearGradient>
+            </defs>
+            <polygon points="30,4 70,4 96,30 96,70 70,96 30,96 4,70 4,30" fill="url(#bronzeBorder5)" stroke="#ed8936" stroke-width="1.8"/>
+            <polygon points="31,9 69,9 91,31 91,69 69,91 31,91 9,69 9,31" fill="url(#bronzeInner5)" stroke="#c05621" stroke-width="1.2"/>
+            <polyline points="20,76 42,56 50,62 76,32" fill="none" stroke="#fbd38d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+            <polygon points="76,28 66,32 72,39" fill="#fbd38d" opacity="0.9"/>
+            <text x="50" y="55" text-anchor="middle" dominant-baseline="central" font-family="'Inter', sans-serif" font-size="34" font-weight="900" fill="#feebc8" stroke="#4a1d0f" stroke-width="2" style="paint-order: stroke fill;">5</text>
+            <text x="50" y="78" text-anchor="middle" font-family="'Inter', sans-serif" font-size="7.5" font-weight="800" fill="#fbd38d" letter-spacing="0.5">STREAK</text>
+          </svg>
+        `,
+        10: (size = 100) => `
+          <svg viewBox="0 0 100 100" width="${size}" height="${size}" class="w-full h-full drop-shadow-lg">
+            <defs>
+              <linearGradient id="bronzeBorder10" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#feebc8"/><stop offset="30%" stop-color="#ed8936"/>
+                <stop offset="60%" stop-color="#c05621"/><stop offset="100%" stop-color="#652b19"/>
+              </linearGradient>
+              <linearGradient id="bronzeInner10" x1="10%" y1="10%" x2="90%" y2="90%">
+                <stop offset="0%" stop-color="#b85323"/><stop offset="50%" stop-color="#702c17"/><stop offset="100%" stop-color="#311208"/>
+              </linearGradient>
+              <filter id="bronzeGlow10" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#f6ad55" flood-opacity="0.8"/>
+              </filter>
+            </defs>
+            <polygon points="30,3 70,3 97,30 97,70 70,97 30,97 3,70 3,30" fill="url(#bronzeBorder10)" stroke="#fbd38d" stroke-width="2.2"/>
+            <polygon points="31,8 69,8 92,31 92,69 69,92 31,92 8,69 8,31" fill="url(#bronzeInner10)" stroke="#ed8936" stroke-width="1.4"/>
+            <polygon points="33,12 67,12 88,33 88,67 67,88 33,88 12,67 12,33" fill="none" stroke="#f6ad55" stroke-width="0.8" stroke-dasharray="2.5 1.5" opacity="0.6"/>
+            <polyline points="18,74 38,50 48,58 80,24" fill="none" stroke="#fefcbf" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#bronzeGlow10)"/>
+            <polygon points="82,19 69,24 77,32" fill="#fefcbf"/>
+            <text x="50" y="55" text-anchor="middle" dominant-baseline="central" font-family="'Inter', sans-serif" font-size="34" font-weight="900" fill="#ffffff" stroke="#521f10" stroke-width="2.5" style="paint-order: stroke fill;" filter="url(#bronzeGlow10)">10</text>
+            <text x="50" y="80" text-anchor="middle" font-family="'Inter', sans-serif" font-size="8" font-weight="900" fill="#feebc8" letter-spacing="1">MASTER</text>
+          </svg>
+        `
+      },
+      advanced: {
+        5: (size = 100) => `
+          <svg viewBox="0 0 100 100" width="${size}" height="${size}" class="w-full h-full drop-shadow-md">
+            <defs>
+              <linearGradient id="silverPlate5" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f8fafc"/><stop offset="40%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#334155"/>
+              </linearGradient>
+              <linearGradient id="silverInner5" x1="0%" y1="50%" x2="100%" y2="50%">
+                <stop offset="0%" stop-color="#1e293b"/><stop offset="50%" stop-color="#334155"/><stop offset="100%" stop-color="#0f172a"/>
+              </linearGradient>
+              <filter id="cyanGlow5" x="-25%" y="-25%" width="150%" height="150%">
+                <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#38bdf8" flood-opacity="0.8"/>
+              </filter>
+            </defs>
+            <polygon points="50,2 98,50 50,98 2,50" fill="url(#silverPlate5)" stroke="#7dd3fc" stroke-width="1.8"/>
+            <polygon points="50,8 92,50 50,92 8,50" fill="url(#silverInner5)" stroke="#38bdf8" stroke-width="1.2"/>
+            <path d="M 24 64 Q 36 72 44 62 T 66 50 L 74 34" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" opacity="0.8"/>
+            <polygon points="76,31 69,35 74,40" fill="#38bdf8"/>
+            <text x="50" y="55" text-anchor="middle" dominant-baseline="central" font-family="'Inter', sans-serif" font-size="34" font-weight="900" fill="#bae6fd" stroke="#082f49" stroke-width="2.2" style="paint-order: stroke fill;" filter="url(#cyanGlow5)">5</text>
+            <text x="50" y="78" text-anchor="middle" font-family="'Inter', sans-serif" font-size="7.5" font-weight="800" fill="#7dd3fc" letter-spacing="0.5">STREAK</text>
+          </svg>
+        `,
+        10: (size = 100) => `
+          <svg viewBox="0 0 100 100" width="${size}" height="${size}" class="w-full h-full drop-shadow-lg">
+            <defs>
+              <linearGradient id="silverPlate10" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff"/><stop offset="25%" stop-color="#cbd5e1"/>
+                <stop offset="60%" stop-color="#64748b"/><stop offset="100%" stop-color="#1e293b"/>
+              </linearGradient>
+              <linearGradient id="silverInner10" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0f172a"/><stop offset="50%" stop-color="#1e293b"/><stop offset="100%" stop-color="#020617"/>
+              </linearGradient>
+              <filter id="cyanGlow10" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#0284c7" flood-opacity="0.95"/>
+                <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#38bdf8" flood-opacity="1"/>
+              </filter>
+            </defs>
+            <polygon points="50,1 99,50 50,99 1,50" fill="none" stroke="#38bdf8" stroke-width="2" opacity="0.65" class="electric-glow"/>
+            <polygon points="50,4 96,50 50,96 4,50" fill="url(#silverPlate10)" stroke="#bae6fd" stroke-width="2"/>
+            <polygon points="50,9 91,50 50,91 9,50" fill="url(#silverInner10)" stroke="#38bdf8" stroke-width="1.4"/>
+            <polygon points="50,14 86,50 50,86 14,50" fill="none" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.6"/>
+            <polyline points="22,60 40,40 50,48 70,22" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#cyanGlow10)"/>
+            <polygon points="72,19 62,22 68,28" fill="#ffffff"/>
+            <path d="M 22 70 Q 34 78 44 66 T 68 50 L 76 34" fill="none" stroke="#38bdf8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <polygon points="78,31 70,35 76,41" fill="#38bdf8"/>
+            <text x="50" y="55" text-anchor="middle" dominant-baseline="central" font-family="'Inter', sans-serif" font-size="34" font-weight="900" fill="#ffffff" stroke="#075985" stroke-width="2.5" style="paint-order: stroke fill;" filter="url(#cyanGlow10)">10</text>
+            <text x="50" y="80" text-anchor="middle" font-family="'Inter', sans-serif" font-size="8" font-weight="900" fill="#38bdf8" letter-spacing="1">MASTER</text>
+          </svg>
+        `
+      },
+      expert: {
+        5: (size = 100) => `
+          <svg viewBox="0 0 100 100" width="${size}" height="${size}" class="w-full h-full drop-shadow-md">
+            <defs>
+              <linearGradient id="goldBorder5" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fef08a"/><stop offset="30%" stop-color="#eab308"/>
+                <stop offset="70%" stop-color="#ca8a04"/><stop offset="100%" stop-color="#854d0e"/>
+              </linearGradient>
+              <linearGradient id="goldInner5" x1="30%" y1="0%" x2="70%" y2="100%">
+                <stop offset="0%" stop-color="#ca8a04"/><stop offset="40%" stop-color="#854d0e"/><stop offset="100%" stop-color="#2a0d02"/>
+              </linearGradient>
+              <filter id="goldGlow5" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#f59e0b" flood-opacity="0.8"/>
+              </filter>
+            </defs>
+            <path d="M 50 4 C 76 4 94 14 94 38 C 94 68 70 87 50 97 C 30 87 6 68 6 38 C 6 14 24 4 50 4 Z" fill="url(#goldBorder5)" stroke="#fef08a" stroke-width="1.8"/>
+            <path d="M 50 9 C 72 9 88 17 88 39 C 88 64 67 82 50 91 C 33 82 12 64 12 39 C 12 17 28 9 50 9 Z" fill="url(#goldInner5)" stroke="#eab308" stroke-width="1.2"/>
+            <polygon points="56,16 48,28 54,28 46,40 58,26 51,26" fill="#facc15" opacity="0.75"/>
+            <g transform="translate(68, 16) rotate(38) scale(0.7)">
+              <polygon points="6,24 2,34 6,28 10,34" fill="#f97316"/>
+              <polygon points="0,22 12,22 6,18" fill="#ef4444"/>
+              <path d="M 6 0 C 10 6 11 18 10 22 L 2 22 C 1 18 2 6 6 0 Z" fill="#ffffff" stroke="#991b1b" stroke-width="0.7"/>
+            </g>
+            <text x="50" y="55" text-anchor="middle" dominant-baseline="central" font-family="'Inter', sans-serif" font-size="34" font-weight="900" fill="#fef08a" stroke="#713f12" stroke-width="2.2" style="paint-order: stroke fill;" filter="url(#goldGlow5)">5</text>
+            <text x="50" y="78" text-anchor="middle" font-family="'Inter', sans-serif" font-size="7.5" font-weight="800" fill="#fde047" letter-spacing="0.5">STREAK</text>
+          </svg>
+        `,
+        10: (size = 100) => `
+          <svg viewBox="0 0 100 100" width="${size}" height="${size}" class="w-full h-full drop-shadow-xl">
+            <defs>
+              <linearGradient id="goldBorder10" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff"/><stop offset="25%" stop-color="#fef08a"/>
+                <stop offset="55%" stop-color="#eab308"/><stop offset="85%" stop-color="#ca8a04"/><stop offset="100%" stop-color="#713f12"/>
+              </linearGradient>
+              <linearGradient id="goldInner10" x1="30%" y1="0%" x2="70%" y2="100%">
+                <stop offset="0%" stop-color="#eab308"/><stop offset="35%" stop-color="#854d0e"/><stop offset="75%" stop-color="#451a03"/><stop offset="100%" stop-color="#1a0601"/>
+              </linearGradient>
+              <filter id="flameGlow10" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#ea580c" flood-opacity="0.95"/>
+                <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#facc15" flood-opacity="1"/>
+              </filter>
+            </defs>
+            <path d="M 50 3 C 78 3 96 14 96 38 C 96 70 71 89 50 98 C 29 89 4 70 4 38 C 4 14 22 3 50 3 Z" fill="url(#goldBorder10)" stroke="#fef08a" stroke-width="2.2"/>
+            <path d="M 50 8 C 74 8 90 17 90 39 C 90 65 68 83 50 92 C 32 83 10 65 10 39 C 10 17 26 8 50 8 Z" fill="url(#goldInner10)" stroke="#facc15" stroke-width="1.4"/>
+            <polygon points="57,12 47,26 53,26 44,39 60,23 52,23" fill="#fde047" opacity="0.9" filter="url(#flameGlow10)"/>
+            <polyline points="16,68 28,54 38,64 50,42 62,50 76,32" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#flameGlow10)"/>
+            <g transform="translate(68, 11) rotate(42)">
+              <polygon points="6,24 2,36 6,28 10,36" fill="#f97316" filter="url(#flameGlow10)"/>
+              <polygon points="6,24 4,32 6,27 8,32" fill="#fef08a"/>
+              <polygon points="0,22 12,22 6,17" fill="#ef4444"/>
+              <path d="M 6 0 C 10 6 11 18 10 22 L 2 22 C 1 18 2 6 6 0 Z" fill="#ffffff" stroke="#991b1b" stroke-width="0.8"/>
+              <circle cx="6" cy="10" r="2.2" fill="#38bdf8" stroke="#0284c7" stroke-width="0.6"/>
+            </g>
+            <text x="50" y="55" text-anchor="middle" dominant-baseline="central" font-family="'Inter', sans-serif" font-size="34" font-weight="900" fill="#ffffff" stroke="#78350f" stroke-width="2.6" style="paint-order: stroke fill;" filter="url(#flameGlow10)">10</text>
+            <text x="50" y="80" text-anchor="middle" font-family="'Inter', sans-serif" font-size="8" font-weight="900" fill="#fde047" letter-spacing="1">MASTER</text>
+          </svg>
+        `
+      }
+    };
+
+    function getBadgeSvg(diff, streak, size = 100) {
+      const s = streak === 5 ? 5 : 10;
+      const targetGroup = BADGE_ASSETS[diff] || BADGE_ASSETS.standard;
+      if (!targetGroup) return '';
+      const fn = targetGroup[s] || targetGroup[10] || targetGroup[5];
+      return typeof fn === 'function' ? fn(size) : '';
+    }
+
+    const FRIEZA_QUOTES = {
+      wrong: [
+        "ぜったいにゆるさんぞ虫ケラども！！！！！",
+        "私の戦闘力は53万です。貴様の一次関数などゴミのようなものですよ。",
+        "いちいち癇に障るヤツだ…！少し痛い目にあわせる必要がありますね。",
+        "ホッホッホ…バカなヤツめ。基礎の傾きすら見誤るとは。",
+        "サービス期間は終わったのですよ。さっさと消えなさい！"
+      ],
+      timeout: [
+        "遅い！ノロマなサルには退屈すぎてあくびが出ますよ！",
+        "残り時間はゼロです。私のデスビームの餌食になりなさい！",
+        "考える時間が長すぎますね。私のスピードについてこれないのですか？"
+      ],
+      correct: [
+        "ほう…少しはやるようですね…ですがまだまだ序の口ですよ。",
+        "チッ…まぐれ当たりか。次はそうはいきませんよ。",
+        "フン、その程度でいい気にならないことです。"
+      ],
+      defeat: "ば、馬鹿な…！このフリーザが…こんなサルの一次関数ごときにぃぃぃーーーーっ！！！"
+    };
+
+    const QUESTION_BANK = {
+      standard: [
+        {
+          id: "s1",
+          question: "一次関数 $y = 3x - 4$ について、傾きを答えなさい。",
+          options: ["$3$", "$-4$", "$\\dfrac{1}{3}$", "$4$"],
+          answerIndex: 0,
+          explanation: "$y = ax + b$ において、$x$ の係数 $a$ が「傾き」です。したがって傾きは $3$ です。"
+        },
+        {
+          id: "s2",
+          question: "一次関数 $y = 3x - 4$ について、切片を答えなさい。",
+          options: ["$-4$", "$3$", "$4$", "$-3$"],
+          answerIndex: 0,
+          explanation: "$y = ax + b$ において、定数項 $b$ が「切片」です。マイナスの符号も忘れずに、切片は $-4$ です。"
+        },
+        {
+          id: "s3",
+          question: "一次関数 $y = 3x - 4$ について、変化の割合を答えなさい。",
+          options: ["$3$", "$-4$", "$1$", "$\\dfrac{4}{3}$"],
+          answerIndex: 0,
+          explanation: "一次関数では「変化の割合」は常に一定で、傾き $a$ と等しくなります。したがって変化の割合は $3$ です。"
+        },
+        {
+          id: "s4",
+          question: "一次関数 $y = -\\dfrac{2}{5}x + 7$ について、傾きを答えなさい。",
+          options: ["$-\\dfrac{2}{5}$", "$7$", "$\\dfrac{2}{5}$", "$-\\dfrac{5}{2}$"],
+          answerIndex: 0,
+          explanation: "$x$ の係数が傾きなので、傾きは $-\\dfrac{2}{5}$ です。"
+        },
+        {
+          id: "s5",
+          question: "一次関数 $y = -\\dfrac{2}{5}x + 7$ について、切片を答えなさい。",
+          options: ["$7$", "$-\\dfrac{2}{5}$", "$-7$", "$\\dfrac{5}{2}$"],
+          answerIndex: 0,
+          explanation: "定数項が切片なので、切片は $7$ です。"
+        },
+        {
+          id: "s6",
+          question: "一次関数 $y = -\\dfrac{2}{5}x + 7$ について、変化の割合を答えなさい。",
+          options: ["$-\\dfrac{2}{5}$", "$7$", "$\\dfrac{2}{5}$", "$-7$"],
+          answerIndex: 0,
+          explanation: "一次関数の変化の割合は傾き $a$ と等しいため、$-\\dfrac{2}{5}$ です。"
+        },
+        {
+          id: "s7",
+          question: "方程式 $3x + 2y = 8$ を $y$ について解きなさい。",
+          options: ["$y = -\\dfrac{3}{2}x + 4$", "$y = \\dfrac{3}{2}x + 4$", "$y = -3x + 8$", "$y = -\\dfrac{3}{2}x + 8$"],
+          answerIndex: 0,
+          explanation: "$2y = -3x + 8$ より、両辺を $2$ で割ると $y = -\\dfrac{3}{2}x + 4$ となります。"
+        },
+        {
+          id: "s8",
+          question: "方程式 $3x + 2y = 8$ のグラフの傾きを答えなさい。",
+          options: ["$-\\dfrac{3}{2}$", "$\\dfrac{3}{2}$", "$-3$", "$4$"],
+          answerIndex: 0,
+          explanation: "$y = -\\dfrac{3}{2}x + 4$ に変形すると、$x$ の係数は $-\\dfrac{3}{2}$ です。"
+        },
+        {
+          id: "s9",
+          question: "方程式 $3x + 2y = 8$ のグラフの切片を答えなさい。",
+          options: ["$4$", "$8$", "$-\\dfrac{3}{2}$", "$-4$"],
+          answerIndex: 0,
+          explanation: "$y = -\\dfrac{3}{2}x + 4$ より、定数項（切片）は $4$ です。"
+        },
+        {
+          id: "s10",
+          question: "傾きが $-4$、切片が $5$ である一次関数の式を求めなさい。",
+          options: ["$y = -4x + 5$", "$y = 4x + 5$", "$y = 5x - 4$", "$y = -4x - 5$"],
+          answerIndex: 0,
+          explanation: "$y = ax + b$ に $a = -4, b = 5$ を代入して $y = -4x + 5$ となります。"
+        },
+        {
+          id: "s11",
+          question: "傾きが $\\dfrac{1}{3}$、切片が $-2$ である一次関数の式を求めなさい。",
+          options: ["$y = \\dfrac{1}{3}x - 2$", "$y = 3x - 2$", "$y = \\dfrac{1}{3}x + 2$", "$y = -2x + \\dfrac{1}{3}$"],
+          answerIndex: 0,
+          explanation: "$y = ax + b$ に $a = \\dfrac{1}{3}, b = -2$ を代入して $y = \\dfrac{1}{3}x - 2$ です。"
+        },
+        {
+          id: "s12",
+          question: "方程式 $2x - y = 5$ を $y$ について解きなさい。",
+          options: ["$y = 2x - 5$", "$y = -2x + 5$", "$y = 2x + 5$", "$y = -2x - 5$"],
+          answerIndex: 0,
+          explanation: "$-y = -2x + 5$ より、両辺に $-1$ を掛けて $y = 2x - 5$ です。"
+        },
+        {
+          id: "s13",
+          question: "一次関数 $y = 4x + 1$ において、$x$ の増加量が $3$ であるときの $y$ の増加量を求めなさい。",
+          options: ["$12$", "$13$", "$7$", "$15$"],
+          answerIndex: 0,
+          explanation: "$y\\text{の増加量} = a \\times (x\\text{の増加量})$ より、$4 \\times 3 = 12$ です。（切片の $+1$ は増加量には影響しません）"
+        },
+        {
+          id: "s14",
+          question: "一次関数 $y = -2x + 9$ において、$x$ の増加量が $5$ であるときの $y$ の増加量を求めなさい。",
+          options: ["$-10$", "$10$", "$-1$", "$-7$"],
+          answerIndex: 0,
+          explanation: "$y\\text{の増加量} = -2 \\times 5 = -10$ です。「増加量」として答えるときは符号を付けて $-10$ と答えます。"
+        },
+        {
+          id: "s15",
+          question: "一次関数 $y = -\\dfrac{3}{4}x - 2$ において、$x$ の値が $-2$ から $6$ まで増加するとき、$x$ の増加量を求めなさい。",
+          options: ["$8$", "$4$", "$-8$", "$6$"],
+          answerIndex: 0,
+          explanation: "増加量 $= (\\text{変化後}) - (\\text{変化前})$ より、$6 - (-2) = 6 + 2 = 8$ です。"
+        },
+        {
+          id: "s16",
+          question: "一次関数 $y = -\\dfrac{3}{4}x - 2$ において、$x$ の値が $-2$ から $6$ まで増加するとき、$y$ の増加量を求めなさい。",
+          options: ["$-6$", "$6$", "$-8$", "$-4$"],
+          answerIndex: 0,
+          explanation: "$x$ の増加量は $8$ なので、$y\\text{の増加量} = -\\dfrac{3}{4} \\times 8 = -6$ です。"
+        },
+        {
+          id: "s17",
+          question: "一次関数 $y = 5x - 3$ において、$x$ の増加量が $4$ のときの $y$ の増加量を求めなさい。",
+          options: ["$20$", "$17$", "$9$", "$23$"],
+          answerIndex: 0,
+          explanation: "$y\\text{の増加量} = 5 \\times 4 = 20$ です。"
+        },
+        {
+          id: "s18",
+          question: "一次関数 $y = -3x + 2$ において、$x$ の増加量が $4$ のときの $y$ の増加量を求めなさい。",
+          options: ["$-12$", "$12$", "$-10$", "$-14$"],
+          answerIndex: 0,
+          explanation: "$y\\text{の増加量} = -3 \\times 4 = -12$ です。"
+        },
+        {
+          id: "s19",
+          question: "一次関数 $y = \\dfrac{1}{2}x + 3$ において、$x$ の増加量が $6$ のときの $y$ の増加量を求めなさい。",
+          options: ["$3$", "$6$", "$5$", "$\\dfrac{7}{2}$"],
+          answerIndex: 0,
+          explanation: "$y\\text{の増加量} = \\dfrac{1}{2} \\times 6 = 3$ です。"
+        },
+        {
+          id: "s20",
+          question: "一次関数 $y = -\\dfrac{2}{3}x + 1$ において、$x$ の値が $1$ から $7$ まで増加するときの $y$ の増加量を求めなさい。",
+          options: ["$-4$", "$4$", "$-6$", "$-3$"],
+          answerIndex: 0,
+          explanation: "$x$ の増加量は $7 - 1 = 6$。よって $y$ の増加量は $-\\dfrac{2}{3} \\times 6 = -4$ です。"
+        },
+        {
+          id: "s21",
+          question: "$y$ は $x$ の一次関数で、$x$ の値が $6$ 増加すると、$y$ の値は $8$ 減少する。この関数の変化の割合を求めなさい。",
+          options: ["$-\\dfrac{4}{3}$", "$\\dfrac{4}{3}$", "$-\\dfrac{3}{4}$", "$-\\dfrac{8}{6}$"],
+          answerIndex: 0,
+          explanation: "「$8$ 減少する」は $y$ の増加量が $-8$ ということです。変化の割合 $= \\dfrac{-8}{6} = -\\dfrac{4}{3}$ です。"
+        },
+        {
+          id: "s22",
+          question: "$y$ は $x$ の一次関数で、$x$ の値が $4$ 増加すると、$y$ の値は $10$ 減少する。この関数の変化の割合を求めなさい。",
+          options: ["$-\\dfrac{5}{2}$", "$\\dfrac{5}{2}$", "$-\\dfrac{2}{5}$", "$-5$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{-10}{4} = -\\dfrac{5}{2}$ です。"
+        },
+        {
+          id: "s23",
+          question: "$y$ は $x$ の一次関数で、$x$ の値が $9$ 増加すると、$y$ の値は $6$ 減少する。この関数の変化の割合を求めなさい。",
+          options: ["$-\\dfrac{2}{3}$", "$\\dfrac{2}{3}$", "$-\\dfrac{3}{2}$", "$-\\dfrac{6}{9}$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{-6}{9} = -\\dfrac{2}{3}$ です。"
+        },
+        {
+          id: "s24",
+          question: "$y$ は $x$ の一次関数で、$x$ の値が $5$ 増加すると、$y$ の値は $15$ 増加する。この関数の変化の割合を求めなさい。",
+          options: ["$3$", "$\\dfrac{1}{3}$", "$-3$", "$10$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{15}{5} = 3$ です。"
+        },
+        {
+          id: "s25",
+          question: "$y$ は $x$ の一次関数で、$x$ の値が $8$ 増加すると、$y$ の値は $12$ 減少する。この関数の変化の割合を求めなさい。",
+          options: ["$-\\dfrac{3}{2}$", "$\\dfrac{3}{2}$", "$-\\dfrac{2}{3}$", "$-4$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{-12}{8} = -\\dfrac{3}{2}$ です。"
+        },
+        {
+          id: "s26",
+          question: "$y$ は $x$ の一次関数で、$x$ の値が $6$ 増加すると、$y$ の値は $9$ 増加する。この関数の変化の割合を求めなさい。",
+          options: ["$\\dfrac{3}{2}$", "$-\\dfrac{3}{2}$", "$\\dfrac{2}{3}$", "$3$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{9}{6} = \\dfrac{3}{2}$ です。"
+        },
+        {
+          id: "s27",
+          question: "$y$ は $x$ の一次関数で、$x$ の値が $10$ 増加すると、$y$ の値は $4$ 減少する。この関数の変化の割合を求めなさい。",
+          options: ["$-\\dfrac{2}{5}$", "$\\dfrac{2}{5}$", "$-\\dfrac{5}{2}$", "$-\\dfrac{4}{10}$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{-4}{10} = -\\dfrac{2}{5}$ です。"
+        },
+        {
+          id: "s28",
+          question: "$y$ は $x$ の一次関数で、$x$ の値が $3$ 増加すると、$y$ の値は $12$ 減少する。この関数の変化の割合を求めなさい。",
+          options: ["$-4$", "$4$", "$-\\dfrac{1}{4}$", "$-9$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{-12}{3} = -4$ です。"
+        },
+        {
+          id: "s29",
+          question: "$y$ は $x$ の一次関数で、$x$ の値が $12$ 増加すると、$y$ の値は $8$ 減少する。この関数の変化の割合を求めなさい。",
+          options: ["$-\\dfrac{2}{3}$", "$\\dfrac{2}{3}$", "$-\\dfrac{3}{2}$", "$-4$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{-8}{12} = -\\dfrac{2}{3}$ です。"
+        },
+        {
+          id: "s30",
+          question: "$y$ は $x$ の一次関数で、$x$ の値が $15$ 増加すると、$y$ の値は $6$ 減少する。この関数の変化の割合を求めなさい。",
+          options: ["$-\\dfrac{2}{5}$", "$\\dfrac{2}{5}$", "$-\\dfrac{5}{2}$", "$-9$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{-6}{15} = -\\dfrac{2}{5}$ です。"
+        }
+      ],
+      advanced: [
+        {
+          id: "a1",
+          question: "一次関数 $y = 6x - 7$ において、$y$ の増加量が $18$ であるときの $x$ の増加量を求めなさい。",
+          options: ["$3$", "$108$", "$12$", "$\\dfrac{1}{3}$"],
+          answerIndex: 0,
+          explanation: "$y\\text{の増加量} = a \\times (x\\text{の増加量})$ より、$18 = 6 \\times (x\\text{の増加量}) \\implies x\\text{の増加量} = \\dfrac{18}{6} = 3$ です。"
+        },
+        {
+          id: "a2",
+          question: "一次関数 $y = -3x + 5$ において、$y$ の増加量が $-15$ であるときの $x$ の増加量を求めなさい。",
+          options: ["$5$", "$-5$", "$45$", "$-45$"],
+          answerIndex: 0,
+          explanation: "$-15 = -3 \\times (x\\text{の増加量}) \\implies x\\text{の増加量} = \\dfrac{-15}{-3} = 5$ です。"
+        },
+        {
+          id: "a3",
+          question: "一次関数 $y = \\dfrac{2}{3}x - 1$ において、$y$ の増加量が $8$ であるときの $x$ の増加量を求めなさい。",
+          options: ["$12$", "$\\dfrac{16}{3}$", "$6$", "$9$"],
+          answerIndex: 0,
+          explanation: "$8 = \\dfrac{2}{3} \\times (x\\text{の増加量}) \\implies x\\text{の増加量} = 8 \\div \\dfrac{2}{3} = 8 \\times \\dfrac{3}{2} = 12$ です。"
+        },
+        {
+          id: "a4",
+          question: "一次関数 $y = -\\dfrac{5}{2}x + 4$ において、$y$ の増加量が $-20$ であるときの $x$ の増加量を求めなさい。",
+          options: ["$8$", "$-8$", "$50$", "$-50$"],
+          answerIndex: 0,
+          explanation: "$-20 = -\\dfrac{5}{2} \\times (x\\text{の増加量}) \\implies x\\text{の増加量} = -20 \\div \\left(-\\dfrac{5}{2}\\right) = -20 \\times \\left(-\\dfrac{2}{5}\\right) = 8$ です。"
+        },
+        {
+          id: "a5",
+          question: "一次関数 $y = 4x - 11$ において、$y$ の増加量が $-16$ であるときの $x$ の増加量を求めなさい。",
+          options: ["$-4$", "$4$", "$-64$", "$-5$"],
+          answerIndex: 0,
+          explanation: "$-16 = 4 \\times (x\\text{の増加量}) \\implies x\\text{の増加量} = \\dfrac{-16}{4} = -4$ です。"
+        },
+        {
+          id: "a6",
+          question: "一次関数 $y = -\\dfrac{1}{4}x + 2$ において、$y$ の増加量が $3$ であるときの $x$ の増加量を求めなさい。",
+          options: ["$-12$", "$12$", "$-\\dfrac{3}{4}$", "$-7$"],
+          answerIndex: 0,
+          explanation: "$3 = -\\dfrac{1}{4} \\times (x\\text{の増加量}) \\implies x\\text{の増加量} = 3 \\div \\left(-\\dfrac{1}{4}\\right) = -12$ です。"
+        },
+        {
+          id: "a7",
+          question: "グラフが2点 $(2, 3)$, $(5, 9)$ を通る一次関数の変化の割合を求めなさい。",
+          options: ["$2$", "$\\dfrac{1}{2}$", "$3$", "$6$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{9 - 3}{5 - 2} = \\dfrac{6}{3} = 2$ です。"
+        },
+        {
+          id: "a8",
+          question: "グラフが2点 $(-1, 4)$, $(3, -4)$ を通る一次関数の変化の割合を求めなさい。",
+          options: ["$-2$", "$2$", "$-\\dfrac{1}{2}$", "$-4$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{-4 - 4}{3 - (-1)} = \\dfrac{-8}{4} = -2$ です。"
+        },
+        {
+          id: "a9",
+          question: "グラフが2点 $(-3, 8)$, $(2, -2)$ を通る直線の傾きと切片を答えなさい。",
+          options: ["傾き: $-2$, 切片: $2$", "傾き: $2$, 切片: $-2$", "傾き: $-2$, 切片: $4$", "傾き: $-\\dfrac{1}{2}$, 切片: $2$"],
+          answerIndex: 0,
+          explanation: "傾き $a = \\dfrac{-2 - 8}{2 - (-3)} = -2$。$y = -2x + b$ に $(2, -2)$ を代入して $-2 = -4 + b \\implies b = 2$ です。"
+        },
+        {
+          id: "a10",
+          question: "グラフが2点 $(1, 5)$, $(4, -1)$ を通る直線の式を求めなさい。",
+          options: ["$y = -2x + 7$", "$y = 2x + 3$", "$y = -2x + 5$", "$y = -\\dfrac{1}{2}x + 7$"],
+          answerIndex: 0,
+          explanation: "傾き $a = \\dfrac{-1 - 5}{4 - 1} = -2$。$5 = -2(1) + b \\implies b = 7$。よって $y = -2x + 7$ です。"
+        },
+        {
+          id: "a11",
+          question: "グラフが2点 $(-2, -3)$, $(2, 5)$ を通る直線の式を求めなさい。",
+          options: ["$y = 2x + 1$", "$y = 2x - 1$", "$y = -2x + 1$", "$y = \\dfrac{1}{2}x + 1$"],
+          answerIndex: 0,
+          explanation: "傾き $a = \\dfrac{5 - (-3)}{2 - (-2)} = \\dfrac{8}{4} = 2$。$5 = 2(2) + b \\implies b = 1$。よって $y = 2x + 1$ です。"
+        },
+        {
+          id: "a12",
+          question: "変化の割合が $-3$ で、点 $(2, -1)$ を通る一次関数の式を求めなさい。",
+          options: ["$y = -3x + 5$", "$y = -3x - 5$", "$y = 3x - 7$", "$y = -3x + 1$"],
+          answerIndex: 0,
+          explanation: "傾きが $-3$ なので $y = -3x + b$。点 $(2, -1)$ を代入して $-1 = -6 + b \\implies b = 5$ です。"
+        },
+        {
+          id: "a13",
+          question: "傾きが $\\dfrac{1}{2}$ で、点 $(4, 1)$ を通る直線の式を求めなさい。",
+          options: ["$y = \\dfrac{1}{2}x - 1$", "$y = \\dfrac{1}{2}x + 1$", "$y = 2x - 7$", "$y = \\dfrac{1}{2}x - 3$"],
+          answerIndex: 0,
+          explanation: "$y = \\dfrac{1}{2}x + b$ に代入して $1 = \\dfrac{1}{2}(4) + b \\implies 1 = 2 + b \\implies b = -1$ です。"
+        },
+        {
+          id: "a14",
+          question: "変化の割合が $4$ で、点 $(-1, -2)$ を通る一次関数の式を求めなさい。",
+          options: ["$y = 4x + 2$", "$y = 4x - 2$", "$y = 4x + 6$", "$y = -4x - 6$"],
+          answerIndex: 0,
+          explanation: "$-2 = 4(-1) + b \\implies -2 = -4 + b \\implies b = 2$。よって $y = 4x + 2$ です。"
+        },
+        {
+          id: "a15",
+          question: "一次関数 $y = -2x + 1$ について、$x$ の変域が $-2 \\leqq x \\leqq 3$ のとき、$x$ の増加量を求めなさい。",
+          options: ["$5$", "$1$", "$-5$", "$6$"],
+          answerIndex: 0,
+          explanation: "$x$ の増加量は $(\\text{最大値}) - (\\text{最小値}) = 3 - (-2) = 5$ です。"
+        },
+        {
+          id: "a16",
+          question: "一次関数 $y = -2x + 1$ について、$x$ の変域が $-2 \\leqq x \\leqq 3$ のとき、$y$ の増加量を求めなさい。",
+          options: ["$-10$", "$10$", "$-6$", "$-8$"],
+          answerIndex: 0,
+          explanation: "$x$ の増加量が $5$、変化の割合が $-2$ なので、$y\\text{の増加量} = -2 \\times 5 = -10$ です。"
+        },
+        {
+          id: "a17",
+          question: "一次関数 $y = -2x + 1$ について、$x$ の変域が $-2 \\leqq x \\leqq 3$ のとき、$y$ の変域を求めなさい。",
+          options: ["$-5 \\leqq y \\leqq 5$", "$-5 \\leqq y \\leqq -1$", "$1 \\leqq y \\leqq 5$", "$-7 \\leqq y \\leqq 5$"],
+          answerIndex: 0,
+          explanation: "$x = -2$ のとき $y = 5$、$x = 3$ のとき $y = -5$。傾きが負なので不等号の向きが反転し、$-5 \\leqq y \\leqq 5$ です。"
+        },
+        {
+          id: "a18",
+          question: "一次関数 $y = 3x - 4$ について、$x$ の変域が $-1 \\leqq x \\leqq 4$ のとき、$y$ の変域を求めなさい。",
+          options: ["$-7 \\leqq y \\leqq 8$", "$-7 \\leqq y \\leqq 12$", "$-1 \\leqq y \\leqq 8$", "$-4 \\leqq y \\leqq 8$"],
+          answerIndex: 0,
+          explanation: "$x = -1$ のとき $y = -7$、$x = 4$ のとき $y = 8$。傾きが正なので $-7 \\leqq y \\leqq 8$ です。"
+        },
+        {
+          id: "a19",
+          question: "一次関数 $y = -\\dfrac{1}{3}x + 2$ について、$x$ の変域が $-3 \\leqq x \\leqq 6$ のとき、$y$ の変域を求めなさい。",
+          options: ["$0 \\leqq y \\leqq 3$", "$-1 \\leqq y \\leqq 3$", "$0 \\leqq y \\leqq 2$", "$1 \\leqq y \\leqq 3$"],
+          answerIndex: 0,
+          explanation: "$x = -3$ のとき $y = 3$、$x = 6$ のとき $y = 0$。したがって $0 \\leqq y \\leqq 3$ です。"
+        },
+        {
+          id: "a20",
+          question: "一次関数 $y = 5x - 2$ について、$x$ の変域が $2 \\leqq x \\leqq 5$ のとき、$y$ の増加量を求めなさい。",
+          options: ["$15$", "$25$", "$13$", "$23$"],
+          answerIndex: 0,
+          explanation: "$x$ の増加量は $5 - 2 = 3$。よって $y$ の増加量は $5 \\times 3 = 15$ です。"
+        },
+        {
+          id: "a21",
+          question: "直線 $y = -\\dfrac{3x - 5}{4}$ を $y = ax + b$ の形にしたときの傾きを答えなさい。",
+          options: ["$-\\dfrac{3}{4}$", "$\\dfrac{3}{4}$", "$-\\dfrac{5}{4}$", "$-3$"],
+          answerIndex: 0,
+          explanation: "$y = -\\left(\\dfrac{3x}{4} - \\dfrac{5}{4}\\right) = -\\dfrac{3}{4}x + \\dfrac{5}{4}$ より、傾きは $-\\dfrac{3}{4}$ です。"
+        },
+        {
+          id: "a22",
+          question: "直線 $y = -\\dfrac{3x - 5}{4}$ の切片を答えなさい。",
+          options: ["$\\dfrac{5}{4}$", "$-\\dfrac{5}{4}$", "$5$", "$-5$"],
+          answerIndex: 0,
+          explanation: "分子の $-5$ の前にマイナス符号がついているため、定数項は $-\\left(-\\dfrac{5}{4}\\right) = +\\dfrac{5}{4}$ です。"
+        },
+        {
+          id: "a23",
+          question: "直線 $y = -\\dfrac{3x - 5}{4}$ において、$x$ の増加量が $8$ のときの $y$ の増加量を求めなさい。",
+          options: ["$-6$", "$6$", "$-10$", "$-\\dfrac{19}{4}$"],
+          answerIndex: 0,
+          explanation: "傾き（変化の割合）は $-\\dfrac{3}{4}$ なので、$y\\text{の増加量} = -\\dfrac{3}{4} \\times 8 = -6$ です。"
+        },
+        {
+          id: "a24",
+          question: "直線 $y = -\\dfrac{2x + 7}{5}$ の切片を答えなさい。",
+          options: ["$-\\dfrac{7}{5}$", "$\\dfrac{7}{5}$", "$-7$", "$7$"],
+          answerIndex: 0,
+          explanation: "$y = -\\dfrac{2}{5}x - \\dfrac{7}{5}$ と分解できるため、切片は $-\\dfrac{7}{5}$ です。"
+        },
+        {
+          id: "a25",
+          question: "直線 $y = -\\dfrac{2x + 7}{5}$ の傾きを答えなさい。",
+          options: ["$-\\dfrac{2}{5}$", "$\\dfrac{2}{5}$", "$-2$", "$-\\dfrac{7}{5}$"],
+          answerIndex: 0,
+          explanation: "$x$ の係数は $-\\dfrac{2}{5}$ です。"
+        },
+        {
+          id: "a26",
+          question: "直線 $y = \\dfrac{4x - 6}{3}$ の切片を答えなさい。",
+          options: ["$-2$", "$-\\dfrac{6}{3}$", "$2$", "$-6$"],
+          answerIndex: 0,
+          explanation: "切片は $-\\dfrac{6}{3} = -2$ と約分できます。"
+        },
+        {
+          id: "a27",
+          question: "直線 $y = -\\dfrac{5x - 8}{2}$ の傾きと切片を答えなさい。",
+          options: ["傾き: $-\\dfrac{5}{2}$, 切片: $4$", "傾き: $-\\dfrac{5}{2}$, 切片: $-4$", "傾き: $\\dfrac{5}{2}$, 切片: $4$", "傾き: $-5$, 切片: $4$"],
+          answerIndex: 0,
+          explanation: "$y = -\\dfrac{5}{2}x + \\dfrac{8}{2} = -\\dfrac{5}{2}x + 4$ より、傾きは $-\\dfrac{5}{2}$、切片は $4$ です。"
+        },
+        {
+          id: "a28",
+          question: "直線 $y = -\\dfrac{x - 12}{6}$ において、$x$ が $18$ 増加したときの $y$ の増加量を求めなさい。",
+          options: ["$-3$", "$3$", "$-1$", "$-6$"],
+          answerIndex: 0,
+          explanation: "傾きは $-\\dfrac{1}{6}$ なので、$y\\text{の増加量} = -\\dfrac{1}{6} \\times 18 = -3$ です。"
+        },
+        {
+          id: "a29",
+          question: "直線 $y = -\\dfrac{3x - 9}{4}$ が $y$ 軸と交わる点の座標を求めなさい。",
+          options: ["$\\left(0, \\dfrac{9}{4}\\right)$", "$\\left(0, -\\dfrac{9}{4}\\right)$", "$\\left(\\dfrac{9}{4}, 0\\right)$", "$(0, 9)$"],
+          answerIndex: 0,
+          explanation: "$y$ 軸との交点は $(0, \\text{切片})$ です。切片は $-\\left(-\\dfrac{9}{4}\\right) = \\dfrac{9}{4}$ なので $\\left(0, \\dfrac{9}{4}\\right)$ です。"
+        },
+        {
+          id: "a30",
+          question: "直線 $y = -\\dfrac{6x - 5}{2}$ の変化の割合を答えなさい。",
+          options: ["$-3$", "$3$", "$-\\dfrac{5}{2}$", "$-6$"],
+          answerIndex: 0,
+          explanation: "傾き（変化の割合）は $-\\dfrac{6}{2} = -3$ です。"
+        },
+        {
+          id: "a31",
+          question: "直線 $y = -2x + 3$ を $y$ 軸の正の方向に $5$ 平行移動した直線の式を求めなさい。",
+          options: ["$y = -2x + 8$", "$y = -2x - 2$", "$y = 3x + 3$", "$y = -2x + 15$"],
+          answerIndex: 0,
+          explanation: "切片に $+5$ します。$y = -2x + (3 + 5) = -2x + 8$ です。（傾きは変わりません）"
+        },
+        {
+          id: "a32",
+          question: "直線 $y = \\dfrac{2}{3}x + 1$ を $y$ 軸の負の方向に $6$ 平行移動した直線の式を求めなさい。",
+          options: ["$y = \\dfrac{2}{3}x - 5$", "$y = \\dfrac{2}{3}x + 7$", "$y = -\\dfrac{2}{3}x - 5$", "$y = \\dfrac{2}{3}x - 6$"],
+          answerIndex: 0,
+          explanation: "切片から $6$ を引きます。$y = \\dfrac{2}{3}x + (1 - 6) = \\dfrac{2}{3}x - 5$ です。"
+        },
+        {
+          id: "a33",
+          question: "直線 $y = 4x - 7$ を $y$ 軸の正の方向に $4$ 平行移動した直線の式を求めなさい。",
+          options: ["$y = 4x - 3$", "$y = 4x - 11$", "$y = 4x + 4$", "$y = 8x - 7$"],
+          answerIndex: 0,
+          explanation: "切片に $+4$ して、$-7 + 4 = -3$。よって $y = 4x - 3$ です。"
+        },
+        {
+          id: "a34",
+          question: "直線 $y = -3x - 2$ を $y$ 軸の負の方向に $5$ 平行移動した直線の式を求めなさい。",
+          options: ["$y = -3x - 7$", "$y = -3x + 3$", "$y = 2x - 2$", "$y = -3x - 10$"],
+          answerIndex: 0,
+          explanation: "$-2 - 5 = -7$ なので、$y = -3x - 7$ です。"
+        },
+        {
+          id: "a35",
+          question: "直線 $y = \\dfrac{1}{2}x - 3$ を $y$ 軸の正の方向に $3$ 平行移動した直線の式を求めなさい。",
+          options: ["$y = \\dfrac{1}{2}x$", "$y = \\dfrac{1}{2}x - 6$", "$y = \\dfrac{1}{2}x + 3$", "$y = x$"],
+          answerIndex: 0,
+          explanation: "$-3 + 3 = 0$ となり切片が $0$ になるため、$y = \\dfrac{1}{2}x$ （原点を通る直線）になります。"
+        },
+        {
+          id: "a36",
+          question: "直線 $y = -5x$ を $y$ 軸の負の方向に $4$ 平行移動した直線の式を求めなさい。",
+          options: ["$y = -5x - 4$", "$y = -5x + 4$", "$y = -9x$", "$y = -x - 4$"],
+          answerIndex: 0,
+          explanation: "切片 $0$ から $4$ 減少し、$y = -5x - 4$ です。"
+        },
+        {
+          id: "a37",
+          question: "直線 $y = \\dfrac{3}{4}x - \\dfrac{1}{2}$ を $y$ 軸の正の方向に $\\dfrac{5}{2}$ 平行移動した直線の式を求めなさい。",
+          options: ["$y = \\dfrac{3}{4}x + 2$", "$y = \\dfrac{3}{4}x + 3$", "$y = \\dfrac{3}{4}x - 3$", "$y = \\dfrac{3}{4}x + \\dfrac{4}{2}$"],
+          answerIndex: 0,
+          explanation: "$-\\dfrac{1}{2} + \\dfrac{5}{2} = \\dfrac{4}{2} = 2$ なので、$y = \\dfrac{3}{4}x + 2$ です。"
+        },
+        {
+          id: "a38",
+          question: "直線 $y = -x + 6$ を平行移動して点 $(0, -2)$ を通るようにした直線の式を求めなさい。",
+          options: ["$y = -x - 2$", "$y = -x + 2$", "$y = x - 2$", "$y = -x - 8$"],
+          answerIndex: 0,
+          explanation: "平行移動しても傾き $-1$ は変わりません。点 $(0, -2)$ を通るため切片が $-2$ となり、$y = -x - 2$ です。"
+        },
+        {
+          id: "a39",
+          question: "直線 $y = 2x - 1$ を $y$ 軸方向に平行移動したら $y = 2x + 5$ になった。どちらの向きにどれだけ移動したか。",
+          options: ["$y$ 軸の正の方向に $6$", "$y$ 軸の負の方向に $6$", "$y$ 軸の正の方向に $4$", "$y$ 軸の負の方向に $4$"],
+          answerIndex: 0,
+          explanation: "切片の変化は $5 - (-1) = 6$ なので、「$y$ 軸の正の方向に $6$」移動しています。"
+        },
+        {
+          id: "a40",
+          question: "直線 $y = -\\dfrac{4}{3}x + 7$ を $y$ 軸の負の方向に $9$ 平行移動した直線の式を求めなさい。",
+          options: ["$y = -\\dfrac{4}{3}x - 2$", "$y = -\\dfrac{4}{3}x + 16$", "$y = -\\dfrac{4}{3}x - 9$", "$y = \\dfrac{4}{3}x - 2$"],
+          answerIndex: 0,
+          explanation: "$7 - 9 = -2$ なので、$y = -\\dfrac{4}{3}x - 2$ です。"
+        },
+        {
+          id: "a41",
+          question: "1次関数 $y = -2x + 1$ のグラフについて、このグラフは $y = \\text{①}$ のグラフを $y$ 軸の正の方向に $\\text{②}$ 平行移動したもので、点 $(0, \\text{②})$ を通る。①、②の組み合わせとして正しいものはどれか。",
+          options: ["①: $-2x$, ②: $1$", "①: $2x$, ②: $1$", "①: $-2x$, ②: $-1$", "①: $-2$, ②: $1$"],
+          answerIndex: 0,
+          explanation: "$y = ax + b$ のグラフは、比例 $y = ax$ のグラフを $y$ 軸の正の方向に $b$ 平行移動したもので、点 $(0, b)$ を通ります。したがって ① は $-2x$、② は $1$ です。"
+        },
+        {
+          id: "a42",
+          question: "1次関数 $y = 3x - 4$ のグラフについて、このグラフは $y = \\text{①}$ のグラフを $y$ 軸の負の方向に $\\text{②}$ 平行移動したもので、点 $(0, \\text{③})$ を通る。①、②、③の組み合わせとして正しいものはどれか。",
+          options: ["①: $3x$, ②: $4$, ③: $-4$", "①: $3x$, ②: $-4$, ③: $-4$", "①: $3$, ②: $4$, ③: $4$", "①: $-3x$, ②: $4$, ③: $-4$"],
+          answerIndex: 0,
+          explanation: "「負の方向に $4$ 移動」するので ② は距離として $4$、交点の座標 ③ は $-4$ となります。"
+        },
+        {
+          id: "a43",
+          question: "1次関数 $y = \\dfrac{1}{2}x + 5$ のグラフは、$y = \\text{①}$ のグラフを $y$ 軸の正の方向に $\\text{②}$ 平行移動したものである。①、②の組み合わせを答えなさい。",
+          options: ["①: $\\dfrac{1}{2}x$, ②: $5$", "①: $x$, ②: $5$", "①: $\\dfrac{1}{2}$, ②: $5$", "①: $\\dfrac{1}{2}x$, ②: $-5$"],
+          answerIndex: 0,
+          explanation: "比例の式は $y = \\dfrac{1}{2}x$、平行移動量は切片の $5$ です。"
+        },
+        {
+          id: "a44",
+          question: "1次関数 $y = -\\dfrac{3}{4}x - 2$ のグラフは、$y = \\text{①}$ のグラフを $y$ 軸の負の方向に $\\text{②}$ 平行移動したものである。①、②の組み合わせを答えなさい。",
+          options: ["①: $-\\dfrac{3}{4}x$, ②: $2$", "①: $-\\dfrac{3}{4}x$, ②: $-2$", "①: $\\dfrac{3}{4}x$, ②: $2$", "①: $-\\dfrac{3}{4}$, ②: $2$"],
+          answerIndex: 0,
+          explanation: "比例の式は $y = -\\dfrac{3}{4}x$、負の方向へ移動した距離は $2$ です。"
+        },
+        {
+          id: "a45",
+          question: "1次関数 $y = 4x + 6$ のグラフは、$y = \\text{①}$ のグラフを $y$ 軸の正の方向に $\\text{②}$ 平行移動したもので、$y$ 軸と交わる点の座標は $(0, \\text{②})$ である。①、②の組み合わせを答えなさい。",
+          options: ["①: $4x$, ②: $6$", "①: $4$, ②: $6$", "①: $-4x$, ②: $6$", "①: $4x$, ②: $-6$"],
+          answerIndex: 0,
+          explanation: "比例 $y = 4x$ を正の方向に $6$ 平行移動したもので、交点は $(0, 6)$ です。"
+        }
+      ],
+      expert: [
+        {
+          id: "e1",
+          question: "一次関数において、$x$ の増加量が $4$ のとき $y$ の増加量は $-12$ であった。この一次関数の変化の割合を求めなさい。",
+          options: ["$-3$", "$3$", "$-\\dfrac{1}{3}$", "$-48$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{y\\text{の増加量}}{x\\text{の増加量}} = \\dfrac{-12}{4} = -3$ です。"
+        },
+        {
+          id: "e2",
+          question: "一次関数において、$x$ の増加量が $6$ のとき $y$ の増加量は $15$ であった。この一次関数の変化の割合を求めなさい。",
+          options: ["$\\dfrac{5}{2}$", "$\\dfrac{2}{5}$", "$-\\dfrac{5}{2}$", "$9$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{15}{6} = \\dfrac{5}{2}$ です。"
+        },
+        {
+          id: "e3",
+          question: "一次関数において、$x$ の増加量が $-5$ のとき $y$ の増加量は $20$ であった。この一次関数の変化の割合を求めなさい。",
+          options: ["$-4$", "$4$", "$-\\dfrac{1}{4}$", "$-100$"],
+          answerIndex: 0,
+          explanation: "変化の割合 $= \\dfrac{20}{-5} = -4$ です。"
+        },
+        {
+          id: "e4",
+          question: "一次関数 $y = ax + 3$ において、$x$ の値が $3$ 増加すると $y$ の値は $9$ 減少する。定数 $a$ の値を求めなさい。",
+          options: ["$-3$", "$3$", "$-\\dfrac{1}{3}$", "$-27$"],
+          answerIndex: 0,
+          explanation: "「$9$ 減少する」は $y$ の増加量が $-9$ なので、$a = \\dfrac{-9}{3} = -3$ です。"
+        },
+        {
+          id: "e5",
+          question: "一次関数 $y = ax - 5$ において、$x$ の値が $4$ 増加すると $y$ の値は $6$ 増加する。定数 $a$ の値を求めなさい。",
+          options: ["$\\dfrac{3}{2}$", "$\\dfrac{2}{3}$", "$-\\dfrac{3}{2}$", "$24$"],
+          answerIndex: 0,
+          explanation: "$a = \\dfrac{6}{4} = \\dfrac{3}{2}$ です。"
+        },
+        {
+          id: "e6",
+          question: "一次関数 $y = ax + 7$ において、$x$ の値が $8$ 増加すると $y$ の値は $2$ 減少する。定数 $a$ の値を求めなさい。",
+          options: ["$-\\dfrac{1}{4}$", "$\\dfrac{1}{4}$", "$-4$", "$-16$"],
+          answerIndex: 0,
+          explanation: "$a = \\dfrac{-2}{8} = -\\dfrac{1}{4}$ です。"
+        },
+        {
+          id: "e7",
+          question: "一次関数 $y = ax - 4$ において、$x$ の値が $-1$ から $5$ まで増加するとき、$y$ の増加量は $18$ であった。定数 $a$ の値を求めなさい。",
+          options: ["$3$", "$-\\dfrac{1}{3}$", "$2$", "$\\dfrac{9}{2}$"],
+          answerIndex: 0,
+          explanation: "$x$ の増加量は $5 - (-1) = 6$。よって $a = \\dfrac{18}{6} = 3$ です。"
+        },
+        {
+          id: "e8",
+          question: "一次関数 $y = ax + 2$ において、$x$ の値が $2$ から $6$ まで増加するとき、$y$ の増加量は $-10$ であった。定数 $a$ の値を求めなさい。",
+          options: ["$-\\dfrac{5}{2}$", "$\\dfrac{5}{2}$", "$-\\dfrac{2}{5}$", "$-5$"],
+          answerIndex: 0,
+          explanation: "$x$ の増加量は $6 - 2 = 4$。よって $a = \\dfrac{-10}{4} = -\\dfrac{5}{2}$ です。"
+        },
+        {
+          id: "e9",
+          question: "一次関数 $y = ax + 1$ において、$x$ の値が $-3$ から $1$ まで増加するとき、$y$ の増加量は $-8$ であった。定数 $a$ の値を求めなさい。",
+          options: ["$-2$", "$2$", "$-\\dfrac{1}{2}$", "$-4$"],
+          answerIndex: 0,
+          explanation: "$x$ の増加量は $1 - (-3) = 4$。よって $a = \\dfrac{-8}{4} = -2$ です。"
+        },
+        {
+          id: "e10",
+          question: "一次関数 $y = ax + b$ ($a > 0$) において、$x$ の変域が $1 \\leqq x \\leqq 4$ のとき $y$ の変域は $-2 \\leqq y \\leqq 7$ である。定数 $a, b$ の値を求めなさい。",
+          options: ["$a = 3, b = -5$", "$a = 3, b = 5$", "$a = -3, b = 1$", "$a = 2, b = -4$"],
+          answerIndex: 0,
+          explanation: "$a > 0$ なので $(1, -2)$ と $(4, 7)$ を通ります。$a = \\dfrac{7 - (-2)}{4 - 1} = 3$。$-2 = 3(1) + b \\implies b = -5$ です。"
+        },
+        {
+          id: "e11",
+          question: "一次関数 $y = ax + b$ ($a > 0$) において、$x$ の変域が $-2 \\leqq x \\leqq 3$ のとき $y$ の変域は $1 \\leqq y \\leqq 11$ である。定数 $a, b$ の値を求めなさい。",
+          options: ["$a = 2, b = 5$", "$a = 2, b = -5$", "$a = 3, b = 7$", "$a = -2, b = 5$"],
+          answerIndex: 0,
+          explanation: "$a > 0$ より $(-2, 1)$ と $(3, 11)$ を通ります。$a = \\dfrac{11 - 1}{3 - (-2)} = \\dfrac{10}{5} = 2$。$1 = 2(-2) + b \\implies b = 5$ です。"
+        },
+        {
+          id: "e12",
+          question: "一次関数 $y = ax + b$ ($a < 0$) において、$x$ の変域が $1 \\leqq x \\leqq 5$ のとき $y$ の変域は $-7 \\leqq y \\leqq 5$ である。定数 $a, b$ の値を求めなさい。",
+          options: ["$a = -3, b = 8$", "$a = -3, b = -8$", "$a = 3, b = 2$", "$a = -2, b = 7$"],
+          answerIndex: 0,
+          explanation: "$a < 0$ のときは右下がりのため、$x = 1$ のとき $y = 5$、$x = 5$ のとき $y = -7$ となります。$a = \\dfrac{-7 - 5}{5 - 1} = -3$。$5 = -3(1) + b \\implies b = 8$ です。"
+        },
+        {
+          id: "e13",
+          question: "一次関数 $y = ax + b$ ($a < 0$) において、$x$ の変域が $-1 \\leqq x \\leqq 3$ のとき $y$ の変域は $-5 \\leqq y \\leqq 3$ である。定数 $a, b$ の値を求めなさい。",
+          options: ["$a = -2, b = 1$", "$a = -2, b = -1$", "$a = 2, b = 1$", "$a = -1, b = 2$"],
+          answerIndex: 0,
+          explanation: "$a < 0$ より $(-1, 3)$ と $(3, -5)$ を通ります。$a = \\dfrac{-5 - 3}{3 - (-1)} = -2$。$3 = -2(-1) + b \\implies b = 1$ です。"
+        },
+        {
+          id: "e14",
+          question: "2つの直線 $y = 2x - 3$ と $y = ax + 5$ が平行であるとき、定数 $a$ の値を求めなさい。",
+          options: ["$2$", "$-2$", "$5$", "$\\dfrac{1}{2}$"],
+          answerIndex: 0,
+          explanation: "2直線が平行であるとき、傾き（変化の割合）は等しくなります。したがって $a = 2$ です。"
+        },
+        {
+          id: "e15",
+          question: "直線 $3x - 4y = 8$ と平行で、点 $(0, -3)$ を通る直線の式を求めなさい。",
+          options: ["$y = \\dfrac{3}{4}x - 3$", "$y = -\\dfrac{3}{4}x - 3$", "$y = \\dfrac{4}{3}x - 3$", "$y = 3x - 3$"],
+          answerIndex: 0,
+          explanation: "$3x - 4y = 8 \\implies y = \\dfrac{3}{4}x - 2$ より傾きは $\\dfrac{3}{4}$。切片が $-3$ なので $y = \\dfrac{3}{4}x - 3$ です。"
+        },
+        {
+          id: "e16",
+          question: "直線 $y = -\\dfrac{2}{3}x + 4$ に平行で、点 $(3, 1)$ を通る直線の式を求めなさい。",
+          options: ["$y = -\\dfrac{2}{3}x + 3$", "$y = -\\dfrac{2}{3}x + 1$", "$y = \\dfrac{2}{3}x - 1$", "$y = -\\dfrac{2}{3}x + 5$"],
+          answerIndex: 0,
+          explanation: "傾きは $-\\dfrac{2}{3}$。$1 = -\\dfrac{2}{3}(3) + b \\implies 1 = -2 + b \\implies b = 3$。よって $y = -\\dfrac{2}{3}x + 3$ です。"
+        },
+        {
+          id: "e17",
+          question: "一次関数 $y = ax + 6$ において、$x$ の変域が $-2 \\leqq x \\leqq 4$ のとき $y$ の増加量が $-18$ であった。定数 $a$ の値を求めなさい。",
+          options: ["$-3$", "$3$", "$-\\dfrac{1}{3}$", "$-2$"],
+          answerIndex: 0,
+          explanation: "$x$ の増加量は $4 - (-2) = 6$。変化の割合 $a = \\dfrac{-18}{6} = -3$ です。"
+        },
+        {
+          id: "e18",
+          question: "一次関数 $y = ax + b$ ($a > 0$) で、$x$ が $3$ 増加すると $y$ が $6$ 増加し、点 $(1, 1)$ を通る。定数 $a, b$ の値を求めなさい。",
+          options: ["$a = 2, b = -1$", "$a = 2, b = 1$", "$a = 3, b = -2$", "$a = \\dfrac{1}{2}, b = \\dfrac{1}{2}$"],
+          answerIndex: 0,
+          explanation: "傾き $a = \\dfrac{6}{3} = 2$。点 $(1, 1)$ を代入して $1 = 2(1) + b \\implies b = -1$ です。"
+        },
+        {
+          id: "e19",
+          question: "直線 $y = -\\dfrac{1}{2}x + 4$ が $x$ 軸と交わる点を $\\mathrm{A}$、$y$ 軸と交わる点を $\\mathrm{B}$ とするとき、点 $\\mathrm{B}$ から点 $\\mathrm{A}$ へ移動するときの $x$ の増加量と $y$ の増加量を求めなさい。",
+          options: ["$x$の増加量: $8$, $y$の増加量: $-4$", "$x$の増加量: $4$, $y$の増加量: $-8$", "$x$の増加量: $8$, $y$の増加量: $4$", "$x$の増加量: $-8$, $y$の増加量: $4$"],
+          answerIndex: 0,
+          explanation: "交点は $\\mathrm{A}(8, 0)$、$\\mathrm{B}(0, 4)$ です。$\\mathrm{B}$ から $\\mathrm{A}$ への変化は $x: 8 - 0 = 8$、$y: 0 - 4 = -4$ です。"
+        },
+        {
+          id: "e20",
+          question: "2点 $(-1, k)$, $(3, 7)$ を通る直線の変化の割合が $3$ であるとき、$k$ の値を求めなさい。",
+          options: ["$-5$", "$5$", "$-1$", "$1$"],
+          answerIndex: 0,
+          explanation: "変化の割合は $\\dfrac{7 - k}{3 - (-1)} = \\dfrac{7 - k}{4} = 3 \\implies 7 - k = 12 \\implies k = -5$ です。"
+        },
+        {
+          id: "e21",
+          question: "関数 $y = -\\dfrac{5}{x}$ において、$x$ の値が $1$ から $5$ まで増加するとき、変化の割合を求めなさい。",
+          options: ["$1$", "$-1$", "$5$", "$-\\dfrac{1}{5}$"],
+          answerIndex: 0,
+          explanation: "$x = 1$ のとき $y = -5$、$x = 5$ のとき $y = -1$ です。$x$ の増加量は $5 - 1 = 4$、$y$ の増加量は $-1 - (-5) = 4$。よって変化の割合は $\\dfrac{4}{4} = 1$ です。"
+        },
+        {
+          id: "e22",
+          question: "関数 $y = \\dfrac{12}{x}$ において、$x$ の値が $2$ から $6$ まで増加するとき、変化の割合を求めなさい。",
+          options: ["$-1$", "$1$", "$-2$", "$\\dfrac{1}{2}$"],
+          answerIndex: 0,
+          explanation: "$x = 2$ のとき $y = 6$、$x = 6$ のとき $y = 2$。$x$ の増加量は $6 - 2 = 4$、$y$ の増加量は $2 - 6 = -4$。よって変化の割合は $\\dfrac{-4}{4} = -1$ です。"
+        },
+        {
+          id: "e23",
+          question: "関数 $y = -\\dfrac{8}{x}$ において、$x$ の値が $2$ から $4$ まで増加するとき、変化の割合を求めなさい。",
+          options: ["$1$", "$-1$", "$2$", "$-2$"],
+          answerIndex: 0,
+          explanation: "$x = 2$ のとき $y = -4$、$x = 4$ のとき $y = -2$。$x$ の増加量は $2$、$y$ の増加量は $-2 - (-4) = 2$。よって変化の割合は $\\dfrac{2}{2} = 1$ です。"
+        },
+        {
+          id: "e24",
+          question: "関数 $y = \\dfrac{18}{x}$ において、$x$ の値が $3$ から $9$ まで増加するとき、変化の割合を求めなさい。",
+          options: ["$-\\dfrac{2}{3}$", "$\\dfrac{2}{3}$", "$-1$", "$-\\dfrac{3}{2}$"],
+          answerIndex: 0,
+          explanation: "$x = 3$ のとき $y = 6$、$x = 9$ のとき $y = 2$。$x$ の増加量は $6$、$y$ の増加量は $2 - 6 = -4$。よって変化の割合は $\\dfrac{-4}{6} = -\\dfrac{2}{3}$ です。"
+        },
+        {
+          id: "e25",
+          question: "関数 $y = -\\dfrac{6}{x}$ において、$x$ の値が $1$ から $3$ まで増加するときの変化の割合と、一次関数 $y = ax + 2$ の変化の割合が等しいとき、定数 $a$ の値を求めなさい。",
+          options: ["$2$", "$-2$", "$3$", "$-3$"],
+          answerIndex: 0,
+          explanation: "$x = 1$ のとき $y = -6$、$x = 3$ のとき $y = -2$。反比例の変化の割合は $\\dfrac{-2 - (-6)}{3 - 1} = \\dfrac{4}{2} = 2$。一次関数の変化の割合は傾き $a$ と等しいため、$a = 2$ です。"
+        }
+      ],
+      frieza: [
+        {
+          id: "fz1",
+          question: "一次関数 $y = ax + b$ について、次の条件が与えられている。<br>・$x$ の増加量が $2$ のとき、$y$ の増加量は $8$ である。<br>・$x$ の値が $1$ から $k$ まで増加するとき、$y$ の増加量は $20$ である。<br>・この直線の切片は $3$ である。<br>$k$ の値を求めよ。",
+          options: [
+            "$k = 6$",
+            "$k = 5$",
+            "$k = 7$",
+            "$k = 4$"
+          ],
+          answerIndex: 0,
+          explanation: "① 変化の割合（傾き）$a = \\dfrac{8}{2} = 4$<br>② $x$ の増加量は $k - 1$ なので、$4 \\times (k - 1) = 20 \\implies k - 1 = 5 \\implies k = 6$ です。<br>※切片の情報（$3$）は変化の割合には無関係なダミー条件です。"
+        },
+        {
+          id: "fz2",
+          question: "一次関数 $y = ax + b$ について、次の条件が与えられている。<br>・$x$ の増加量が $4$ のとき、$y$ の増加量は $12$ である。<br>・$x$ の値が $-5$ から $k$ まで増加するとき、$y$ の増加量は $27$ である。<br>・この直線の切片は $-1$ である。<br>$k$ の値を求めよ。",
+          options: [
+            "$k = 4$",
+            "$k = 3$",
+            "$k = 9$",
+            "$k = -2$"
+          ],
+          answerIndex: 0,
+          explanation: "① 変化の割合 $a = \\dfrac{12}{4} = 3$<br>② $x$ の増加量は $k - (-5) = k + 5$ なので、$3 \\times (k + 5) = 27 \\implies k + 5 = 9 \\implies k = 4$ です。"
+        },
+        {
+          id: "fz3",
+          question: "一次関数 $y = ax + b$ について、次の条件が与えられている。<br>・$x$ の増加量が $3$ のとき、$y$ の増加量は $-6$ である。<br>・$x$ の値が $-1$ から $k$ まで増加するとき、$y$ の増加量は $-14$ である。<br>・この直線の切片は $5$ である。<br>$k$ の値を求めよ。",
+          options: [
+            "$k = 6$",
+            "$k = 7$",
+            "$k = -7$",
+            "$k = 8$"
+          ],
+          answerIndex: 0,
+          explanation: "① 変化の割合 $a = \\dfrac{-6}{3} = -2$<br>② $x$ の増加量は $k - (-1) = k + 1$ なので、$-2 \\times (k + 1) = -14 \\implies k + 1 = 7 \\implies k = 6$ です。"
+        },
+        {
+          id: "fz4",
+          question: "一次関数 $y = ax + b$ について、次の条件が与えられている。<br>・$x$ の増加量が $5$ のとき、$y$ の増加量は $15$ である。<br>・$x$ の値が $3$ から $k$ まで増加するとき、$y$ の増加量は $24$ である。<br>・この直線の切片は $-7$ である。<br>$k$ の値を求めよ。",
+          options: [
+            "$k = 11$",
+            "$k = 8$",
+            "$k = 5$",
+            "$k = 12$"
+          ],
+          answerIndex: 0,
+          explanation: "① 変化の割合 $a = \\dfrac{15}{5} = 3$<br>② $x$ の増加量は $k - 3$ なので、$3 \\times (k - 3) = 24 \\implies k - 3 = 8 \\implies k = 11$ です。"
+        },
+        {
+          id: "fz5",
+          question: "一次関数 $y = ax + b$ について、次の条件が与えられている。<br>・$x$ の増加量が $2$ のとき、$y$ の増加量は $-10$ である。<br>・$x$ の値が $-3$ から $k$ まで増加するとき、$y$ の増加量は $-35$ である。<br>・この直線の切片は $2$ である。<br>$k$ の値を求めよ。",
+          options: [
+            "$k = 4$",
+            "$k = 7$",
+            "$k = -4$",
+            "$k = 10$"
+          ],
+          answerIndex: 0,
+          explanation: "① 変化の割合 $a = \\dfrac{-10}{2} = -5$<br>② $x$ の増加量は $k - (-3) = k + 3$ なので、$-5 \\times (k + 3) = -35 \\implies k + 3 = 7 \\implies k = 4$ です。"
+        },
+        {
+          id: "fz6",
+          question: "一次関数 $y = ax + b$ について、次の条件が与えられている。<br>・$x$ の増加量が $4$ のとき、$y$ の増加量は $2$ である。<br>・$x$ の値が $-4$ から $k$ まで増加するとき、$y$ の増加量は $5$ である。<br>・この直線の切片は $-3$ である。<br>$k$ の値を求めよ。",
+          options: [
+            "$k = 6$",
+            "$k = 10$",
+            "$k = 1$",
+            "$k = -1$"
+          ],
+          answerIndex: 0,
+          explanation: "① 変化の割合 $a = \\dfrac{2}{4} = \\dfrac{1}{2}$<br>② $x$ の増加量は $k - (-4) = k + 4$ なので、$\\dfrac{1}{2} \\times (k + 4) = 5 \\implies k + 4 = 10 \\implies k = 6$ です。"
+        },
+        {
+          id: "fz7",
+          question: "一次関数 $y = ax + b$ について、次の条件が与えられている。<br>・$x$ の増加量が $6$ のとき、$y$ の増加量は $-18$ である。<br>・$x$ の値が $2$ から $k$ まで増加するとき、$y$ の増加量は $-21$ である。<br>・この直線の切片は $8$ である。<br>$k$ の値を求めよ。",
+          options: [
+            "$k = 9$",
+            "$k = 7$",
+            "$k = -5$",
+            "$k = 11$"
+          ],
+          answerIndex: 0,
+          explanation: "① 変化の割合 $a = \\dfrac{-18}{6} = -3$<br>② $x$ の増加量は $k - 2$ なので、$-3 \\times (k - 2) = -21 \\implies k - 2 = 7 \\implies k = 9$ です。"
+        },
+        {
+          id: "fz8",
+          question: "一次関数 $y = ax + b$ について、次の条件が与えられている。<br>・$x$ の増加量が $3$ のとき、$y$ の増加量は $12$ である。<br>・$x$ の値が $-6$ から $k$ まで増加するとき、$y$ の増加量は $32$ である。<br>・この直線の切片は $-5$ である。<br>$k$ の値を求めよ。",
+          options: [
+            "$k = 2$",
+            "$k = 8$",
+            "$k = -2$",
+            "$k = 4$"
+          ],
+          answerIndex: 0,
+          explanation: "① 変化の割合 $a = \\dfrac{12}{3} = 4$<br>② $x$ の増加量は $k - (-6) = k + 6$ なので、$4 \\times (k + 6) = 32 \\implies k + 6 = 8 \\implies k = 2$ です。"
+        },
+        {
+          id: "fz9",
+          question: "一次関数 $y = ax + b$ について、次の条件が与えられている。<br>・$x$ の増加量が $5$ のとき、$y$ の増加量は $-15$ である。<br>・$x$ の値が $-4$ から $k$ まで増加するとき、$y$ の増加量は $-27$ である。<br>・この直線の切片は $1$ である。<br>$k$ の値を求めよ。",
+          options: [
+            "$k = 5$",
+            "$k = 9$",
+            "$k = -5$",
+            "$k = 13$"
+          ],
+          answerIndex: 0,
+          explanation: "① 変化の割合 $a = \\dfrac{-15}{5} = -3$<br>② $x$ の増加量は $k - (-4) = k + 4$ なので、$-3 \\times (k + 4) = -27 \\implies k + 4 = 9 \\implies k = 5$ です。"
+        },
+        {
+          id: "fz10",
+          question: "一次関数 $y = ax + b$ について、次の条件が与えられている。<br>・$x$ の増加量が $3$ のとき、$y$ の増加量は $2$ である。<br>・$x$ の値が $-1$ から $k$ まで増加するとき、$y$ の増加量は $8$ である。<br>・この直線の切片は $-6$ である。<br>$k$ の値を求めよ。",
+          options: [
+            "$k = 11$",
+            "$k = 12$",
+            "$k = 7$",
+            "$k = 13$"
+          ],
+          answerIndex: 0,
+          explanation: "① 変化の割合 $a = \\dfrac{2}{3}$<br>② $x$ の増加量は $k - (-1) = k + 1$ なので、$\\dfrac{2}{3} \\times (k + 1) = 8 \\implies k + 1 = 8 \\times \\dfrac{3}{2} = 12 \\implies k = 11$ です。"
+        }
+      ]
+    };
+
+    /**
+     * Main App Controller
+     */
+    class QuizApp {
+      constructor() {
+        this.currentDifficulty = 'standard';
+        this.quizQuestions = [];
+        this.currentIndex = 0;
+        this.score = 0;
+        this.streak = 0;
+        this.consecutiveWrongCount = 0;
+        this.isAnsweringLocked = false;
+        this.autoAdvanceTimer = null;
+        this.isReviewMode = false;
+        this.hasAchievedVictoryThisSession = false;
+
+        // Frieza Saga Mode State
+        this.isFriezaMode = false;
+        this.friezaBasePower = 530000;
+
+        // Target Consecutive Correct State
+        this.targetStreakStorageKey = 'linear_func_target_streak_v1';
+        this.targetStreak = this.loadTargetStreak();
+
+        // Cleared Badges State
+        this.badgesStorageKey = 'linear_func_badges_v2';
+        this.clearedBadges = this.loadBadges();
+
+        // Local Storage for mistake history
+        this.storageKey = 'linear_func_mistakes_v1';
+        this.mistakesHistory = this.loadMistakes();
+
+        // DOM Elements
+        this.views = {
+          home: document.getElementById('homeView'),
+          quiz: document.getElementById('quizView'),
+          result: document.getElementById('resultView'),
+          victory: document.getElementById('victoryView'),
+          shenron: document.getElementById('shenronView'),
+          specialClear: document.getElementById('specialClearView'),
+          friezaLobby: document.getElementById('friezaLobbyView')
+        };
+        
+        this.specialTimer = null;
+        this.modal = document.getElementById('mistakesModal');
+        this.updateMistakeBadge();
+        this.updateTargetStreakUI();
+        this.renderBadges();
+        this.checkFriezaUnlock();
+      }
+
+      getUnlockedBadgesCount() {
+        let count = 0;
+        ['standard', 'advanced', 'expert'].forEach(d => {
+          [5, 10].forEach(s => {
+            if (this.clearedBadges?.[d]?.[s]) count++;
+          });
+        });
+        return count;
+      }
+
+      hasAllBadges() {
+        return this.getUnlockedBadgesCount() === 6;
+      }
+
+      onHeaderBadgesClick() {
+        if (this.hasAllBadges()) {
+          this.showSpecialGrandClearScreen();
+        } else {
+          const count = this.getUnlockedBadgesCount();
+          this.showToast(`現在バッジ ${count}/6 個獲得中！6個集めると完全制覇！`);
+        }
+      }
+
+      skipToFriezaInvasion() {
+        if (this.specialTimer) clearTimeout(this.specialTimer);
+        const grandVictoryStep = document.getElementById('grandVictoryStep');
+        const friezaInvasionStep = document.getElementById('friezaInvasionStep');
+        if (grandVictoryStep) grandVictoryStep.classList.add('hidden');
+        if (friezaInvasionStep) friezaInvasionStep.classList.remove('hidden');
+        sound.playDeathBeam();
+      }
+
+      checkFriezaUnlock() {
+        const allCleared = this.hasAllBadges();
+        const banner = document.getElementById('friezaSecretBanner');
+        if (banner) {
+          if (allCleared) {
+            banner.classList.remove('hidden');
+          } else {
+            banner.classList.add('hidden');
+          }
+        }
+        return allCleared;
+      }
+
+      showPasswordModal() {
+        const modal = document.getElementById('passwordModal');
+        const input = document.getElementById('secretPasswordInput');
+        const errorMsg = document.getElementById('passwordErrorMsg');
+        if (modal) {
+          if (input) input.value = '';
+          if (errorMsg) errorMsg.innerText = '';
+          modal.classList.remove('hidden');
+          setTimeout(() => { if (input) input.focus(); }, 100);
+        }
+      }
+
+      closePasswordModal() {
+        const modal = document.getElementById('passwordModal');
+        if (modal) modal.classList.add('hidden');
+      }
+
+      submitPassword() {
+        const input = document.getElementById('secretPasswordInput');
+        const errorMsg = document.getElementById('passwordErrorMsg');
+        const entered = input ? input.value.trim() : '';
+
+        if (entered === '141421356') {
+          this.closePasswordModal();
+          // 1. バッジが6個そろう
+          this.clearedBadges = {
+            standard: { 5: true, 10: true },
+            advanced: { 5: true, 10: true },
+            expert:   { 5: true, 10: true }
+          };
+          this.saveBadges();
+          this.renderBadges();
+          this.checkFriezaUnlock();
+
+          // 2. 特別な合格画面を表示、3秒後にfrieza.pngとパスワードを表示
+          this.showSpecialGrandClearScreen('141421356');
+        } else {
+          sound.playWrong();
+          if (errorMsg) errorMsg.innerText = 'パスワードが正しくありません';
+        }
+      }
+
+      showSpecialGrandClearScreen(passcode = '141421356') {
+        if (this.autoAdvanceTimer) clearTimeout(this.autoAdvanceTimer);
+        if (this.specialTimer) clearTimeout(this.specialTimer);
+
+        this.views.home.classList.add('hidden');
+        this.views.quiz.classList.add('hidden');
+        this.views.result.classList.add('hidden');
+        this.views.victory.classList.add('hidden');
+        if (this.views.shenron) this.views.shenron.classList.add('hidden');
+        this.views.friezaLobby.classList.add('hidden');
+
+        if (this.views.specialClear) {
+          this.views.specialClear.classList.remove('hidden');
+        }
+
+        const grandVictoryStep = document.getElementById('grandVictoryStep');
+        const friezaInvasionStep = document.getElementById('friezaInvasionStep');
+        if (grandVictoryStep) grandVictoryStep.classList.remove('hidden');
+        if (friezaInvasionStep) friezaInvasionStep.classList.add('hidden');
+
+        // 6個のバッジをレンダリング
+        const badgeContainer = document.getElementById('grandBadgesContainer');
+        if (badgeContainer) {
+          badgeContainer.innerHTML = `
+            <div class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 border border-amber-500/30">
+              <div class="w-10 h-10 flex items-center justify-center">${getBadgeSvg('standard', 5, 42)}</div>
+              <span class="text-[10px] text-amber-300 font-bold">標準 5</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 border border-amber-500/30">
+              <div class="w-10 h-10 flex items-center justify-center">${getBadgeSvg('standard', 10, 42)}</div>
+              <span class="text-[10px] text-amber-300 font-bold">標準 10</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 border border-cyan-500/30">
+              <div class="w-10 h-10 flex items-center justify-center">${getBadgeSvg('advanced', 5, 42)}</div>
+              <span class="text-[10px] text-cyan-300 font-bold">発展 5</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 border border-cyan-500/30">
+              <div class="w-10 h-10 flex items-center justify-center">${getBadgeSvg('advanced', 10, 42)}</div>
+              <span class="text-[10px] text-cyan-300 font-bold">発展 10</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 border border-yellow-500/30">
+              <div class="w-10 h-10 flex items-center justify-center">${getBadgeSvg('expert', 5, 42)}</div>
+              <span class="text-[10px] text-yellow-300 font-bold">超発展 5</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 border border-yellow-500/30">
+              <div class="w-10 h-10 flex items-center justify-center">${getBadgeSvg('expert', 10, 42)}</div>
+              <span class="text-[10px] text-yellow-300 font-bold">超発展 10</span>
+            </div>
+          `;
+        }
+
+        sound.playVictory();
+
+        // 3秒後に frieza.png とパスワードを表示
+        this.specialTimer = setTimeout(() => {
+          if (grandVictoryStep) grandVictoryStep.classList.add('hidden');
+          if (friezaInvasionStep) friezaInvasionStep.classList.remove('hidden');
+          sound.playDeathBeam();
+        }, 3000);
+      }
+
+      showFriezaLobby() {
+        if (this.autoAdvanceTimer) clearTimeout(this.autoAdvanceTimer);
+        if (this.specialTimer) clearTimeout(this.specialTimer);
+        this.views.home.classList.add('hidden');
+        this.views.quiz.classList.add('hidden');
+        this.views.result.classList.add('hidden');
+        this.views.victory.classList.add('hidden');
+        if (this.views.shenron) this.views.shenron.classList.add('hidden');
+        if (this.views.specialClear) this.views.specialClear.classList.add('hidden');
+        this.views.friezaLobby.classList.remove('hidden');
+        sound.playScouterBeep();
+      }
+
+      startFriezaBattle() {
+        if (this.specialTimer) clearTimeout(this.specialTimer);
+        this.isFriezaMode = true;
+        this.isReviewMode = false;
+        this.currentDifficulty = 'frieza';
+        this.hasAchievedVictoryThisSession = false;
+
+        this.quizQuestions = this.prepareQuestions(QUESTION_BANK.frieza);
+
+        this.currentIndex = 0;
+        this.score = 0;
+        this.streak = 0;
+        this.consecutiveWrongCount = 0;
+        this.isAnsweringLocked = false;
+
+        this.applyFriezaTheme(true);
+
+        document.getElementById('totalQNum').innerText = this.quizQuestions.length;
+        document.getElementById('quizTargetDisplay').innerText = 5;
+
+        this.views.friezaLobby.classList.add('hidden');
+        this.views.home.classList.add('hidden');
+        this.views.result.classList.add('hidden');
+        this.views.victory.classList.add('hidden');
+        if (this.views.shenron) this.views.shenron.classList.add('hidden');
+        if (this.views.specialClear) this.views.specialClear.classList.add('hidden');
+        this.views.quiz.classList.remove('hidden');
+
+        sound.playDeathBeam();
+        this.renderCurrentQuestion();
+      }
+
+      applyFriezaTheme(enable) {
+        const header = document.getElementById('quizHeaderContainer');
+        const badge = document.getElementById('quizDiffBadge');
+        const speechBox = document.getElementById('friezaSpeechBox');
+
+        if (enable) {
+          header.className = 'bg-slate-950/90 rounded-2xl p-4 border-2 border-fuchsia-500/70 shadow-2xl shadow-fuchsia-500/20';
+          badge.innerText = 'フリーザ編';
+          badge.className = 'text-xs font-black px-2.5 py-0.5 rounded-full uppercase bg-fuchsia-500 text-slate-950 shadow-md shadow-fuchsia-500/50';
+          speechBox.classList.remove('hidden');
+          document.getElementById('friezaSpeechText').innerText = '「ホッホッホ…さあ、私の一次関数に答えられますか？」';
+        } else {
+          header.className = 'bg-slate-800/80 rounded-2xl p-4 border border-slate-700/80 shadow-md';
+          speechBox.classList.add('hidden');
+        }
+      }
+
+      loadTargetStreak() {
+        try {
+          const val = localStorage.getItem(this.targetStreakStorageKey);
+          const parsed = val ? parseInt(val, 10) : 10;
+          return [5, 10].includes(parsed) ? parsed : 10;
+        } catch(e) {
+          return 10;
+        }
+      }
+
+      saveTargetStreak() {
+        try {
+          localStorage.setItem(this.targetStreakStorageKey, this.targetStreak.toString());
+        } catch(e) {
+          console.error(e);
+        }
+      }
+
+      setTargetStreak(num) {
+        this.targetStreak = num;
+        this.saveTargetStreak();
+        this.updateTargetStreakUI();
+        sound.playClick();
+        this.showToast(`目標を「${num}問連続正解」に設定しました`);
+      }
+
+      updateTargetStreakUI() {
+        const display = document.getElementById('currentTargetDisplay');
+        if (display) display.innerText = this.targetStreak;
+        
+        const quizDisplay = document.getElementById('quizTargetDisplay');
+        if (quizDisplay) quizDisplay.innerText = this.targetStreak;
+
+        const btns = document.querySelectorAll('.target-btn');
+        btns.forEach(btn => {
+          const target = parseInt(btn.getAttribute('data-target'), 10);
+          if (target === this.targetStreak) {
+            btn.className = 'target-btn py-2.5 px-4 rounded-xl border-2 border-indigo-500 bg-indigo-600/30 text-indigo-200 shadow-md font-bold flex items-center justify-center gap-1.5';
+          } else {
+            btn.className = 'target-btn py-2.5 px-4 rounded-xl border border-slate-700 bg-slate-800/90 text-slate-300 hover:border-indigo-400 hover:text-white transition flex items-center justify-center gap-1.5';
+          }
+        });
+      }
+
+      loadBadges() {
+        try {
+          const raw = localStorage.getItem(this.badgesStorageKey);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            return {
+              standard: { 5: !!parsed?.standard?.[5], 10: !!parsed?.standard?.[10] },
+              advanced: { 5: !!parsed?.advanced?.[5], 10: !!parsed?.advanced?.[10] },
+              expert:   { 5: !!parsed?.expert?.[5],   10: !!parsed?.expert?.[10] }
+            };
+          }
+        } catch(e) {}
+        return {
+          standard: { 5: false, 10: false },
+          advanced: { 5: false, 10: false },
+          expert:   { 5: false, 10: false }
+        };
+      }
+
+      saveBadges() {
+        try {
+          localStorage.setItem(this.badgesStorageKey, JSON.stringify(this.clearedBadges));
+        } catch(e) {
+          console.error(e);
+        }
+        this.renderBadges();
+      }
+
+      unlockBadge(difficulty, streak) {
+        if (!['standard', 'advanced', 'expert'].includes(difficulty)) return;
+        const s = streak === 5 ? 5 : 10;
+        if (!this.clearedBadges[difficulty]) {
+          this.clearedBadges[difficulty] = { 5: false, 10: false };
+        }
+        this.clearedBadges[difficulty][s] = true;
+        this.saveBadges();
+      }
+
+      removeOneBadge() {
+        const priorityOrder = [
+          { diff: 'expert', streak: 10, name: '超発展 10連勝' },
+          { diff: 'expert', streak: 5,  name: '超発展 5連勝' },
+          { diff: 'advanced', streak: 10, name: '発展 10連勝' },
+          { diff: 'advanced', streak: 5,  name: '発展 5連勝' },
+          { diff: 'standard', streak: 10, name: '標準 10連勝' },
+          { diff: 'standard', streak: 5,  name: '標準 5連勝' }
+        ];
+
+        // 1. 現在の難易度のバッジ（10連勝→5連勝の順）があれば優先して減らす
+        let target = null;
+        if (['standard', 'advanced', 'expert'].includes(this.currentDifficulty)) {
+          const d = this.currentDifficulty;
+          const diffNames = { standard: '標準', advanced: '発展', expert: '超発展' };
+          if (this.clearedBadges?.[d]?.[10]) {
+            target = { diff: d, streak: 10, name: `${diffNames[d]} 10連勝` };
+          } else if (this.clearedBadges?.[d]?.[5]) {
+            target = { diff: d, streak: 5, name: `${diffNames[d]} 5連勝` };
+          }
+        }
+
+        // 2. 現在の難易度にバッジがない場合、獲得済みの最も上位のバッジを減らす
+        if (!target) {
+          for (const item of priorityOrder) {
+            if (this.clearedBadges?.[item.diff]?.[item.streak]) {
+              target = item;
+              break;
+            }
+          }
+        }
+
+        if (!target) return null;
+
+        this.clearedBadges[target.diff][target.streak] = false;
+        this.saveBadges();
+        this.renderBadges();
+        this.checkFriezaUnlock();
+
+        // 画面上部バッジバーを警告アニメーションさせる
+        const headerBadges = document.getElementById('headerBadges');
+        if (headerBadges) {
+          headerBadges.classList.add('ring-2', 'ring-rose-500', 'animate-pulse');
+          setTimeout(() => {
+            headerBadges.classList.remove('ring-2', 'ring-rose-500', 'animate-pulse');
+          }, 2000);
+        }
+
+        return target;
+      }
+
+      renderBadges() {
+        const diffConfig = {
+          standard: { name: '標準' },
+          advanced: { name: '発展' },
+          expert: { name: '超発展' }
+        };
+
+        ['standard', 'advanced', 'expert'].forEach(diff => {
+          [5, 10].forEach(streak => {
+            const isCleared = !!this.clearedBadges?.[diff]?.[streak];
+            const headerBadgeEl = document.getElementById(`badge-${diff}-${streak}`);
+            const cardBadgeEl = document.getElementById(`cardBadge-${diff}-${streak}`);
+            const cardStatusEl = document.getElementById(`cardStatus-${diff}-${streak}`);
+
+            if (headerBadgeEl) {
+              headerBadgeEl.innerHTML = getBadgeSvg(diff, streak, 20);
+              if (isCleared) {
+                headerBadgeEl.className = 'w-5 h-5 flex items-center justify-center badge-unlocked cursor-pointer transition transform hover:scale-110';
+                headerBadgeEl.title = `${diffConfig[diff].name} ${streak}連勝：合格獲得 🎖️`;
+              } else {
+                headerBadgeEl.className = 'w-5 h-5 flex items-center justify-center badge-locked opacity-35 cursor-pointer transition transform hover:scale-105';
+                headerBadgeEl.title = `${diffConfig[diff].name} ${streak}連勝：未獲得`;
+              }
+            }
+
+            if (cardBadgeEl) {
+              cardBadgeEl.innerHTML = getBadgeSvg(diff, streak, 28);
+              if (isCleared) {
+                cardBadgeEl.className = 'w-7 h-7 flex-shrink-0 flex items-center justify-center badge-unlocked drop-shadow';
+              } else {
+                cardBadgeEl.className = 'w-7 h-7 flex-shrink-0 flex items-center justify-center badge-locked opacity-35';
+              }
+            }
+
+            if (cardStatusEl) {
+              if (isCleared) {
+                cardStatusEl.innerText = '獲得済 🎖️';
+                cardStatusEl.className = 'text-[9px] text-amber-300 font-bold';
+              } else {
+                cardStatusEl.innerText = '未獲得';
+                cardStatusEl.className = 'text-[9px] text-slate-500 font-medium';
+              }
+            }
+          });
+        });
+      }
+
+      shuffleArray(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      prepareQuestions(rawList) {
+        const cloned = JSON.parse(JSON.stringify(rawList));
+        const shuffledQuestions = this.shuffleArray(cloned);
+
+        shuffledQuestions.forEach(q => {
+          const correctAnswerText = q.options[q.answerIndex];
+          q.options = this.shuffleArray(q.options);
+          q.answerIndex = q.options.indexOf(correctAnswerText);
+        });
+
+        return shuffledQuestions;
+      }
+
+      loadMistakes() {
+        try {
+          const raw = localStorage.getItem(this.storageKey);
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      saveMistakes() {
+        try {
+          localStorage.setItem(this.storageKey, JSON.stringify(this.mistakesHistory));
+        } catch (e) {
+          console.error(e);
+        }
+        this.updateMistakeBadge();
+      }
+
+      updateMistakeBadge() {
+        const badge = document.getElementById('mistakeBadge');
+        const countSpan = document.getElementById('reviewCountSpan');
+        const startReviewBtn = document.getElementById('startReviewBtn');
+        const count = this.mistakesHistory.length;
+        
+        if (badge) badge.innerText = count;
+        if (countSpan) countSpan.innerText = count;
+        if (startReviewBtn) startReviewBtn.disabled = count === 0;
+      }
+
+      showToast(msg) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.innerText = msg;
+        toast.classList.remove('opacity-0', 'pointer-events-none');
+        toast.classList.add('opacity-100');
+        setTimeout(() => {
+          toast.classList.remove('opacity-100');
+          toast.classList.add('opacity-0', 'pointer-events-none');
+        }, 2200);
+      }
+
+      showHome() {
+        if (this.autoAdvanceTimer) clearTimeout(this.autoAdvanceTimer);
+        if (this.specialTimer) clearTimeout(this.specialTimer);
+        this.isFriezaMode = false;
+        this.applyFriezaTheme(false);
+        this.views.home.classList.remove('hidden');
+        this.views.quiz.classList.add('hidden');
+        this.views.result.classList.add('hidden');
+        this.views.victory.classList.add('hidden');
+        if (this.views.shenron) this.views.shenron.classList.add('hidden');
+        if (this.views.specialClear) this.views.specialClear.classList.add('hidden');
+        this.views.friezaLobby.classList.add('hidden');
+        this.closeMistakesModal();
+        this.closePasswordModal();
+        this.cancelFullReset();
+        this.renderBadges();
+        this.checkFriezaUnlock();
+        this.renderMath();
+      }
+
+      exitAppWindow() {
+        window.close();
+        this.showToast('ブラウザのタブを閉じて終了してください');
+      }
+
+      promptFullReset() {
+        const initBtn = document.getElementById('resetInitBtn');
+        const confirmGroup = document.getElementById('resetConfirmGroup');
+        if (initBtn && confirmGroup) {
+          initBtn.classList.add('hidden');
+          confirmGroup.classList.remove('hidden');
+        }
+      }
+
+      cancelFullReset() {
+        const initBtn = document.getElementById('resetInitBtn');
+        const confirmGroup = document.getElementById('resetConfirmGroup');
+        if (initBtn && confirmGroup) {
+          confirmGroup.classList.add('hidden');
+          initBtn.classList.remove('hidden');
+        }
+      }
+
+      executeFullReset() {
+        this.clearedBadges = {
+          standard: { 5: false, 10: false },
+          advanced: { 5: false, 10: false },
+          expert:   { 5: false, 10: false }
+        };
+        this.saveBadges();
+        this.mistakesHistory = [];
+        this.saveMistakes();
+        this.streak = 0;
+        this.cancelFullReset();
+        this.checkFriezaUnlock();
+        sound.playClick();
+        this.showToast('バッジと復習履歴をすべてリセットしました');
+      }
+
+      startQuiz(difficulty) {
+        this.isFriezaMode = false;
+        this.isReviewMode = false;
+        this.applyFriezaTheme(false);
+        this.currentDifficulty = difficulty;
+        this.hasAchievedVictoryThisSession = false;
+        
+        const raw = QUESTION_BANK[difficulty] || [];
+        this.quizQuestions = this.prepareQuestions(raw);
+
+        this.currentIndex = 0;
+        this.score = 0;
+        this.streak = 0;
+        this.consecutiveWrongCount = 0;
+        this.isAnsweringLocked = false;
+
+        const badge = document.getElementById('quizDiffBadge');
+        if (difficulty === 'standard') {
+          badge.innerText = '標準';
+          badge.className = 'text-xs font-extrabold px-2.5 py-0.5 rounded-full uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        } else if (difficulty === 'advanced') {
+          badge.innerText = '発展';
+          badge.className = 'text-xs font-extrabold px-2.5 py-0.5 rounded-full uppercase bg-blue-500/20 text-blue-300 border border-blue-500/30';
+        } else {
+          badge.innerText = '超発展';
+          badge.className = 'text-xs font-extrabold px-2.5 py-0.5 rounded-full uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30';
+        }
+
+        document.getElementById('totalQNum').innerText = this.quizQuestions.length;
+        document.getElementById('quizTargetDisplay').innerText = this.targetStreak;
+        this.views.home.classList.add('hidden');
+        this.views.result.classList.add('hidden');
+        this.views.victory.classList.add('hidden');
+        if (this.views.shenron) this.views.shenron.classList.add('hidden');
+        if (this.views.specialClear) this.views.specialClear.classList.add('hidden');
+        if (this.specialTimer) clearTimeout(this.specialTimer);
+        this.views.friezaLobby.classList.add('hidden');
+        this.views.quiz.classList.remove('hidden');
+
+        sound.playClick();
+        this.renderCurrentQuestion();
+      }
+
+      retryCurrentQuiz() {
+        if (this.isReviewMode) {
+          this.startMistakesReviewQuiz();
+        } else if (this.isFriezaMode) {
+          this.startFriezaBattle();
+        } else {
+          this.startQuiz(this.currentDifficulty);
+        }
+      }
+
+      exitQuiz() {
+        if (this.autoAdvanceTimer) clearTimeout(this.autoAdvanceTimer);
+        this.showHome();
+      }
+
+      renderCurrentQuestion() {
+        if (this.autoAdvanceTimer) clearTimeout(this.autoAdvanceTimer);
+        this.isAnsweringLocked = false;
+
+        const q = this.quizQuestions[this.currentIndex];
+        if (!q) {
+          this.finishQuiz();
+          return;
+        }
+
+        document.getElementById('currentQNum').innerText = this.currentIndex + 1;
+        document.getElementById('correctScore').innerText = this.score;
+        document.getElementById('streakCount').innerText = this.streak;
+        
+        const progressPercent = ((this.currentIndex) / this.quizQuestions.length) * 100;
+        document.getElementById('quizProgressBar').style.width = `${progressPercent}%`;
+
+        if (this.isFriezaMode) {
+          const power = this.friezaBasePower + (this.streak * 70000);
+          document.getElementById('friezaPowerDisplay').innerText = `SCOUTER: ${power.toLocaleString()}`;
+        }
+
+        const feedbackBox = document.getElementById('feedbackBox');
+        feedbackBox.classList.add('hidden');
+        feedbackBox.className = 'hidden rounded-2xl p-5 border transition-all duration-300';
+
+        const qTextEl = document.getElementById('questionText');
+        qTextEl.innerHTML = q.question;
+
+        const container = document.getElementById('optionsContainer');
+        container.innerHTML = '';
+
+        q.options.forEach((optText, idx) => {
+          const btn = document.createElement('button');
+          const isFrieza = this.isFriezaMode;
+          const bgStyles = isFrieza 
+            ? 'border-purple-800/80 bg-purple-950/40 hover:bg-purple-900/60 hover:border-fuchsia-400 text-purple-100'
+            : 'border-slate-700 bg-slate-800/90 hover:bg-slate-700 hover:border-slate-500 text-slate-200';
+
+          btn.className = `w-full text-left p-4 rounded-xl border ${bgStyles} transition-all font-medium text-sm sm:text-base flex items-center justify-between group shadow-sm`;
+          btn.setAttribute('data-index', idx);
+          
+          btn.innerHTML = `
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-lg ${isFrieza ? 'bg-purple-800 text-fuchsia-300' : 'bg-slate-700/80 text-slate-300'} group-hover:bg-indigo-600/80 group-hover:text-white transition flex items-center justify-center text-xs font-bold">
+                ${['A', 'B', 'C', 'D'][idx]}
+              </span>
+              <span class="option-text">${optText}</span>
+            </div>
+            <span class="option-indicator opacity-0 transition text-sm"></span>
+          `;
+
+          btn.onclick = () => this.handleAnswer(idx);
+          container.appendChild(btn);
+        });
+
+        this.renderMath();
+      }
+
+      handleAnswer(selectedIndex) {
+        if (this.isAnsweringLocked) return;
+        this.isAnsweringLocked = true;
+
+        const q = this.quizQuestions[this.currentIndex];
+        const isCorrect = (selectedIndex === q.answerIndex);
+        const optionsBtns = document.getElementById('optionsContainer').children;
+        const feedbackBox = document.getElementById('feedbackBox');
+        const feedbackHeader = document.getElementById('feedbackHeader');
+        const explanationText = document.getElementById('explanationText');
+        const speechText = document.getElementById('friezaSpeechText');
+
+        Array.from(optionsBtns).forEach((btn, idx) => {
+          btn.disabled = true;
+          const indicator = btn.querySelector('.option-indicator');
+          
+          if (idx === q.answerIndex) {
+            btn.classList.remove('bg-slate-800/90', 'border-slate-700', 'bg-purple-950/40', 'border-purple-800/80');
+            btn.classList.add('bg-emerald-950/40', 'border-emerald-500', 'text-emerald-200', 'font-bold');
+            if (indicator) {
+              indicator.innerHTML = '✔ 正解';
+              indicator.classList.remove('opacity-0');
+              indicator.classList.add('text-emerald-400', 'font-bold');
+            }
+          }
+
+          if (idx === selectedIndex && !isCorrect) {
+            btn.classList.remove('bg-slate-800/90', 'border-slate-700', 'bg-purple-950/40', 'border-purple-800/80');
+            btn.classList.add('bg-rose-950/40', 'border-rose-500', 'text-rose-200');
+            if (indicator) {
+              indicator.innerHTML = '✖';
+              indicator.classList.remove('opacity-0');
+              indicator.classList.add('text-rose-400', 'font-bold');
+            }
+          }
+        });
+
+        if (isCorrect) {
+          this.score++;
+          this.streak++;
+          this.consecutiveWrongCount = 0;
+
+          if (this.isFriezaMode) {
+            const praise = FRIEZA_QUOTES.correct[Math.floor(Math.random() * FRIEZA_QUOTES.correct.length)];
+            speechText.innerText = `フリーザ：「${praise}」`;
+          }
+
+          const targetRequired = this.isFriezaMode ? 5 : this.targetStreak;
+          if (!this.isReviewMode && this.streak >= targetRequired && !this.hasAchievedVictoryThisSession) {
+            this.hasAchievedVictoryThisSession = true;
+            if (!this.isFriezaMode) {
+              this.unlockBadge(this.currentDifficulty, this.targetStreak);
+            }
+
+            if (this.isFriezaMode) {
+              sound.playShenronSummon();
+              feedbackBox.className = 'rounded-2xl p-5 border-2 border-fuchsia-400 bg-fuchsia-950/60 text-fuchsia-200 animate-pop';
+              feedbackHeader.innerHTML = `
+                <span class="text-xl">💥</span>
+                <span class="text-fuchsia-200 font-extrabold text-base">フリーザ撃破！！5連続正解達成！</span>
+                <span class="text-xs text-amber-300 font-bold ml-2">神龍（シェンロン）が出現します...</span>
+              `;
+              explanationText.innerHTML = `
+                <div class="p-3 bg-purple-950 rounded-xl border border-fuchsia-500/50 mb-3 text-white font-bold">
+                  フリーザ：「${FRIEZA_QUOTES.defeat}」
+                </div>
+                <span class="font-bold text-slate-200">【解説】</span><br>${q.explanation}
+              `;
+
+              feedbackBox.classList.remove('hidden');
+
+              this.autoAdvanceTimer = setTimeout(() => {
+                this.showShenronEnding();
+              }, 1500);
+
+            } else {
+              sound.playVictory();
+              const isAllGrandCleared = this.hasAllBadges();
+
+              feedbackBox.className = 'rounded-2xl p-5 border border-amber-400/60 bg-amber-950/30 text-amber-200 animate-pop';
+              if (isAllGrandCleared) {
+                feedbackHeader.innerHTML = `
+                  <span class="text-xl">👑</span>
+                  <span class="text-amber-300 font-extrabold text-base">全6種のバッジ完全制覇達成！！！</span>
+                  <span class="text-xs text-amber-200 font-normal ml-2">完全制覇画面を表示します...</span>
+                `;
+              } else {
+                feedbackHeader.innerHTML = `
+                  <span class="text-xl">🎖️</span>
+                  <span class="text-amber-300 font-extrabold text-base">目標達成！合格勲章を獲得！</span>
+                  <span class="text-xs text-amber-200 font-normal ml-2">合格画面を表示します...</span>
+                `;
+              }
+              explanationText.innerHTML = `<span class="font-bold text-slate-200">【解説】</span><br>${q.explanation}`;
+              feedbackBox.classList.remove('hidden');
+
+              this.autoAdvanceTimer = setTimeout(() => {
+                if (isAllGrandCleared) {
+                  this.showSpecialGrandClearScreen();
+                } else {
+                  this.showVictoryScreen();
+                }
+              }, 1400);
+            }
+
+            this.renderMath();
+            return;
+          }
+
+          sound.playCorrect();
+          feedbackBox.className = 'rounded-2xl p-5 border border-emerald-500/40 bg-emerald-950/20 text-emerald-300 animate-pop';
+          feedbackHeader.innerHTML = `
+            <span class="text-xl">🎉</span>
+            <span class="text-emerald-300 font-extrabold text-base">正解！</span>
+            <span class="text-xs text-emerald-400 font-normal ml-2">自動で次の問題に進みます...</span>
+          `;
+          explanationText.innerHTML = `<span class="font-bold text-slate-200">【解説】</span><br>${q.explanation}`;
+          feedbackBox.classList.remove('hidden');
+
+          this.autoAdvanceTimer = setTimeout(() => {
+            this.nextQuestion();
+          }, 1100);
+
+        } else {
+          this.consecutiveWrongCount = (this.consecutiveWrongCount || 0) + 1;
+          let badgeLost = null;
+          let hitPenalty = false;
+
+          if (this.consecutiveWrongCount >= 3) {
+            hitPenalty = true;
+            this.consecutiveWrongCount = 0;
+            badgeLost = this.removeOneBadge();
+          }
+
+          if (this.isFriezaMode) {
+            sound.playDeathBeam();
+            const harshQuote = FRIEZA_QUOTES.wrong[Math.floor(Math.random() * FRIEZA_QUOTES.wrong.length)];
+            speechText.innerText = `フリーザ：「${harshQuote}」`;
+
+            feedbackBox.className = 'rounded-2xl p-5 border-2 border-fuchsia-500 bg-purple-950/60 text-purple-200 animate-pop';
+            feedbackHeader.innerHTML = `
+              <span class="text-xl">👽</span>
+              <span class="text-fuchsia-300 font-extrabold text-base">不正解！</span>
+              ${badgeLost ? `<span class="text-xs font-bold text-rose-300 bg-rose-950/90 border border-rose-500/60 px-2 py-0.5 rounded-full ml-2 animate-pulse">💔 連続3回不正解！【${badgeLost.name}】バッジ減少！</span>` : (hitPenalty ? `<span class="text-xs text-rose-400 font-bold ml-2">⚠️ 連続3回不正解！（現在保持バッジなし）</span>` : (this.consecutiveWrongCount === 2 ? `<span class="text-xs text-amber-400 font-bold ml-2">⚠️ 連続2回不正解（次もミスするとバッジ減少）</span>` : ''))}
+            `;
+            explanationText.innerHTML = `
+              ${badgeLost ? `
+                <div class="p-3 bg-rose-950/90 rounded-xl border border-rose-500/80 mb-3 text-rose-200 font-bold text-xs sm:text-sm flex items-center gap-2">
+                  <span class="text-lg">💔</span>
+                  <span>連続3回不正解のペナルティにより、【${badgeLost.name}】バッジが1個剥奪されました。</span>
+                </div>
+              ` : ''}
+              <div class="p-3 bg-fuchsia-950/70 rounded-xl border border-fuchsia-500/40 mb-3 text-fuchsia-200 font-medium">
+                「${harshQuote}」
+              </div>
+              <span class="font-bold text-slate-200">【解説】</span><br>${q.explanation}
+            `;
+          } else {
+            sound.playWrong();
+            feedbackBox.className = 'rounded-2xl p-5 border border-rose-500/40 bg-rose-950/20 text-rose-300 animate-pop';
+            feedbackHeader.innerHTML = `
+              <span class="text-xl">⚠️</span>
+              <span class="text-rose-300 font-extrabold text-base">不正解</span>
+              ${badgeLost ? `<span class="text-xs font-bold text-rose-300 bg-rose-950/90 border border-rose-500/60 px-2 py-0.5 rounded-full ml-2 animate-pulse">💔 連続3回不正解！【${badgeLost.name}】バッジ減少！</span>` : (hitPenalty ? `<span class="text-xs text-rose-400 font-bold ml-2">⚠️ 連続3回不正解！（現在保持バッジなし）</span>` : (this.consecutiveWrongCount === 2 ? `<span class="text-xs text-amber-300 font-bold ml-2">⚠️ 連続2回ミス（次も間違えるとバッジ減少）</span>` : `<span class="text-xs text-slate-300 font-normal ml-2">解説を確認して次へ進もう</span>`))}
+            `;
+            explanationText.innerHTML = `
+              ${badgeLost ? `
+                <div class="p-3 bg-rose-950/80 rounded-xl border border-rose-500/70 mb-3 text-rose-200 font-bold text-xs sm:text-sm flex items-center gap-2">
+                  <span class="text-lg">💔</span>
+                  <span>連続3回不正解のペナルティにより、【${badgeLost.name}】バッジが1個減りました。</span>
+                </div>
+              ` : ''}
+              <span class="font-bold text-slate-200">【解説】</span><br>${q.explanation}
+            `;
+          }
+
+          if (badgeLost) {
+            this.showToast(`⚠️ 連続3回不正解！【${badgeLost.name}】バッジが1個減りました`);
+          }
+
+          this.streak = 0;
+          this.addMistake(q, selectedIndex);
+          feedbackBox.classList.remove('hidden');
+        }
+
+        this.renderMath();
+      }
+
+      showShenronEnding() {
+        if (this.autoAdvanceTimer) clearTimeout(this.autoAdvanceTimer);
+        this.views.quiz.classList.add('hidden');
+        this.views.result.classList.add('hidden');
+        this.views.victory.classList.add('hidden');
+        this.views.friezaLobby.classList.add('hidden');
+        if (this.views.shenron) this.views.shenron.classList.remove('hidden');
+      }
+
+      showVictoryScreen() {
+        if (this.hasAllBadges()) {
+          this.showSpecialGrandClearScreen();
+          return;
+        }
+        if (this.autoAdvanceTimer) clearTimeout(this.autoAdvanceTimer);
+        this.views.quiz.classList.add('hidden');
+        this.views.result.classList.add('hidden');
+        this.views.friezaLobby.classList.add('hidden');
+        if (this.views.shenron) this.views.shenron.classList.add('hidden');
+        if (this.views.specialClear) this.views.specialClear.classList.add('hidden');
+        this.views.victory.classList.remove('hidden');
+
+        const diffNames = { standard: '標準', advanced: '発展', expert: '超発展' };
+        const diff = this.currentDifficulty;
+        const streak = this.targetStreak;
+        
+        const diffTitleConfig = {
+          standard: {
+            5: { title: '標準 5連勝 MASTER', subtitle: 'STANDARD 5 STREAK' },
+            10: { title: '標準 10連勝 MASTER', subtitle: 'STANDARD 10 STREAK' }
+          },
+          advanced: {
+            5: { title: '発展 5連勝 MASTER', subtitle: 'ADVANCED 5 STREAK' },
+            10: { title: '発展 10連勝 MASTER', subtitle: 'ADVANCED 10 STREAK' }
+          },
+          expert: {
+            5: { title: '超発展 5連勝 MASTER', subtitle: 'SUPREME 5 STREAK' },
+            10: { title: '超発展 10連勝 MASTER', subtitle: 'SUPREME 10 STREAK' }
+          }
+        };
+
+        const config = diffTitleConfig[diff]?.[streak] || { title: `${diffNames[diff]} MASTER`, subtitle: 'ACHIEVEMENT' };
+
+        document.getElementById('victoryDiffName').innerText = diffNames[diff] || '標準';
+        document.getElementById('victoryTargetStreakNum').innerText = streak;
+        
+        const heroEl = document.getElementById('victoryBadgeHero');
+        const thumbEl = document.getElementById('victoryBadgeThumb');
+        if (heroEl) heroEl.innerHTML = getBadgeSvg(diff, streak, 110);
+        if (thumbEl) thumbEl.innerHTML = getBadgeSvg(diff, streak, 40);
+
+        document.getElementById('victoryBadgeTitle').innerText = config.title;
+        document.getElementById('victoryBadgeSubtitle').innerText = config.subtitle;
+
+        this.renderBadges();
+        this.checkFriezaUnlock();
+      }
+
+      finishQuiz() {
+        if (this.autoAdvanceTimer) clearTimeout(this.autoAdvanceTimer);
+        this.views.quiz.classList.add('hidden');
+        this.views.victory.classList.add('hidden');
+        if (this.views.shenron) this.views.shenron.classList.add('hidden');
+        this.views.result.classList.remove('hidden');
+
+        const total = this.quizQuestions.length;
+        document.getElementById('finalScore').innerText = this.score;
+
+        const gradeComment = document.getElementById('gradeComment');
+        const ratio = this.score / total;
+        if (ratio === 1) {
+          gradeComment.innerText = '完璧です！全問正解パーフェクト！🎉';
+          gradeComment.className = 'text-xs font-bold text-emerald-400 mt-2';
+        } else if (ratio >= 0.8) {
+          gradeComment.innerText = '素晴らしい！合格圏内です！✨';
+          gradeComment.className = 'text-xs font-bold text-blue-400 mt-2';
+        } else if (ratio >= 0.6) {
+          gradeComment.innerText = 'もう少し！間違えた問題を復習しましょう👍';
+          gradeComment.className = 'text-xs font-bold text-amber-400 mt-2';
+        } else {
+          gradeComment.innerText = '公式まとめを確認して再挑戦してみよう！💪';
+          gradeComment.className = 'text-xs font-bold text-rose-400 mt-2';
+        }
+
+        const summaryBox = document.getElementById('resultMistakesSummary');
+        if (this.mistakesHistory.length > 0) {
+          summaryBox.classList.remove('hidden');
+        } else {
+          summaryBox.classList.add('hidden');
+        }
+      }
+
+      nextQuestion() {
+        if (this.autoAdvanceTimer) clearTimeout(this.autoAdvanceTimer);
+        this.currentIndex++;
+        if (this.currentIndex < this.quizQuestions.length) {
+          this.renderCurrentQuestion();
+        } else {
+          this.finishQuiz();
+        }
+      }
+
+      continueQuizAfterVictory() {
+        this.views.victory.classList.add('hidden');
+        if (this.views.shenron) this.views.shenron.classList.add('hidden');
+        this.views.quiz.classList.remove('hidden');
+        this.nextQuestion();
+      }
+
+      addMistake(questionObj, userSelectedIndex) {
+        const existingIdx = this.mistakesHistory.findIndex(m => m.question.id === questionObj.id);
+        const mistakeData = {
+          question: questionObj,
+          userChoice: questionObj.options[userSelectedIndex],
+          timestamp: new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }),
+          difficulty: this.currentDifficulty
+        };
+
+        if (existingIdx !== -1) {
+          this.mistakesHistory[existingIdx] = mistakeData;
+        } else {
+          this.mistakesHistory.unshift(mistakeData);
+        }
+
+        this.saveMistakes();
+      }
+
+      showMistakesModal() {
+        const list = document.getElementById('mistakesList');
+        list.innerHTML = '';
+
+        if (this.mistakesHistory.length === 0) {
+          list.innerHTML = `
+            <div class="text-center py-12 text-slate-400">
+              <span class="text-3xl block mb-2">🎉</span>
+              <p class="font-bold">間違えた問題はありません！</p>
+              <p class="text-xs text-slate-500 mt-1">クイズで間違えた問題は自動でここに蓄積されます。</p>
+            </div>
+          `;
+        } else {
+          this.mistakesHistory.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 space-y-2';
+            
+            card.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-700 text-slate-300">
+                  #${index + 1}
+                </span>
+                <span class="text-[10px] text-slate-500">${item.timestamp}</span>
+              </div>
+              <div class="text-slate-100 font-semibold text-sm">
+                ${item.question.question}
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                <div class="p-2 rounded-lg bg-rose-950/30 border border-rose-500/30 text-rose-300">
+                  <span class="font-bold">選んだ回答:</span> ${item.userChoice}
+                </div>
+                <div class="p-2 rounded-lg bg-emerald-950/30 border border-emerald-500/30 text-emerald-300">
+                  <span class="font-bold">正しい答え:</span> ${item.question.options[item.question.answerIndex]}
+                </div>
+              </div>
+              <div class="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 mt-2">
+                <span class="font-bold text-indigo-300">【解説】</span> ${item.question.explanation}
+              </div>
+            `;
+            list.appendChild(card);
+          });
+        }
+
+        this.modal.classList.remove('hidden');
+        this.renderMath();
+      }
+
+      closeMistakesModal() {
+        this.modal.classList.add('hidden');
+      }
+
+      clearMistakesHistory() {
+        if (this.mistakesHistory.length === 0) return;
+        this.mistakesHistory = [];
+        this.saveMistakes();
+        this.showMistakesModal();
+        this.showToast('復習帳をリセットしました');
+      }
+
+      startMistakesReviewQuiz() {
+        if (this.mistakesHistory.length === 0) return;
+
+        this.closeMistakesModal();
+        this.isReviewMode = true;
+        const raw = this.mistakesHistory.map(m => m.question);
+        this.quizQuestions = this.prepareQuestions(raw);
+        this.currentIndex = 0;
+        this.score = 0;
+        this.streak = 0;
+        this.consecutiveWrongCount = 0;
+        this.isAnsweringLocked = false;
+
+        const badge = document.getElementById('quizDiffBadge');
+        badge.innerText = '間違えた問題 特訓';
+        badge.className = 'text-xs font-extrabold px-2.5 py-0.5 rounded-full uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30';
+
+        document.getElementById('totalQNum').innerText = this.quizQuestions.length;
+        this.views.home.classList.add('hidden');
+        this.views.result.classList.add('hidden');
+        this.views.victory.classList.add('hidden');
+        if (this.views.shenron) this.views.shenron.classList.add('hidden');
+        this.views.quiz.classList.remove('hidden');
+
+        sound.playClick();
+        this.renderCurrentQuestion();
+      }
+
+      renderMath() {
+        if (window.renderMathInElement) {
+          window.renderMathInElement(document.body, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false }
+            ],
+            throwOnError: false
+          });
+        }
+      }
+    }
+
+    let app;
+    window.addEventListener('DOMContentLoaded', () => {
+      app = new QuizApp();
+      setTimeout(() => {
+        app.renderMath();
+      }, 200);
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (!app || app.isAnsweringLocked) return;
+      if (['1', '2', '3', '4'].includes(e.key)) {
+        const index = parseInt(e.key, 10) - 1;
+        app.handleAnswer(index);
+      }
+    });
+  </script>
+</body>
+</html>
