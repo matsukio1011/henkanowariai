@@ -27,8 +27,10 @@
 | `index.html` | アプリ本体（HTML / Tailwind CSS / KaTeX / JavaScript） |
 | `frieza.png` | フリーザ編のビジュアル画像 |
 | `shenron.jpg` | 完全制覇・エンディングの神龍ビジュアル画像 |
-| `linear_function_problems_10.md` | フリーザ編で使用されている難問10選の解説ドキュメント |
+| `favicon.svg` | アプリ用ベクターファビコン（一次関数のグラフと傾き三角形） |
+| `favicon.png` | アプリ用高解像度PNGファビコン・Webクリップアイコン |
 | `README.md` | 本説明書 |
+| `HOW_TO_RESUME.md` | Antigravity開発再開手順書 |
 | `.gitignore` | 不要ファイル除外設定 |
 
 ---
