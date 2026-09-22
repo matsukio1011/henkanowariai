@@ -256,16 +256,8 @@
       </div>
 
       <!-- フィードバック & 解説エリア -->
-      <div id="feedback-panel" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex-shrink-0 min-h-[140px] flex flex-col justify-between transition-all duration-200">
-        <div id="feedback-content" class="flex flex-col gap-1.5">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
-            <span class="text-sm font-bold text-slate-400">選択肢をクリックしてください</span>
-          </div>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            グラフの <b class="text-slate-300">y切片 (0, b)</b> を見つけ、そこから <b class="text-slate-300">xが1増加したときのyの増加量（傾き a）</b> を読み取るのがコツです。
-          </p>
-        </div>
+      <div id="feedback-panel" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex-shrink-0 min-h-[140px] flex flex-col justify-between transition-all duration-200">
+        <div id="feedback-content" class="flex flex-col gap-1.5"></div>
 
         <!-- 次へ進むボタン（回答後にアクティブ化） -->
         <div class="pt-2 mt-2 border-t border-slate-800/80 flex items-center justify-between relative">
@@ -1577,15 +1569,8 @@
         choicesContainer.appendChild(btn);
       });
 
-      feedbackContent.innerHTML = `
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
-          <span class="text-sm font-bold text-slate-300">式を選択してください</span>
-        </div>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          ${getModeTip()}
-        </p>
-      `;
+      feedbackPanel.classList.add('hidden');
+      feedbackContent.innerHTML = '';
 
       btnNext.disabled = true;
       btnNextText.textContent = "次の問題へ";
@@ -1626,6 +1611,7 @@
     function handleChoice(selectedIndex) {
       if (state.answered) return;
       state.answered = true;
+      feedbackPanel.classList.remove('hidden');
 
       const choice = state.currentQuestion.choices[selectedIndex];
       const isCorrect = choice.isCorrect;
