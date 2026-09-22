@@ -1,0 +1,2125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一次関数 グラフマスター</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & M PLUS Rounded 1c -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=M+PLUS+Rounded+1c:wght@500;700;800&family=Fira+Code:wght@500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"M PLUS Rounded 1c"', 'Inter', 'sans-serif'],
+            mono: ['"Fira Code"', 'monospace'],
+          },
+          colors: {
+            math: {
+              grid: '#334155',
+              axis: '#94a3b8',
+              line: '#38bdf8',
+              point: '#f43f5e',
+              slope: '#fbbf24',
+              correct: '#10b981',
+              wrong: '#ef4444',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 全画面スクロール防止 */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* 分数表示用のCSS */
+    .fraction {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 3px;
+      line-height: 1.1;
+      font-size: 0.9em;
+    }
+    .fraction .numerator {
+      border-bottom: 1.5px solid currentColor;
+      padding-bottom: 1px;
+    }
+    .fraction .denominator {
+      padding-top: 1px;
+    }
+
+    /* 選択肢ボタンの波紋・押し心地エフェクト */
+    .choice-btn {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .choice-btn:active {
+      transform: scale(0.985);
+    }
+
+    /* パルスアニメーション */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-ring {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 flex flex-col h-screen font-sans">
+  <header class="h-14 bg-slate-900/90 border-b border-slate-800 px-3 md:px-6 flex items-center justify-between flex-shrink-0 z-10 backdrop-blur gap-2">
+    <!-- タイトルとロゴ -->
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-md shadow-sky-500/20 text-sm">
+        y=
+      </div>
+      <div>
+        <h1 class="font-bold text-sm md:text-lg tracking-wide text-slate-100 flex items-center gap-2">
+          一次関数 グラフマスター
+        </h1>
+      </div>
+    </div>
+
+    <!-- アプリ切替タブ -->
+    <div class="flex items-center bg-slate-950/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/80 text-xs flex-shrink-0 shadow-inner">
+      <a href="index.html" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white font-medium flex items-center gap-1 transition" title="文章題・条件から式を求める特訓アプリへ">
+        <span>📝</span>
+        <span class="hidden md:inline">文章題・特訓</span>
+      </a>
+      <a href="graph.html" class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-bold flex items-center gap-1 shadow-sm">
+        <span>📈</span>
+        <span class="hidden md:inline">グラフマスター</span>
+      </a>
+    </div>
+
+    <!-- 統計・スコアボード -->
+    <div class="flex items-center gap-2 sm:gap-4">
+      <div class="flex items-center gap-1.5 text-xs sm:text-sm bg-slate-800/80 px-2.5 sm:px-3 py-1 rounded-lg border border-slate-700/60">
+        <span class="text-amber-400 font-bold flex items-center gap-1">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.316.492-.533 1.035-.688 1.58-.266.938-.415 1.947-.442 2.983H7.5a1 1 0 00-.832.445l-3.5 5.5A1 1 0 004 15h6v4a1 1 0 001.707.707l7-7A1 1 0 0018 12h-4.5a15.82 15.82 0 00.395-4.447c.1-.8.25-1.59.45-2.35.1-.38.16-.76.15-1.14a2.97 2.97 0 00-.6-1.51z"/></svg>
+          <span class="hidden sm:inline">連続正解:</span>
+        </span>
+        <span id="stat-streak" class="font-bold text-white font-mono text-base">0</span>
+        <span class="text-slate-500 font-mono">/</span>
+        <div class="flex items-center gap-1" title="目標連続正解数を設定">
+          <span class="text-slate-400 text-xs hidden lg:inline">目標:</span>
+          <select id="target-streak-select" class="bg-slate-700 hover:bg-slate-650 text-amber-300 font-bold text-xs rounded px-1.5 py-0.5 border border-slate-600 focus:outline-none focus:border-amber-400 cursor-pointer transition">
+            <option value="5">5問</option>
+            <option value="10" selected>10問</option>
+            <option value="15">15問</option>
+            <option value="20">20問</option>
+            <option value="0">なし(無制限)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hidden sm:flex items-center gap-1.5 text-xs sm:text-sm bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700/60">
+        <span class="text-slate-400">正解率:</span>
+        <span id="stat-accuracy" class="font-bold text-emerald-400 font-mono text-base">0%</span>
+        <span id="stat-count" class="text-slate-400 text-xs font-mono">(0/0)</span>
+      </div>
+
+      <!-- 設定・トグルボタン類 -->
+      <div class="flex items-center gap-1.5">
+        <!-- グリッド線(方眼)表示切替ボタン -->
+        <button id="btn-grid-toggle" title="方眼グリッド線を表示/非表示 ([M]キー)" class="px-2.5 py-1.5 rounded-lg bg-sky-950/70 hover:bg-sky-900/80 text-xs text-sky-300 border border-sky-500/50 flex items-center gap-1.5 transition shadow-sm">
+          <span id="grid-dot" class="w-2 h-2 rounded-full bg-sky-400"></span>
+          <span>方眼</span>
+          <span id="grid-status" class="text-[10px] bg-sky-400 text-slate-950 font-bold px-1 rounded">ON</span>
+        </button>
+
+        <!-- 格子点表示切替ボタン -->
+        <button id="btn-lattice-toggle" title="直線が通る格子点(整数座標)を表示/非表示 ([G]キー)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 border border-slate-700 flex items-center gap-1.5 transition">
+          <span id="lattice-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+          <span>格子点</span>
+          <span id="lattice-status" class="text-[10px] bg-slate-700 text-slate-300 px-1 rounded">OFF</span>
+        </button>
+
+        <!-- 自動送り切替ボタン -->
+        <button id="btn-auto-advance" title="正解時に自動で次の問題へ進む" class="hidden sm:flex px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 text-xs text-emerald-300 border border-emerald-500/40 items-center gap-1.5 transition">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>自動送り</span>
+          <span id="auto-advance-status" class="text-[10px] bg-emerald-400 text-slate-950 font-bold px-1 rounded">ON</span>
+        </button>
+
+        <button id="btn-sound" title="音声ON/OFF" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-sm flex items-center justify-center">
+          <svg id="icon-sound-on" class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+          <svg id="icon-sound-off" class="w-4 h-4 text-slate-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
+        </button>
+
+        <button id="btn-hint-toggle" title="切片・傾きの補助線を表示" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span>ガイド</span>
+          <span id="hint-status" class="text-[10px] bg-amber-400/20 text-amber-300 px-1 rounded">OFF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 flex flex-col md:flex-row p-3 md:p-4 gap-3 md:gap-4 overflow-hidden min-h-0">
+    
+    <!-- 左側：超特大グラフエリア（画面の主役） -->
+    <section class="flex-1 bg-slate-900/70 border border-slate-800/90 rounded-2xl relative flex flex-col overflow-hidden shadow-2xl p-2 sm:p-3">
+      <!-- グラフ上部のステータスバー -->
+      <div class="flex items-center justify-between px-2 pb-1.5 text-xs text-slate-400 flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1 text-sky-400 font-semibold">
+            <span class="w-3 h-0.5 bg-sky-400 rounded"></span> <span id="graph-curve-label">直線 <span class="font-mono text-slate-200">y = ax + b</span></span>
+          </span>
+          <span class="text-slate-500">|</span>
+          <span class="hidden sm:inline text-slate-400">目盛りから切片と傾きを読み取ろう！</span>
+        </div>
+
+        <div class="flex items-center gap-3 text-[11px] font-mono">
+          <span class="text-slate-400">範囲: x, y ∈ [-6, 6]</span>
+          <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">Q. <span id="question-index">1</span></span>
+        </div>
+      </div>
+
+      <!-- グラフ描画 Canvas ラッパー -->
+      <div id="canvas-container" class="flex-1 relative w-full h-full flex items-center justify-center min-h-0 bg-slate-950/60 rounded-xl border border-slate-800/50 overflow-hidden">
+        <canvas id="graphCanvas" class="block"></canvas>
+      </div>
+    </section>
+
+    <!-- 右側：問題・選択肢・解説パネル -->
+    <section class="w-full md:w-96 lg:w-[420px] flex-shrink-0 flex flex-col gap-3 min-h-0 justify-between">
+      
+      <!-- 設問カード -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl flex-shrink-0">
+        <div class="flex items-center justify-between gap-2 mb-2.5">
+          <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 flex items-center gap-1.5 flex-shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            出題モード
+          </span>
+          <!-- 学習モード切替ドロップダウン -->
+          <div class="relative flex-1 max-w-[210px]">
+            <select id="mode-select" class="w-full bg-slate-800 hover:bg-slate-750 text-sky-300 text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-sky-500/30 focus:outline-none focus:border-sky-400 cursor-pointer transition shadow-inner">
+              <option value="standard">標準（一般の一次関数）</option>
+              <option value="proportional">比例のグラフ（y = ax）</option>
+              <option value="inverse">反比例のグラフ（y = a/x）</option>
+              <option value="intercept_point">切片と通る点から求める</option>
+              <option value="two_intercepts">x切片とy切片から求める</option>
+              <option value="fraction">分数傾きあり（発展）</option>
+              <option value="non_intercepts">両切片が非格子点（通る2点から求める）</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 傾き限定フィルター（正・負・すべて） -->
+        <div class="flex items-center justify-between gap-1.5 mb-2.5 bg-slate-950/50 px-2.5 py-1.5 rounded-xl border border-slate-800/80">
+          <span class="text-xs text-slate-300 font-medium flex items-center gap-1 flex-shrink-0">
+            <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            傾き限定:
+          </span>
+          <div id="slope-filter-group" class="inline-flex bg-slate-800/90 p-0.5 rounded-lg border border-slate-700 text-[11px] font-medium">
+            <button type="button" data-filter="all" class="slope-filter-btn px-2 py-0.5 rounded-md font-bold text-sky-300 bg-sky-950/90 border border-sky-500/50 transition">すべて</button>
+            <button type="button" data-filter="positive" class="slope-filter-btn px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200 border border-transparent transition" title="右上がりの直線 (a > 0)">正 (a &gt; 0)</button>
+            <button type="button" data-filter="negative" class="slope-filter-btn px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200 border border-transparent transition" title="右下がりの直線 (a < 0)">負 (a &lt; 0)</button>
+          </div>
+        </div>
+
+        <p id="question-text" class="text-base font-bold text-slate-100 leading-snug">
+          表示されているグラフを表す式を1つ選んでください。
+        </p>
+        <p class="text-xs text-slate-400 mt-1.5 flex items-center justify-between">
+          <span>キー <span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">1</span>〜<span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">4</span> で即答 <span class="text-slate-500 hidden sm:inline">([G]格子点, [M]方眼, [S]傾き)</span></span>
+          <span id="mode-badge" class="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700 font-medium">標準</span>
+        </p>
+      </div>
+
+      <!-- 4択ボタンリスト -->
+      <div id="choices-container" class="grid grid-cols-1 gap-2.5 flex-1 min-h-0 flex-shrink-0">
+        <!-- 4つの選択肢はJSで動的生成 -->
+      </div>
+
+      <!-- フィードバック & 解説エリア -->
+      <div id="feedback-panel" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex-shrink-0 min-h-[140px] flex flex-col justify-between transition-all duration-200">
+        <div id="feedback-content" class="flex flex-col gap-1.5">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+            <span class="text-sm font-bold text-slate-400">選択肢をクリックしてください</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            グラフの <b class="text-slate-300">y切片 (0, b)</b> を見つけ、そこから <b class="text-slate-300">xが1増加したときのyの増加量（傾き a）</b> を読み取るのがコツです。
+          </p>
+        </div>
+
+        <!-- 次へ進むボタン（回答後にアクティブ化） -->
+        <div class="pt-2 mt-2 border-t border-slate-800/80 flex items-center justify-between relative">
+          <!-- 自動送りプログレスバー -->
+          <div id="auto-advance-bar-wrapper" class="absolute -top-1 left-0 right-0 h-0.5 bg-slate-800 rounded-full overflow-hidden hidden">
+            <div id="auto-advance-bar" class="h-full bg-emerald-400 w-0 transition-all"></div>
+          </div>
+          <span class="text-[11px] text-slate-500 font-mono hidden sm:inline">[Enter] / [Space] で次の問題</span>
+          <button id="btn-next" disabled class="w-full sm:w-auto px-5 py-2 rounded-xl font-bold text-sm bg-slate-800 text-slate-500 cursor-not-allowed transition flex items-center justify-center gap-2">
+            <span id="btn-next-text">次の問題へ</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- 目標連続正解達成時の合格モーダル -->
+  <div id="clear-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+    <canvas id="confetti-canvas" class="absolute inset-0 pointer-events-none w-full h-full"></canvas>
+    <div id="clear-card" class="relative bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border-2 border-amber-400/80 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl shadow-amber-500/25 text-center transform scale-90 transition-transform duration-300 flex flex-col items-center">
+      
+      <!-- トロフィーバッジ -->
+      <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center shadow-lg shadow-amber-400/40 mb-4 animate-bounce">
+        <svg class="w-11 h-11 text-slate-950" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M5 3h14a1 1 0 0 1 1 1v4a6 6 0 0 1-5 5.91V17h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h2v-3.09A6 6 0 0 1 4 8V4a1 1 0 0 1 1-1zm-1 3v2a4 4 0 0 0 3 3.86V6H4zm16 0h-3v4.86A4 4 0 0 0 20 8V6z"/>
+        </svg>
+      </div>
+
+      <span class="text-xs font-bold text-amber-300 uppercase tracking-widest bg-amber-400/10 border border-amber-400/30 px-3 py-1 rounded-full mb-2">
+        MISSION COMPLETE
+      </span>
+
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-wide mb-2">
+        合格！目標達成！
+      </h2>
+
+      <p id="clear-message" class="text-slate-300 text-sm mb-6 leading-relaxed">
+        連続 <span id="clear-target-count" class="text-amber-400 font-bold font-mono text-xl">10</span> 問正解を達成しました！<br>
+        グラフの読み取りがしっかり身についています！
+      </p>
+
+      <!-- 成績サマリー -->
+      <div class="grid grid-cols-2 gap-3 w-full bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80 mb-6">
+        <div class="flex flex-col items-center">
+          <span class="text-[11px] text-slate-400">総正解率</span>
+          <span id="clear-accuracy" class="text-lg font-bold text-emerald-400 font-mono">100%</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-[11px] text-slate-400">挑戦問題数</span>
+          <span id="clear-total-questions" class="text-lg font-bold text-sky-400 font-mono">10問</span>
+        </div>
+      </div>
+
+      <!-- アクションボタン群 -->
+      <div class="flex flex-col sm:flex-row gap-2.5 w-full">
+        <button id="btn-extend-target" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>さらに+5問挑戦</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </button>
+        <button id="btn-restart-goal" class="py-3 px-4 rounded-xl font-bold text-sm bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 transition cursor-pointer">
+          最初から
+        </button>
+        <button id="btn-close-modal" class="py-3 px-4 rounded-xl font-bold text-sm bg-slate-800 hover:bg-slate-750 text-slate-400 border border-slate-700 transition cursor-pointer">
+          閉じる
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // --- 状態管理 ---
+    const state = {
+      mode: 'standard', // 'standard', 'proportional', 'intercept_point', 'two_intercepts', 'fraction'
+      slopeFilter: 'all', // 'all', 'positive', 'negative'
+      currentQuestion: null,
+      totalAnswered: 0,
+      totalCorrect: 0,
+      streak: 0,
+      targetStreak: 10, // 目標連続正解数 (0は無制限)
+      goalReached: false, // 今回のセッションで目標達成済みか
+      answered: false,
+      showGrid: true, // 背景グリッド線の表示/非表示
+      showLatticePoints: false, // 格子点(整数座標)ドットの表示/非表示
+      showHintGuide: false,
+      soundEnabled: true,
+      autoAdvance: true, // 正解時に自動で次へ
+      autoAdvanceTimer: null,
+      autoAdvanceDuration: 750, // ミリ秒
+      questionNum: 1,
+    };
+
+    // --- Web Audio API による心地よい効果音合成 ---
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!state.soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+
+        if (type === 'fanfare') {
+          // 目標達成を祝う明るいファンファーレ (C5 -> E5 -> G5 -> C6)
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const start = now + i * 0.11;
+            const duration = i === 3 ? 0.6 : 0.12;
+
+            osc.type = i === 3 ? 'triangle' : 'sine';
+            osc.frequency.setValueAtTime(freq, start);
+
+            gain.gain.setValueAtTime(0.22, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(start);
+            osc.stop(start + duration);
+          });
+          return;
+        }
+
+        if (type === 'correct') {
+          // キラリとした明快なメジャー2和音
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+
+          osc1.type = 'sine';
+          osc2.type = 'triangle';
+
+          osc1.frequency.setValueAtTime(523.25, now); // C5
+          osc1.frequency.exponentialRampToValueAtTime(1046.50, now + 0.18); // C6
+
+          osc2.frequency.setValueAtTime(659.25, now); // E5
+          osc2.frequency.exponentialRampToValueAtTime(1318.51, now + 0.22); // E6
+
+          gainNode.gain.setValueAtTime(0.18, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+          osc1.connect(gainNode);
+          osc2.connect(gainNode);
+          gainNode.connect(ctx.destination);
+
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.35);
+          osc2.stop(now + 0.35);
+        } else if (type === 'wrong') {
+          // 落ち着いたブブー音
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.setValueAtTime(130, now + 0.1);
+
+          gainNode.gain.setValueAtTime(0.2, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'click') {
+          // 軽快なタップ音
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, now);
+          gainNode.gain.setValueAtTime(0.05, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.05);
+        }
+      } catch (e) {
+        console.warn('Audio playback error', e);
+      }
+    }
+
+    // 最大公約数
+    function gcd(a, b) {
+      a = Math.abs(a);
+      b = Math.abs(b);
+      while (b) {
+        const t = b;
+        b = a % b;
+        a = t;
+      }
+      return a;
+    }
+
+    // 分数オブジェクトの作成と約分
+    function makeFraction(numerator, denominator = 1) {
+      if (denominator === 0) throw new Error("Denominator cannot be zero");
+      let sign = (numerator * denominator < 0) ? -1 : 1;
+      let num = Math.abs(numerator);
+      let den = Math.abs(denominator);
+      let g = gcd(num, den);
+      num = (num / g) * sign;
+      den = den / g;
+      return { num, den, val: num / den };
+    }
+
+    // 数値または分数オブジェクトを統一して分数オブジェクトに正規化
+    function normalizeFraction(val) {
+      if (typeof val === 'number') {
+        return makeFraction(val, 1);
+      }
+      return val;
+    }
+
+    // x切片が整数（格子点）であるかを判定する関数
+    function isXInterceptInteger(slope, intercept) {
+      const b = normalizeFraction(intercept);
+      if (b.num === 0) return true; // 原点 (0, 0)
+      const num = b.num * slope.den;
+      const den = b.den * slope.num;
+      return num % den === 0;
+    }
+
+    // 数式HTML文字列の整形 (切片が分数の場合にも完全対応)
+    function formatEquationHTML(slope, intercept) {
+      const b = normalizeFraction(intercept);
+      let slopePart = '';
+      
+      if (slope.den === 1) {
+        if (slope.num === 1) {
+          slopePart = 'x';
+        } else if (slope.num === -1) {
+          slopePart = '-x';
+        } else {
+          slopePart = `${slope.num}x`;
+        }
+      } else {
+        const isNeg = slope.num < 0;
+        const absNum = Math.abs(slope.num);
+        const signStr = isNeg ? '-' : '';
+        slopePart = `${signStr}<span class="fraction"><span class="numerator">${absNum}</span><span class="denominator">${slope.den}</span></span>x`;
+      }
+
+      let interceptPart = '';
+      if (b.num !== 0) {
+        const isNeg = b.num < 0;
+        const signStr = isNeg ? ' - ' : ' + ';
+        const absNum = Math.abs(b.num);
+        if (b.den === 1) {
+          interceptPart = `${signStr}${absNum}`;
+        } else {
+          interceptPart = `${signStr}<span class="fraction"><span class="numerator">${absNum}</span><span class="denominator">${b.den}</span></span>`;
+        }
+      }
+
+      return `<span class="font-mono">y = ${slopePart}${interceptPart}</span>`;
+    }
+
+    // プレーンテキスト数式（比較・重複排除用）
+    function formatEquationText(slope, intercept) {
+      const b = normalizeFraction(intercept);
+      let slopeStr = '';
+      if (slope.den === 1) {
+        if (slope.num === 1) slopeStr = 'x';
+        else if (slope.num === -1) slopeStr = '-x';
+        else slopeStr = `${slope.num}x`;
+      } else {
+        slopeStr = `${slope.num}/${slope.den}x`;
+      }
+
+      let bStr = '';
+      if (b.num !== 0) {
+        const signStr = b.num > 0 ? '+' : '-';
+        const absNum = Math.abs(b.num);
+        if (b.den === 1) {
+          bStr = `${signStr}${absNum}`;
+        } else {
+          bStr = `${signStr}${absNum}/${b.den}`;
+        }
+      }
+
+      return `y=${slopeStr}${bStr}`;
+    }
+
+    // 反比例 数式HTML文字列の整形 (y = a/x)
+    function formatInverseEquationHTML(a) {
+      const isNeg = a < 0;
+      const absA = Math.abs(a);
+      const signStr = isNeg ? '-' : '';
+      return `<span class="font-mono">y = ${signStr}<span class="fraction"><span class="numerator">${absA}</span><span class="denominator">x</span></span></span>`;
+    }
+
+    // 反比例 プレーンテキスト数式
+    function formatInverseEquationText(a) {
+      return `y=${a}/x`;
+    }
+
+    function generateQuestion() {
+      let slope, intercept;
+      let prompt = "表示されているグラフを表す式を1つ選んでください。";
+      let keyPoints = [];
+
+      if (state.mode === 'inverse') {
+        prompt = "表示されている反比例のグラフを表す式を1つ選んでください。";
+        let aPool = [2, 3, 4, 6, 8, 12, -2, -3, -4, -6, -8, -12];
+        if (state.slopeFilter === 'positive') {
+          aPool = aPool.filter(v => v > 0);
+        } else if (state.slopeFilter === 'negative') {
+          aPool = aPool.filter(v => v < 0);
+        }
+
+        const a = aPool[Math.floor(Math.random() * aPool.length)];
+
+        for (let x = -6; x <= 6; x++) {
+          if (x === 0) continue;
+          if (a % x === 0) {
+            const y = a / x;
+            if (y >= -6 && y <= 6) {
+              keyPoints.push({ x, y, type: 'point' });
+            }
+          }
+        }
+
+        const correctEq = {
+          type: 'inverse',
+          a: a,
+          html: formatInverseEquationHTML(a),
+          text: formatInverseEquationText(a),
+          isCorrect: true
+        };
+
+        const distractors = [];
+        const distractorKeys = new Set([correctEq.text]);
+
+        const tryAddInvDistractor = (html, text) => {
+          if (!distractorKeys.has(text)) {
+            distractorKeys.add(text);
+            distractors.push({ html, text, isCorrect: false });
+            return true;
+          }
+          return false;
+        };
+
+        tryAddInvDistractor(formatInverseEquationHTML(-a), formatInverseEquationText(-a));
+
+        const propSlope = makeFraction(a, 1);
+        tryAddInvDistractor(formatEquationHTML(propSlope, 0), formatEquationText(propSlope, 0));
+
+        const candidateDiffs = [
+          a > 0 ? (a % 2 === 0 ? a / 2 : a + 2) : (a % 2 === 0 ? a / 2 : a - 2),
+          a > 0 ? a + 2 : a - 2,
+          -a + 2,
+          a > 0 ? a * 2 : a * 2
+        ];
+        for (const da of candidateDiffs) {
+          if (da !== 0 && Math.abs(da) <= 16) {
+            tryAddInvDistractor(formatInverseEquationHTML(da), formatInverseEquationText(da));
+          }
+        }
+
+        const invPropSlope = makeFraction(1, Math.abs(a) * (a < 0 ? -1 : 1));
+        tryAddInvDistractor(formatEquationHTML(invPropSlope, 0), formatEquationText(invPropSlope, 0));
+
+        let extraStep = 1;
+        while (distractors.length < 3) {
+          const fakeA = a + extraStep;
+          if (fakeA !== 0) {
+            tryAddInvDistractor(formatInverseEquationHTML(fakeA), formatInverseEquationText(fakeA));
+          }
+          extraStep = extraStep > 0 ? -extraStep : -extraStep + 1;
+        }
+
+        const choices = [correctEq, ...distractors.slice(0, 3)];
+        for (let i = choices.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [choices[i], choices[j]] = [choices[j], choices[i]];
+        }
+
+        return {
+          type: 'inverse',
+          a,
+          correctEq,
+          choices,
+          prompt,
+          keyPoints
+        };
+
+      } else if (state.mode === 'proportional') {
+        intercept = 0;
+        let candidates = [
+          [1, 1], [-1, 1], [2, 1], [-2, 1], [3, 1], [-3, 1],
+          [1, 2], [-1, 2], [1, 3], [-1, 3], [2, 3], [-2, 3], [3, 2], [-3, 2]
+        ];
+        if (state.slopeFilter === 'positive') {
+          candidates = candidates.filter(pair => (pair[0] * pair[1]) > 0);
+        } else if (state.slopeFilter === 'negative') {
+          candidates = candidates.filter(pair => (pair[0] * pair[1]) < 0);
+        }
+        const pair = candidates[Math.floor(Math.random() * candidates.length)];
+        slope = makeFraction(pair[0], pair[1]);
+
+        let px = slope.den;
+        let py = slope.num;
+        if (Math.abs(px) <= 5 && Math.abs(py) <= 5) {
+          keyPoints.push({ x: 0, y: 0, type: 'origin' });
+          keyPoints.push({ x: px, y: py, type: 'point' });
+        } else {
+          keyPoints.push({ x: 0, y: 0, type: 'origin' });
+        }
+        prompt = "比例のグラフを表す式を1つ選んでください。";
+
+      } else if (state.mode === 'intercept_point') {
+        let possibleSlopes = [
+          [1, 1], [-1, 1], [2, 1], [-2, 1], [3, 1], [-3, 1],
+          [1, 2], [-1, 2], [1, 3], [-1, 3], [2, 3], [-2, 3], [3, 2], [-3, 2]
+        ];
+        if (state.slopeFilter === 'positive') {
+          possibleSlopes = possibleSlopes.filter(pair => (pair[0] * pair[1]) > 0);
+        } else if (state.slopeFilter === 'negative') {
+          possibleSlopes = possibleSlopes.filter(pair => (pair[0] * pair[1]) < 0);
+        }
+        const bCandidates = [-4, -3, -2, -1, 1, 2, 3, 4];
+
+        let found = false;
+        let attempts = 0;
+        let validPoints = [];
+
+        while (!found && attempts < 200) {
+          attempts++;
+          const pair = possibleSlopes[Math.floor(Math.random() * possibleSlopes.length)];
+          const tempSlope = makeFraction(pair[0], pair[1]);
+          const tempB = bCandidates[Math.floor(Math.random() * bCandidates.length)];
+
+          if (!isXInterceptInteger(tempSlope, tempB)) {
+            validPoints = [];
+            for (let x = -5; x <= 5; x++) {
+              if (x === 0) continue;
+              const y = tempSlope.val * x + tempB;
+              if (Math.abs(y - Math.round(y)) < 1e-6 && y >= -5 && y <= 5) {
+                validPoints.push({ x, y: Math.round(y) });
+              }
+            }
+            if (validPoints.length > 0) {
+              slope = tempSlope;
+              intercept = tempB;
+              found = true;
+            }
+          }
+        }
+
+        const targetPoint = validPoints.length > 0 
+          ? validPoints[Math.floor(Math.random() * validPoints.length)]
+          : { x: slope.den, y: slope.num + intercept };
+
+        keyPoints.push({ x: 0, y: intercept, type: 'intercept' });
+        keyPoints.push({ x: targetPoint.x, y: targetPoint.y, type: 'point' });
+
+        prompt = "表示されているグラフを表す式を1つ選んでください。";
+
+      } else if (state.mode === 'two_intercepts') {
+        const nonZeroNums = [-5, -4, -3, -2, -1, 1, 2, 3, 4, 5];
+        let x0, b;
+        if (state.slopeFilter === 'positive') {
+          const pos = [1, 2, 3, 4, 5];
+          const neg = [-5, -4, -3, -2, -1];
+          if (Math.random() < 0.5) {
+            x0 = pos[Math.floor(Math.random() * pos.length)];
+            b = neg[Math.floor(Math.random() * neg.length)];
+          } else {
+            x0 = neg[Math.floor(Math.random() * neg.length)];
+            b = pos[Math.floor(Math.random() * pos.length)];
+          }
+        } else if (state.slopeFilter === 'negative') {
+          const pool = Math.random() < 0.5 ? [1, 2, 3, 4, 5] : [-5, -4, -3, -2, -1];
+          x0 = pool[Math.floor(Math.random() * pool.length)];
+          b = pool[Math.floor(Math.random() * pool.length)];
+        } else {
+          x0 = nonZeroNums[Math.floor(Math.random() * nonZeroNums.length)];
+          b = nonZeroNums[Math.floor(Math.random() * nonZeroNums.length)];
+        }
+
+        intercept = b;
+        slope = makeFraction(-b, x0);
+
+        keyPoints.push({ x: 0, y: b, type: 'intercept' });
+        keyPoints.push({ x: x0, y: 0, type: 'x_intercept' });
+
+        prompt = "表示されているグラフを表す式を1つ選んでください。";
+
+      } else if (state.mode === 'non_intercepts') {
+        let candidatePairs = [
+          [2, 3], [-2, 3], [3, 2], [-3, 2],
+          [3, 4], [-3, 4], [4, 3], [-4, 3],
+          [2, 5], [-2, 5], [3, 5], [-3, 5]
+        ];
+        if (state.slopeFilter === 'positive') {
+          candidatePairs = candidatePairs.filter(p => (p[0] * p[1]) > 0);
+        } else if (state.slopeFilter === 'negative') {
+          candidatePairs = candidatePairs.filter(p => (p[0] * p[1]) < 0);
+        }
+
+        let found = false;
+        let attempts = 0;
+
+        while (!found && attempts < 300) {
+          attempts++;
+          const pair = candidatePairs[Math.floor(Math.random() * candidatePairs.length)];
+          const tempSlope = makeFraction(pair[0], pair[1]);
+          const p = tempSlope.num;
+          const q = tempSlope.den;
+
+          const validCandidates = [];
+          for (let x = -5; x <= 5; x++) {
+            if (x % q === 0) continue;
+            for (let y = -5; y <= 5; y++) {
+              if (y % p === 0) continue;
+
+              const nextX = x + q;
+              const nextY = y + p;
+              if (nextX >= -5 && nextX <= 5 && nextY >= -5 && nextY <= 5) {
+                const bFrac = makeFraction(q * y - p * x, q);
+                const xIntFrac = makeFraction(-(q * y - p * x), p);
+
+                if (Math.abs(bFrac.val) <= 5.2 && Math.abs(xIntFrac.val) <= 5.2) {
+                  validCandidates.push({
+                    p1: { x, y },
+                    p2: { x: nextX, y: nextY },
+                    slope: tempSlope,
+                    b: bFrac
+                  });
+                }
+              }
+            }
+          }
+
+          if (validCandidates.length > 0) {
+            const picked = validCandidates[Math.floor(Math.random() * validCandidates.length)];
+            slope = picked.slope;
+            intercept = picked.b;
+            keyPoints.push({ x: picked.p1.x, y: picked.p1.y, type: 'point' });
+            keyPoints.push({ x: picked.p2.x, y: picked.p2.y, type: 'point' });
+            found = true;
+          }
+        }
+        prompt = "表示されているグラフを表す式を1つ選んでください。";
+
+      } else if (state.mode === 'fraction') {
+        let candidatePairs = [
+          [1, 2], [-1, 2], [1, 3], [-1, 3], [2, 3], [-2, 3],
+          [3, 2], [-3, 2], [1, 4], [-1, 4], [3, 4], [-3, 4]
+        ];
+        if (state.slopeFilter === 'positive') {
+          candidatePairs = candidatePairs.filter(p => (p[0] * p[1]) > 0);
+        } else if (state.slopeFilter === 'negative') {
+          candidatePairs = candidatePairs.filter(p => (p[0] * p[1]) < 0);
+        }
+
+        let found = false;
+        let attempts = 0;
+        while (!found && attempts < 200) {
+          attempts++;
+          const pair = candidatePairs[Math.floor(Math.random() * candidatePairs.length)];
+          const tempSlope = makeFraction(pair[0], pair[1]);
+          const tempB = Math.floor(Math.random() * 9) - 4;
+
+          if (tempB !== 0 && !isXInterceptInteger(tempSlope, tempB)) {
+            let targetPoint = null;
+            for (let x = -5; x <= 5; x++) {
+              if (x === 0) continue;
+              const y = tempSlope.val * x + tempB;
+              if (Math.abs(y - Math.round(y)) < 1e-6 && y >= -5 && y <= 5) {
+                targetPoint = { x, y: Math.round(y) };
+                break;
+              }
+            }
+            if (targetPoint) {
+              slope = tempSlope;
+              intercept = tempB;
+              keyPoints.push({ x: 0, y: tempB, type: 'intercept' });
+              keyPoints.push({ x: targetPoint.x, y: targetPoint.y, type: 'point' });
+              found = true;
+            }
+          }
+        }
+        prompt = "表示されているグラフを表す式を1つ選んでください。";
+
+      } else {
+        let slopes = [2, 3];
+        if (state.slopeFilter === 'positive') {
+          slopes = [2, 3];
+        } else if (state.slopeFilter === 'negative') {
+          slopes = [-3, -2];
+        } else {
+          slopes = [-3, -2, 2, 3];
+        }
+
+        let found = false;
+        let attempts = 0;
+        const bPool = [-4, -3, -2, -1, 1, 2, 3, 4];
+
+        while (!found && attempts < 200) {
+          attempts++;
+          const a = slopes[Math.floor(Math.random() * slopes.length)];
+          const b = bPool[Math.floor(Math.random() * bPool.length)];
+          const s = makeFraction(a, 1);
+
+          if (!isXInterceptInteger(s, b)) {
+            let targetPoint = null;
+            for (let x = -5; x <= 5; x++) {
+              if (x === 0) continue;
+              const y = a * x + b;
+              if (y >= -5 && y <= 5) {
+                targetPoint = { x, y };
+                break;
+              }
+            }
+            if (targetPoint) {
+              slope = s;
+              intercept = b;
+              keyPoints.push({ x: 0, y: b, type: 'intercept' });
+              keyPoints.push({ x: targetPoint.x, y: targetPoint.y, type: 'point' });
+              found = true;
+            }
+          }
+        }
+        prompt = "表示されているグラフを表す式を1つ選んでください。";
+      }
+
+      const correctEq = {
+        slope: slope,
+        intercept: intercept,
+        html: formatEquationHTML(slope, intercept),
+        text: formatEquationText(slope, intercept),
+        isCorrect: true
+      };
+
+      const distractors = [];
+      const distractorKeys = new Set([correctEq.text]);
+
+      const tryAddDistractor = (s, b) => {
+        const text = formatEquationText(s, b);
+        if (!distractorKeys.has(text)) {
+          distractorKeys.add(text);
+          distractors.push({
+            slope: s,
+            intercept: b,
+            html: formatEquationHTML(s, b),
+            text: text,
+            isCorrect: false
+          });
+          return true;
+        }
+        return false;
+      };
+
+      if (state.mode === 'proportional') {
+        tryAddDistractor(makeFraction(-slope.num, slope.den), 0);
+        if (slope.num !== slope.den) {
+          tryAddDistractor(makeFraction(slope.den * (slope.num < 0 ? -1 : 1), Math.abs(slope.num)), 0);
+        }
+        tryAddDistractor(slope, 1);
+        tryAddDistractor(slope, -1);
+      } else if (state.mode === 'non_intercepts') {
+        const b = normalizeFraction(intercept);
+        tryAddDistractor(makeFraction(-slope.num, slope.den), b);
+        tryAddDistractor(slope, makeFraction(-b.num, b.den));
+        tryAddDistractor(makeFraction(-slope.num, slope.den), makeFraction(-b.num, b.den));
+        tryAddDistractor(slope, makeFraction(b.num + b.den, b.den));
+        tryAddDistractor(slope, makeFraction(b.num - b.den, b.den));
+      } else if (state.mode === 'two_intercepts') {
+        tryAddDistractor(makeFraction(-slope.num, slope.den), intercept);
+        tryAddDistractor(slope, -intercept);
+        tryAddDistractor(makeFraction(-slope.num, slope.den), -intercept);
+        tryAddDistractor(makeFraction(-intercept, -slope.num * intercept / slope.den || 1), slope.num);
+      } else {
+        tryAddDistractor(makeFraction(-slope.num, slope.den), intercept);
+        if (intercept !== 0) {
+          tryAddDistractor(slope, -intercept);
+        } else {
+          tryAddDistractor(slope, 2);
+        }
+        tryAddDistractor(makeFraction(-slope.num, slope.den), -intercept);
+        tryAddDistractor(slope, intercept > 0 ? intercept - 1 : intercept + 1);
+      }
+
+      let fallbackOffset = 1;
+      while (distractors.length < 3) {
+        const b = normalizeFraction(intercept);
+        if (b.den === 1) {
+          tryAddDistractor(makeFraction(slope.num, slope.den), b.num + fallbackOffset);
+        } else {
+          tryAddDistractor(makeFraction(slope.num, slope.den), makeFraction(b.num + fallbackOffset * b.den, b.den));
+        }
+        fallbackOffset = fallbackOffset > 0 ? -fallbackOffset : -fallbackOffset + 1;
+      }
+
+      const choices = [correctEq, ...distractors.slice(0, 3)];
+      for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+      }
+
+      return {
+        slope,
+        intercept,
+        correctEq,
+        choices,
+        prompt,
+        keyPoints
+      };
+    }
+
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvas-container');
+
+    const GRAPH_BOUNDS = {
+      minX: -6,
+      maxX: 6,
+      minY: -6,
+      maxY: 6
+    };
+
+    let canvasWidth = 0;
+    let canvasHeight = 0;
+    let originX = 0;
+    let originY = 0;
+    let unitScale = 40;
+
+    function resizeCanvas() {
+      const rect = container.getBoundingClientRect();
+      const size = Math.min(rect.width, rect.height) - 16;
+      const validSize = Math.max(size, 260);
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = validSize * dpr;
+      canvas.height = validSize * dpr;
+      canvas.style.width = `${validSize}px`;
+      canvas.style.height = `${validSize}px`;
+
+      canvasWidth = validSize;
+      canvasHeight = validSize;
+      originX = validSize / 2;
+      originY = validSize / 2;
+      unitScale = validSize / (GRAPH_BOUNDS.maxX - GRAPH_BOUNDS.minX + 1.2);
+
+      drawGraph();
+    }
+
+    function mathToPixel(x, y) {
+      return {
+        x: originX + x * unitScale,
+        y: originY - y * unitScale
+      };
+    }
+
+    function drawGraph() {
+      if (!canvasWidth || !canvasHeight) return;
+      const dpr = window.devicePixelRatio || 1;
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      if (state.showGrid) {
+        drawGrid();
+      }
+
+      drawAxes();
+
+      if (state.currentQuestion) {
+        if (state.currentQuestion.type === 'inverse') {
+          drawHyperbola(state.currentQuestion.a);
+        } else {
+          drawLine(state.currentQuestion.slope, state.currentQuestion.intercept);
+        }
+
+        if (!state.showGrid) {
+          drawRequiredGridLines();
+        }
+
+        if (state.showHintGuide || state.answered) {
+          drawHintAnnotations();
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function drawRequiredGridLines() {
+      if (!state.currentQuestion) return;
+      const q = state.currentQuestion;
+
+      let targetPoints = [];
+      if (q.type === 'inverse') {
+        if (q.keyPoints && q.keyPoints.length > 0) {
+          const pos = q.keyPoints.filter(p => p.x > 0 && Math.abs(p.y) <= 5);
+          if (pos.length > 0) {
+            targetPoints.push(pos[0]);
+            if (pos.length > 1 && Math.abs(pos[pos.length - 1].x) !== Math.abs(pos[0].x)) {
+              targetPoints.push(pos[pos.length - 1]);
+            }
+          } else {
+            targetPoints.push(q.keyPoints[0]);
+          }
+        }
+      } else {
+        if (q.keyPoints && q.keyPoints.length > 0) {
+          targetPoints = q.keyPoints.filter(pt => pt.type !== 'origin');
+        }
+      }
+
+      targetPoints.forEach(pt => {
+        if (pt.x !== 0 || pt.y !== 0) {
+          const p = mathToPixel(pt.x, pt.y);
+
+          ctx.save();
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.65)';
+          ctx.lineWidth = 1.3;
+          ctx.setLineDash([4, 4]);
+
+          ctx.beginPath();
+          if (pt.y !== 0) {
+            const pxAxis = mathToPixel(pt.x, 0);
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(pxAxis.x, pxAxis.y);
+          }
+          if (pt.x !== 0) {
+            const pyAxis = mathToPixel(0, pt.y);
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(pyAxis.x, pyAxis.y);
+          }
+          ctx.stroke();
+          ctx.restore();
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#38bdf8';
+          ctx.fill();
+          ctx.restore();
+        }
+      });
+    }
+
+    function drawGrid() {
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#1e293b';
+
+      for (let x = GRAPH_BOUNDS.minX; x <= GRAPH_BOUNDS.maxX; x++) {
+        const p = mathToPixel(x, 0);
+        ctx.beginPath();
+        ctx.moveTo(p.x, 0);
+        ctx.lineTo(p.x, canvasHeight);
+        ctx.stroke();
+      }
+
+      for (let y = GRAPH_BOUNDS.minY; y <= GRAPH_BOUNDS.maxY; y++) {
+        const p = mathToPixel(0, y);
+        ctx.beginPath();
+        ctx.moveTo(0, p.y);
+        ctx.lineTo(canvasWidth, p.y);
+        ctx.stroke();
+      }
+    }
+
+    function drawAxes() {
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#64748b';
+
+      ctx.beginPath();
+      ctx.moveTo(0, originY);
+      ctx.lineTo(canvasWidth, originY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(originX, 0);
+      ctx.lineTo(originX, canvasHeight);
+      ctx.stroke();
+
+      const arrowSize = 7;
+      ctx.fillStyle = '#64748b';
+
+      ctx.beginPath();
+      ctx.moveTo(canvasWidth - 2, originY);
+      ctx.lineTo(canvasWidth - arrowSize - 2, originY - arrowSize * 0.7);
+      ctx.lineTo(canvasWidth - arrowSize - 2, originY + arrowSize * 0.7);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(originX, 2);
+      ctx.lineTo(originX - arrowSize * 0.7, arrowSize + 2);
+      ctx.lineTo(originX + arrowSize * 0.7, arrowSize + 2);
+      ctx.fill();
+
+      ctx.font = '600 14px "Inter", sans-serif';
+      ctx.fillStyle = '#cbd5e1';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'top';
+      ctx.fillText('x', canvasWidth - 8, originY + 8);
+
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('y', originX + 8, 4);
+
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'top';
+      ctx.fillText('O', originX - 6, originY + 4);
+
+      ctx.font = '600 13px "Fira Code", monospace';
+      ctx.fillStyle = '#cbd5e1';
+
+      for (let x = GRAPH_BOUNDS.minX; x <= GRAPH_BOUNDS.maxX; x++) {
+        if (x === 0) continue;
+        const p = mathToPixel(x, 0);
+
+        ctx.beginPath();
+        ctx.moveTo(p.x, originY - 4);
+        ctx.lineTo(p.x, originY + 4);
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(x.toString(), p.x, originY + 6);
+      }
+
+      for (let y = GRAPH_BOUNDS.minY; y <= GRAPH_BOUNDS.maxY; y++) {
+        if (y === 0) continue;
+        const p = mathToPixel(0, y);
+
+        ctx.beginPath();
+        ctx.moveTo(originX - 4, p.y);
+        ctx.lineTo(originX + 4, p.y);
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(y.toString(), originX - 8, p.y);
+      }
+    }
+
+    function drawLine(slope, intercept) {
+      const bVal = (typeof intercept === 'object') ? intercept.val : intercept;
+      const x1 = GRAPH_BOUNDS.minX - 2;
+      const y1 = slope.val * x1 + bVal;
+      const x2 = GRAPH_BOUNDS.maxX + 2;
+      const y2 = slope.val * x2 + bVal;
+
+      const p1 = mathToPixel(x1, y1);
+      const p2 = mathToPixel(x2, y2);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, canvasWidth, canvasHeight);
+      ctx.clip();
+
+      ctx.shadowColor = '#0284c7';
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineCap = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+
+      ctx.restore();
+
+      if (state.showLatticePoints || state.showHintGuide) {
+        drawLatticePoints(slope, intercept);
+      }
+    }
+
+    function drawHyperbola(a) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, canvasWidth, canvasHeight);
+      ctx.clip();
+
+      ctx.shadowColor = '#0284c7';
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineCap = 'round';
+
+      const drawBranch = (minX, maxX) => {
+        ctx.beginPath();
+        let started = false;
+        const step = 0.05;
+        for (let x = minX; x <= maxX; x += step) {
+          if (Math.abs(x) < 0.08) continue;
+          const y = a / x;
+          const p = mathToPixel(x, y);
+          if (!started) {
+            ctx.moveTo(p.x, p.y);
+            started = true;
+          } else {
+            ctx.lineTo(p.x, p.y);
+          }
+        }
+        ctx.stroke();
+      };
+
+      drawBranch(GRAPH_BOUNDS.minX - 1.5, -0.12);
+      drawBranch(0.12, GRAPH_BOUNDS.maxX + 1.5);
+
+      ctx.restore();
+
+      if (state.showLatticePoints || state.showHintGuide) {
+        drawInverseLatticePoints(a);
+      }
+    }
+
+    function drawInverseLatticePoints(a) {
+      for (let x = GRAPH_BOUNDS.minX; x <= GRAPH_BOUNDS.maxX; x++) {
+        if (x === 0) continue;
+        if (a % x === 0) {
+          const y = a / x;
+          if (y >= GRAPH_BOUNDS.minY && y <= GRAPH_BOUNDS.maxY) {
+            const p = mathToPixel(x, y);
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#38bdf8';
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#0f172a';
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      }
+    }
+
+    function drawLatticePoints(slope, intercept) {
+      const bVal = (typeof intercept === 'object') ? intercept.val : intercept;
+      for (let x = GRAPH_BOUNDS.minX; x <= GRAPH_BOUNDS.maxX; x++) {
+        const y = slope.val * x + bVal;
+        if (Math.abs(y - Math.round(y)) < 1e-5 && y >= GRAPH_BOUNDS.minY && y <= GRAPH_BOUNDS.maxY) {
+          const p = mathToPixel(x, Math.round(y));
+          const isIntercept = (x === 0);
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, isIntercept ? 5.5 : 4, 0, Math.PI * 2);
+          ctx.fillStyle = isIntercept ? '#fb7185' : '#38bdf8';
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#0f172a';
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+
+    function drawHintAnnotations() {
+      if (!state.currentQuestion) return;
+
+      if (state.currentQuestion.type === 'inverse') {
+        const { a, keyPoints } = state.currentQuestion;
+        if (!keyPoints || keyPoints.length === 0) return;
+
+        const posPoints = keyPoints.filter(pt => pt.x > 0 && Math.abs(pt.y) <= 5);
+        const target = posPoints.length > 0 ? posPoints[0] : keyPoints[0];
+
+        const pMath = mathToPixel(target.x, target.y);
+        const pOrigin = mathToPixel(0, 0);
+        const pX = mathToPixel(target.x, 0);
+        const pY = mathToPixel(0, target.y);
+
+        ctx.save();
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = '#fbbf24';
+
+        ctx.beginPath();
+        ctx.moveTo(pX.x, pX.y);
+        ctx.lineTo(pMath.x, pMath.y);
+        ctx.lineTo(pY.x, pY.y);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(pMath.x, pMath.y, 9, 0, Math.PI * 2);
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 3]);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.font = 'bold 11px "Inter", sans-serif';
+        ctx.fillStyle = '#fbbf24';
+        ctx.textAlign = 'center';
+        ctx.fillText(`x=${target.x}`, (pOrigin.x + pX.x) / 2, pX.y + (target.y >= 0 ? 14 : -6));
+
+        ctx.fillStyle = '#34d399';
+        ctx.textAlign = target.x >= 0 ? 'right' : 'left';
+        ctx.fillText(`y=${target.y}`, pY.x + (target.x >= 0 ? -6 : 6), (pOrigin.y + pY.y) / 2);
+
+        return;
+      }
+
+      const { slope, intercept, keyPoints } = state.currentQuestion;
+      const b = normalizeFraction(intercept);
+
+      if (state.mode === 'non_intercepts' && keyPoints && keyPoints.length >= 2) {
+        const pA = keyPoints[0];
+        const pB = keyPoints[1];
+        const p0 = mathToPixel(pA.x, pA.y);
+        const pMid = mathToPixel(pB.x, pA.y);
+        const pEnd = mathToPixel(pB.x, pB.y);
+
+        [p0, pEnd].forEach(pt => {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 8, 0, Math.PI * 2);
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.restore();
+        });
+
+        ctx.save();
+        ctx.lineWidth = 2;
+        ctx.setLineDash([3, 3]);
+
+        ctx.strokeStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(pMid.x, pMid.y);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#34d399';
+        ctx.beginPath();
+        ctx.moveTo(pMid.x, pMid.y);
+        ctx.lineTo(pEnd.x, pEnd.y);
+        ctx.stroke();
+
+        ctx.restore();
+
+        const dx = pB.x - pA.x;
+        const dy = pB.y - pA.y;
+
+        ctx.font = 'bold 11px "Inter", sans-serif';
+        ctx.fillStyle = '#fbbf24';
+        ctx.textAlign = 'center';
+        ctx.fillText(`+${dx}`, (p0.x + pMid.x) / 2, p0.y + (dy >= 0 ? 14 : -6));
+
+        ctx.fillStyle = '#34d399';
+        ctx.textAlign = 'left';
+        ctx.fillText((dy >= 0 ? `+${dy}` : `${dy}`), pMid.x + 5, (pMid.y + pEnd.y) / 2);
+        return;
+      }
+
+      const pIntercept = mathToPixel(0, b.val);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(pIntercept.x, pIntercept.y, 10, 0, Math.PI * 2);
+      ctx.strokeStyle = '#f43f5e';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.stroke();
+      ctx.restore();
+
+      const dx = slope.den;
+      const dy = slope.num;
+      const x0 = 0;
+      const y0 = b.val;
+      const x1 = x0 + dx;
+      const y1 = y0 + dy;
+
+      if (x1 <= GRAPH_BOUNDS.maxX && y1 >= GRAPH_BOUNDS.minY && y1 <= GRAPH_BOUNDS.maxY) {
+        const p0 = mathToPixel(x0, y0);
+        const pMid = mathToPixel(x1, y0);
+        const pEnd = mathToPixel(x1, y1);
+
+        ctx.save();
+        ctx.lineWidth = 2;
+        ctx.setLineDash([3, 3]);
+
+        ctx.strokeStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(pMid.x, pMid.y);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#34d399';
+        ctx.beginPath();
+        ctx.moveTo(pMid.x, pMid.y);
+        ctx.lineTo(pEnd.x, pEnd.y);
+        ctx.stroke();
+
+        ctx.restore();
+
+        ctx.font = 'bold 11px "Inter", sans-serif';
+        ctx.fillStyle = '#fbbf24';
+        ctx.textAlign = 'center';
+        ctx.fillText(`+${dx}`, (p0.x + pMid.x) / 2, p0.y + (dy >= 0 ? 14 : -6));
+
+        ctx.fillStyle = '#34d399';
+        ctx.textAlign = 'left';
+        ctx.fillText((dy >= 0 ? `+${dy}` : `${dy}`), pMid.x + 5, (pMid.y + pEnd.y) / 2);
+      }
+    }
+
+    const choicesContainer = document.getElementById('choices-container');
+    const feedbackPanel = document.getElementById('feedback-panel');
+    const feedbackContent = document.getElementById('feedback-content');
+    const btnNext = document.getElementById('btn-next');
+    const btnNextText = document.getElementById('btn-next-text');
+    const autoAdvanceBarWrapper = document.getElementById('auto-advance-bar-wrapper');
+    const autoAdvanceBar = document.getElementById('auto-advance-bar');
+    const questionIndexEl = document.getElementById('question-index');
+    const statStreakEl = document.getElementById('stat-streak');
+    const statAccuracyEl = document.getElementById('stat-accuracy');
+    const statCountEl = document.getElementById('stat-count');
+    const btnHint = document.getElementById('btn-hint-toggle');
+    const hintStatusEl = document.getElementById('hint-status');
+    const btnSound = document.getElementById('btn-sound');
+    const iconSoundOn = document.getElementById('icon-sound-on');
+    const iconSoundOff = document.getElementById('icon-sound-off');
+    const modeSelect = document.getElementById('mode-select');
+    const modeBadge = document.getElementById('mode-badge');
+    const questionTextEl = document.getElementById('question-text');
+    const graphCurveLabel = document.getElementById('graph-curve-label');
+    const btnAutoAdvance = document.getElementById('btn-auto-advance');
+    const autoAdvanceStatus = document.getElementById('auto-advance-status');
+    const btnLattice = document.getElementById('btn-lattice-toggle');
+    const latticeStatusEl = document.getElementById('lattice-status');
+    const latticeDotEl = document.getElementById('lattice-dot');
+    const btnGrid = document.getElementById('btn-grid-toggle');
+    const gridStatusEl = document.getElementById('grid-status');
+    const gridDotEl = document.getElementById('grid-dot');
+    const targetStreakSelect = document.getElementById('target-streak-select');
+    const clearModal = document.getElementById('clear-modal');
+    const clearCard = document.getElementById('clear-card');
+    const clearTargetCount = document.getElementById('clear-target-count');
+    const clearAccuracy = document.getElementById('clear-accuracy');
+    const clearTotalQuestions = document.getElementById('clear-total-questions');
+    const btnExtendTarget = document.getElementById('btn-extend-target');
+    const btnRestartGoal = document.getElementById('btn-restart-goal');
+    const btnCloseModal = document.getElementById('btn-close-modal');
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    let confettiAnimationId = null;
+
+    function loadNewQuestion() {
+      clearAutoAdvance();
+
+      state.currentQuestion = generateQuestion();
+      state.answered = false;
+
+      questionIndexEl.textContent = state.questionNum;
+      questionTextEl.textContent = state.currentQuestion.prompt;
+
+      if (graphCurveLabel) {
+        if (state.mode === 'inverse') {
+          graphCurveLabel.innerHTML = '双曲線 <span class="font-mono text-slate-200">y = a/x</span>';
+        } else if (state.mode === 'proportional') {
+          graphCurveLabel.innerHTML = '直線 <span class="font-mono text-slate-200">y = ax</span>';
+        } else {
+          graphCurveLabel.innerHTML = '直線 <span class="font-mono text-slate-200">y = ax + b</span>';
+        }
+      }
+
+      choicesContainer.innerHTML = '';
+      state.currentQuestion.choices.forEach((choice, index) => {
+        const keyNumber = index + 1;
+        const btn = document.createElement('button');
+        btn.className = `choice-btn w-full bg-slate-800/90 hover:bg-slate-750 hover:border-sky-500/60 border border-slate-700/80 rounded-xl p-3 flex items-center justify-between group shadow-md text-left transition-all`;
+        btn.dataset.index = index;
+
+        btn.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-lg bg-slate-700/80 group-hover:bg-sky-500 group-hover:text-white text-slate-300 font-mono font-bold text-xs flex items-center justify-center transition-colors">
+              ${keyNumber}
+            </span>
+            <div class="text-base sm:text-lg font-semibold text-slate-100 tracking-wider">
+              ${choice.html}
+            </div>
+          </div>
+          <div class="choice-badge w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-60 transition">
+            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </div>
+        `;
+
+        btn.addEventListener('click', () => handleChoice(index));
+        choicesContainer.appendChild(btn);
+      });
+
+      feedbackContent.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+          <span class="text-sm font-bold text-slate-300">式を選択してください</span>
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          ${getModeTip()}
+        </p>
+      `;
+
+      btnNext.disabled = true;
+      btnNextText.textContent = "次の問題へ";
+      btnNext.className = "w-full sm:w-auto px-5 py-2 rounded-xl font-bold text-sm bg-slate-800 text-slate-500 cursor-not-allowed transition flex items-center justify-center gap-2";
+
+      drawGraph();
+    }
+
+    function getModeTip() {
+      switch (state.mode) {
+        case 'inverse':
+          return state.showGrid
+            ? '反比例は <b class="text-slate-200">y = a/x (xy = a)</b> です。通りやすい格子点を見つけて計算しましょう。'
+            : '方眼OFFモード: 引かれている <b class="text-sky-300">点線（グリッド線）</b> から軸の目盛りを読み取り、<b class="text-amber-300">a = x × y</b> を求めましょう。';
+        case 'proportional':
+          return state.showGrid
+            ? '比例は <b class="text-slate-200">y = ax (切片なし)</b> です。原点(0,0)からの変化量を調べましょう。'
+            : '方眼OFFモード: 点線が指す <b class="text-sky-300">軸の目盛り</b> から傾き <b class="text-amber-300">a = y / x</b> を求めましょう。';
+        case 'intercept_point':
+          return state.showGrid
+            ? 'まず y軸との交点 <b class="text-rose-400">切片(0, b)</b> を読み取り、もう1つの点との差から傾きを計算しましょう。'
+            : '方眼OFFモード: <b class="text-rose-400">y切片</b> と点線が指す <b class="text-sky-300">通る点の目盛り</b> を読み取って解きましょう。';
+        case 'two_intercepts':
+          return state.showGrid
+            ? 'y切片はそのまま <b class="text-rose-400">b</b> になり、傾きは <b class="text-amber-300">-(y切片)/(x切片)</b> で求まります。'
+            : '方眼OFFモード: 軸上の <b class="text-rose-400">y切片</b> と <b class="text-sky-300">x切片</b> の目盛りを使って式を求めましょう。';
+        case 'non_intercepts':
+          return state.showGrid
+            ? 'x切片・y切片とも目盛り線上にありません。<b class="text-sky-300">通る2つの格子点</b>を見つけて解きましょう。'
+            : '方眼OFFモード: 表示された <b class="text-sky-300">2箇所の点線</b> が指す軸の目盛りから、傾きと切片を計算しましょう。';
+        default:
+          return state.showGrid
+            ? 'y軸との交点 <b class="text-slate-200">(0, b)</b> と、直線の傾き <b class="text-slate-200">a = (yの増加量)/(xの増加量)</b> に注目しましょう。'
+            : '方眼OFFモード: <b class="text-rose-400">y切片</b> と点線が指す <b class="text-sky-300">目盛り</b> から傾きを計算しましょう。';
+      }
+    }
+
+    function handleChoice(selectedIndex) {
+      if (state.answered) return;
+      state.answered = true;
+
+      const choice = state.currentQuestion.choices[selectedIndex];
+      const isCorrect = choice.isCorrect;
+
+      state.totalAnswered++;
+      if (isCorrect) {
+        state.totalCorrect++;
+        state.streak++;
+        playSound('correct');
+      } else {
+        state.streak = 0;
+        state.goalReached = false;
+        playSound('wrong');
+      }
+
+      updateStats();
+
+      const buttons = choicesContainer.querySelectorAll('.choice-btn');
+      buttons.forEach((btn, idx) => {
+        const item = state.currentQuestion.choices[idx];
+        btn.disabled = true;
+        btn.classList.remove('hover:bg-slate-750', 'hover:border-sky-500/60');
+
+        if (item.isCorrect) {
+          btn.className = "choice-btn w-full bg-emerald-950/70 border-2 border-emerald-500 text-emerald-100 rounded-xl p-3 flex items-center justify-between shadow-lg";
+          btn.querySelector('.choice-badge').innerHTML = `
+            <svg class="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          `;
+          btn.querySelector('.choice-badge').classList.remove('opacity-0');
+        } else if (idx === selectedIndex) {
+          btn.className = "choice-btn w-full bg-rose-950/70 border-2 border-rose-500 text-rose-100 rounded-xl p-3 flex items-center justify-between shadow-lg";
+          btn.querySelector('.choice-badge').innerHTML = `
+            <svg class="w-5 h-5 text-rose-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.707a1 1 0 00-1.414-1.414L10 8.586 8.293 6.879a1 1 0 10-1.414 1.414L8.586 10l-1.707 1.707a1 1 0 001.414 1.414L10 11.414l1.707 1.707a1 1 0 001.414-1.414L11.414 10l1.707-1.707z" clip-rule="evenodd"/></svg>
+          `;
+          btn.querySelector('.choice-badge').classList.remove('opacity-0');
+        } else {
+          btn.classList.add('opacity-40');
+        }
+      });
+
+      const q = state.currentQuestion;
+
+      if (q.type === 'inverse') {
+        const pt = (q.keyPoints && q.keyPoints.length > 0)
+          ? q.keyPoints.find(p => p.x > 0) || q.keyPoints[0]
+          : { x: 1, y: q.a };
+        const calcText = `${pt.x} × (${pt.y}) = ${q.a}`;
+        const invEqHtml = formatInverseEquationHTML(q.a);
+
+        if (isCorrect) {
+          feedbackContent.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+              <span class="text-base font-bold text-emerald-400">正解！ すばらしい！</span>
+            </div>
+            <div class="text-xs text-slate-300 leading-relaxed bg-slate-950/60 p-2 rounded-lg border border-slate-800">
+              <div>・ <span class="text-sky-300 font-semibold">反比例の式:</span> ${invEqHtml}</div>
+              <div>・ <span class="text-amber-300 font-semibold">比例定数の求め方:</span> 通る点 (${pt.x}, ${pt.y}) より <span class="font-mono text-amber-300 font-bold">a = x × y = ${calcText}</span></div>
+              <div>・ a が ${q.a > 0 ? '正なので第1・第3象限' : '負なので第2・第4象限'} に双曲線が現れます</div>
+            </div>
+          `;
+        } else {
+          feedbackContent.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-rose-400"></span>
+              <span class="text-base font-bold text-rose-400">おしい！ 正解は ${invEqHtml}</span>
+            </div>
+            <div class="text-xs text-slate-300 leading-relaxed bg-slate-950/60 p-2 rounded-lg border border-slate-800">
+              <div>・ 反比例の式は <span class="text-amber-300 font-bold">xy = a (一定)</span> です</div>
+              <div>・ 点 (${pt.x}, ${pt.y}) を通るため、<span class="font-mono font-bold text-rose-400">a = ${calcText}</span> となります</div>
+            </div>
+          `;
+        }
+      } else {
+        const slopeStr = q.slope.den === 1 ? `${q.slope.num}` : `${q.slope.num}/${q.slope.den}`;
+        const bFrac = normalizeFraction(q.intercept);
+        const bDisplay = bFrac.den === 1 
+          ? `${bFrac.num}` 
+          : (bFrac.num < 0 ? `-${Math.abs(bFrac.num)}/${bFrac.den}` : `${bFrac.num}/${bFrac.den}`);
+
+        let extraTip = '';
+        if (state.mode === 'non_intercepts' && q.keyPoints && q.keyPoints.length >= 2) {
+          const p1 = q.keyPoints[0];
+          const p2 = q.keyPoints[1];
+          extraTip = `<div class="text-sky-300 font-semibold mt-1">・ 通る格子点: (${p1.x}, ${p1.y}) と (${p2.x}, ${p2.y})</div>`;
+        }
+
+        if (isCorrect) {
+          feedbackContent.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+              <span class="text-base font-bold text-emerald-400">正解！ すばらしい！</span>
+            </div>
+            <div class="text-xs text-slate-300 leading-relaxed bg-slate-950/60 p-2 rounded-lg border border-slate-800">
+              <div>・ <span class="text-rose-400 font-semibold">y切片 b = ${bDisplay}</span> ${bFrac.num === 0 ? '(原点通過)' : (bFrac.den > 1 ? '(分数切片)' : `(点 (0, ${bFrac.num}) を通過)`)}</div>
+              <div>・ <span class="text-amber-300 font-semibold">傾き a = ${slopeStr}</span> （右に ${q.slope.den} 進むと ${q.slope.num >= 0 ? '上に' : '下に'} ${Math.abs(q.slope.num)} 変化）</div>
+              ${extraTip}
+            </div>
+          `;
+        } else {
+          feedbackContent.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-rose-400"></span>
+              <span class="text-base font-bold text-rose-400">おしい！ 正解は ${q.correctEq.html}</span>
+            </div>
+            <div class="text-xs text-slate-300 leading-relaxed bg-slate-950/60 p-2 rounded-lg border border-slate-800">
+              <div>・ 切片: <span class="text-rose-400 font-bold">b = ${bDisplay}</span></div>
+              <div>・ 傾き: <span class="text-amber-300 font-bold">a = ${slopeStr}</span></div>
+              ${extraTip}
+            </div>
+          `;
+        }
+      }
+
+      btnNext.disabled = false;
+      btnNext.className = "w-full sm:w-auto px-6 py-2 rounded-xl font-bold text-sm bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white shadow-lg shadow-sky-500/25 transition flex items-center justify-center gap-2 cursor-pointer transform hover:scale-[1.02]";
+
+      drawGraph();
+
+      if (isCorrect && state.targetStreak > 0 && state.streak >= state.targetStreak && !state.goalReached) {
+        state.goalReached = true;
+        clearAutoAdvance();
+        setTimeout(() => {
+          showClearModal();
+        }, 300);
+        return;
+      }
+
+      if (isCorrect && state.autoAdvance) {
+        startAutoAdvance();
+      }
+    }
+
+    function startAutoAdvance() {
+      clearAutoAdvance();
+      autoAdvanceBarWrapper.classList.remove('hidden');
+      autoAdvanceBar.style.transition = 'none';
+      autoAdvanceBar.style.width = '0%';
+
+      btnNextText.textContent = "自動で次へ...";
+
+      requestAnimationFrame(() => {
+        autoAdvanceBar.style.transition = `width ${state.autoAdvanceDuration}ms linear`;
+        autoAdvanceBar.style.width = '100%';
+      });
+
+      state.autoAdvanceTimer = setTimeout(() => {
+        nextQuestion();
+      }, state.autoAdvanceDuration);
+    }
+
+    function clearAutoAdvance() {
+      if (state.autoAdvanceTimer) {
+        clearTimeout(state.autoAdvanceTimer);
+        state.autoAdvanceTimer = null;
+      }
+      autoAdvanceBarWrapper.classList.add('hidden');
+      autoAdvanceBar.style.width = '0%';
+      btnNextText.textContent = "次の問題へ";
+    }
+
+    function updateStats() {
+      statStreakEl.textContent = state.streak;
+      const rate = state.totalAnswered > 0 ? Math.round((state.totalCorrect / state.totalAnswered) * 100) : 0;
+      statAccuracyEl.textContent = `${rate}%`;
+      statCountEl.textContent = `(${state.totalCorrect}/${state.totalAnswered})`;
+
+      if (state.targetStreak > 0 && state.streak >= state.targetStreak) {
+        statStreakEl.className = 'font-bold text-amber-300 font-mono text-base animate-pulse';
+      } else {
+        statStreakEl.className = 'font-bold text-white font-mono text-base';
+      }
+    }
+
+    function showClearModal() {
+      playSound('fanfare');
+      clearTargetCount.textContent = state.streak;
+      clearAccuracy.textContent = statAccuracyEl.textContent;
+      clearTotalQuestions.textContent = `${state.totalAnswered}問`;
+
+      clearModal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        clearModal.classList.remove('opacity-0');
+        clearCard.classList.remove('scale-90');
+        clearCard.classList.add('scale-100');
+      });
+
+      startConfetti();
+    }
+
+    function hideClearModal() {
+      stopConfetti();
+      clearCard.classList.remove('scale-100');
+      clearCard.classList.add('scale-90');
+      clearModal.classList.add('opacity-0');
+      setTimeout(() => {
+        clearModal.classList.add('hidden');
+      }, 300);
+    }
+
+    targetStreakSelect.addEventListener('change', (e) => {
+      playSound('click');
+      state.targetStreak = parseInt(e.target.value, 10);
+      state.goalReached = false;
+      updateStats();
+    });
+
+    btnExtendTarget.addEventListener('click', () => {
+      playSound('click');
+      hideClearModal();
+      const current = state.targetStreak > 0 ? state.targetStreak : state.streak;
+      state.targetStreak = current + 5;
+
+      let matched = false;
+      for (let i = 0; i < targetStreakSelect.options.length; i++) {
+        if (parseInt(targetStreakSelect.options[i].value, 10) === state.targetStreak) {
+          targetStreakSelect.selectedIndex = i;
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        const newOpt = document.createElement('option');
+        newOpt.value = state.targetStreak;
+        newOpt.textContent = `${state.targetStreak}問`;
+        newOpt.selected = true;
+        targetStreakSelect.insertBefore(newOpt, targetStreakSelect.lastElementChild);
+      }
+
+      state.goalReached = false;
+      updateStats();
+      nextQuestion();
+    });
+
+    btnRestartGoal.addEventListener('click', () => {
+      playSound('click');
+      hideClearModal();
+      state.streak = 0;
+      state.goalReached = false;
+      state.totalAnswered = 0;
+      state.totalCorrect = 0;
+      state.questionNum = 1;
+      updateStats();
+      loadNewQuestion();
+    });
+
+    btnCloseModal.addEventListener('click', () => {
+      playSound('click');
+      hideClearModal();
+    });
+
+    function startConfetti() {
+      const canvas = confettiCanvas;
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#f59e0b', '#fbbf24', '#38bdf8', '#818cf8', '#34d399', '#f43f5e'];
+
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width * 0.5 + (Math.random() - 0.5) * 200,
+          y: canvas.height * 0.4 + (Math.random() - 0.5) * 100,
+          vx: (Math.random() - 0.5) * 14,
+          vy: Math.random() * -12 - 5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          size: Math.random() * 8 + 5,
+          tilt: Math.random() * 10,
+          tiltAngle: 0,
+          tiltAngleInc: Math.random() * 0.08 + 0.04
+        });
+      }
+
+      function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35;
+          p.vx *= 0.98;
+          p.tiltAngle += p.tiltAngleInc;
+          p.tilt = Math.sin(p.tiltAngle) * 12;
+
+          if (p.y < canvas.height + 20) {
+            active = true;
+            ctx.save();
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.translate(p.x + p.tilt, p.y);
+            ctx.rotate(p.tiltAngle);
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+            ctx.restore();
+          }
+        });
+
+        if (active) {
+          confettiAnimationId = requestAnimationFrame(update);
+        }
+      }
+
+      cancelAnimationFrame(confettiAnimationId);
+      update();
+    }
+
+    function stopConfetti() {
+      if (confettiAnimationId) {
+        cancelAnimationFrame(confettiAnimationId);
+        confettiAnimationId = null;
+      }
+      const ctx = confettiCanvas.getContext('2d');
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    function nextQuestion() {
+      clearAutoAdvance();
+      playSound('click');
+      state.questionNum++;
+      loadNewQuestion();
+    }
+
+    btnNext.addEventListener('click', nextQuestion);
+
+    function updateSlopeFilterButtons() {
+      const buttons = document.querySelectorAll('.slope-filter-btn');
+      buttons.forEach(btn => {
+        const filter = btn.dataset.filter;
+        if (filter === state.slopeFilter) {
+          btn.className = 'slope-filter-btn px-2 py-0.5 rounded-md font-bold text-sky-300 bg-sky-950/90 border border-sky-500/50 transition shadow-sm';
+        } else {
+          btn.className = 'slope-filter-btn px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200 border border-transparent transition';
+        }
+      });
+    }
+
+    document.querySelectorAll('.slope-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const selected = btn.dataset.filter;
+        if (state.slopeFilter !== selected) {
+          playSound('click');
+          state.slopeFilter = selected;
+          updateSlopeFilterButtons();
+          loadNewQuestion();
+        }
+      });
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (['1', '2', '3', '4'].includes(e.key)) {
+        const index = parseInt(e.key, 10) - 1;
+        if (!state.answered) {
+          handleChoice(index);
+        }
+      }
+      if (e.key === 'Enter' || e.code === 'Space') {
+        if (!clearModal.classList.contains('hidden')) {
+          e.preventDefault();
+          hideClearModal();
+          return;
+        }
+        if (state.answered) {
+          e.preventDefault();
+          nextQuestion();
+        }
+      }
+      if (e.key === 'Escape' && !clearModal.classList.contains('hidden')) {
+        hideClearModal();
+      }
+      if (e.key === 'h' || e.key === 'H') {
+        toggleHint();
+      }
+      if (e.key === 'g' || e.key === 'G') {
+        toggleLattice();
+      }
+      if (e.key === 'm' || e.key === 'M') {
+        toggleGrid();
+      }
+      if (e.key === 's' || e.key === 'S') {
+        playSound('click');
+        const order = ['all', 'positive', 'negative'];
+        const currentIdx = order.indexOf(state.slopeFilter);
+        state.slopeFilter = order[(currentIdx + 1) % order.length];
+        updateSlopeFilterButtons();
+        loadNewQuestion();
+      }
+    });
+
+    modeSelect.addEventListener('change', (e) => {
+      playSound('click');
+      state.mode = e.target.value;
+      const selectedText = modeSelect.options[modeSelect.selectedIndex].text.split('（')[0];
+      modeBadge.textContent = selectedText;
+
+      state.questionNum = 1;
+      state.streak = 0;
+      state.goalReached = false;
+      state.totalAnswered = 0;
+      state.totalCorrect = 0;
+      updateStats();
+      loadNewQuestion();
+    });
+
+    function toggleLattice() {
+      playSound('click');
+      state.showLatticePoints = !state.showLatticePoints;
+      if (state.showLatticePoints) {
+        latticeStatusEl.textContent = 'ON';
+        latticeStatusEl.className = 'text-[10px] bg-sky-400 text-slate-950 font-bold px-1 rounded';
+        btnLattice.className = 'px-2.5 py-1.5 rounded-lg bg-sky-950/70 hover:bg-sky-900/80 text-xs text-sky-300 border border-sky-500/50 flex items-center gap-1.5 transition shadow-sm';
+        latticeDotEl.className = 'w-2 h-2 rounded-full bg-sky-400 animate-pulse';
+      } else {
+        latticeStatusEl.textContent = 'OFF';
+        latticeStatusEl.className = 'text-[10px] bg-slate-700 text-slate-300 px-1 rounded';
+        btnLattice.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 border border-slate-700 flex items-center gap-1.5 transition';
+        latticeDotEl.className = 'w-2 h-2 rounded-full bg-slate-500';
+      }
+      drawGraph();
+    }
+    btnLattice.addEventListener('click', toggleLattice);
+
+    function toggleGrid() {
+      playSound('click');
+      state.showGrid = !state.showGrid;
+      if (gridStatusEl && btnGrid && gridDotEl) {
+        if (state.showGrid) {
+          gridStatusEl.textContent = 'ON';
+          gridStatusEl.className = 'text-[10px] bg-sky-400 text-slate-950 font-bold px-1 rounded';
+          btnGrid.className = 'px-2.5 py-1.5 rounded-lg bg-sky-950/70 hover:bg-sky-900/80 text-xs text-sky-300 border border-sky-500/50 flex items-center gap-1.5 transition shadow-sm';
+          gridDotEl.className = 'w-2 h-2 rounded-full bg-sky-400';
+        } else {
+          gridStatusEl.textContent = 'OFF';
+          gridStatusEl.className = 'text-[10px] bg-slate-700 text-slate-300 px-1 rounded';
+          btnGrid.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 border border-slate-700 flex items-center gap-1.5 transition';
+          gridDotEl.className = 'w-2 h-2 rounded-full bg-slate-500';
+        }
+      }
+      drawGraph();
+    }
+    if (btnGrid) {
+      btnGrid.addEventListener('click', toggleGrid);
+    }
+
+    btnAutoAdvance.addEventListener('click', () => {
+      playSound('click');
+      state.autoAdvance = !state.autoAdvance;
+      if (state.autoAdvance) {
+        autoAdvanceStatus.textContent = 'ON';
+        btnAutoAdvance.className = 'hidden sm:flex px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 text-xs text-emerald-300 border border-emerald-500/40 items-center gap-1.5 transition';
+        autoAdvanceStatus.className = 'text-[10px] bg-emerald-400 text-slate-950 font-bold px-1 rounded';
+      } else {
+        clearAutoAdvance();
+        autoAdvanceStatus.textContent = 'OFF';
+        btnAutoAdvance.className = 'hidden sm:flex px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 border border-slate-700 items-center gap-1.5 transition';
+        autoAdvanceStatus.className = 'text-[10px] bg-slate-700 text-slate-300 px-1 rounded';
+      }
+    });
+
+    function toggleHint() {
+      playSound('click');
+      state.showHintGuide = !state.showHintGuide;
+      if (state.showHintGuide) {
+        hintStatusEl.textContent = 'ON';
+        hintStatusEl.className = 'text-[10px] bg-amber-400 text-slate-900 font-bold px-1 rounded';
+      } else {
+        hintStatusEl.textContent = 'OFF';
+        hintStatusEl.className = 'text-[10px] bg-amber-400/20 text-amber-300 px-1 rounded';
+      }
+      drawGraph();
+    }
+    btnHint.addEventListener('click', toggleHint);
+
+    btnSound.addEventListener('click', () => {
+      state.soundEnabled = !state.soundEnabled;
+      if (state.soundEnabled) {
+        iconSoundOn.classList.remove('hidden');
+        iconSoundOff.classList.add('hidden');
+        playSound('click');
+      } else {
+        iconSoundOn.classList.add('hidden');
+        iconSoundOff.classList.remove('hidden');
+      }
+    });
+
+    const resizeObserver = new ResizeObserver(() => {
+      resizeCanvas();
+    });
+    resizeObserver.observe(container);
+
+    window.addEventListener('load', () => {
+      resizeCanvas();
+      loadNewQuestion();
+    });
+  </script>
+</body>
+</html>

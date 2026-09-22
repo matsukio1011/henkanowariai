@@ -104,6 +104,18 @@
         </div>
       </div>
 
+      <!-- App Switcher Tabs -->
+      <div class="flex items-center bg-slate-950/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/80 text-xs flex-shrink-0 shadow-inner">
+        <a href="index.html" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold flex items-center gap-1 shadow-sm">
+          <span>📝</span>
+          <span class="hidden md:inline">文章題・特訓</span>
+        </a>
+        <a href="graph.html" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white font-medium flex items-center gap-1 transition" title="方眼グラフから式を読み取る特訓へ">
+          <span>📈</span>
+          <span class="hidden md:inline">グラフマスター</span>
+        </a>
+      </div>
+
       <!-- Center / Header Badges: Displays 5-streak and 10-streak badges for each difficulty -->
       <div id="headerBadges" onclick="app.onHeaderBadgesClick()" class="flex items-center gap-1.5 sm:gap-2.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-slate-800/90 border border-slate-700/80 hover:border-amber-400/50 cursor-pointer text-[11px] transition shadow-sm" title="バッジコレクション（クリックで確認）">
         <!-- Standard Streak Group -->
@@ -155,6 +167,26 @@
         <p class="text-sm text-slate-400 max-w-lg mx-auto">
           設定した連続正解数を達成すると即時で合格！合格バッジを獲得できます。
         </p>
+      </div>
+
+      <!-- App Switcher Banner to Graph Master -->
+      <div class="p-4 rounded-2xl bg-gradient-to-r from-sky-950/70 via-slate-900 to-indigo-950/70 border border-sky-500/40 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl max-w-2xl mx-auto">
+        <div class="flex items-center gap-3 text-left">
+          <div class="w-12 h-12 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center justify-center text-2xl flex-shrink-0 shadow-inner">
+            📈
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm sm:text-base font-bold text-white">一次関数 グラフマスター</h3>
+              <span class="text-[10px] bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded-full border border-sky-500/40 font-bold">グラフ読取</span>
+            </div>
+            <p class="text-xs text-slate-300 mt-0.5">方眼の直線グラフから式を直接読み取る実践特訓（比例・反比例・切片・分数傾き等）</p>
+          </div>
+        </div>
+        <a href="graph.html" class="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-sky-500/20 transition flex items-center justify-center gap-1.5 flex-shrink-0">
+          <span>グラフマスターで遊ぶ</span>
+          <span>→</span>
+        </a>
       </div>
 
       <!-- Target Streak Selector Box -->
