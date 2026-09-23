@@ -164,6 +164,14 @@
           <span id="auto-advance-status" class="text-[10px] bg-emerald-400 text-slate-950 font-bold px-1 rounded">ON</span>
         </button>
 
+        <!-- 全画面表示切替ボタン -->
+        <button id="btn-fullscreen" title="全画面表示切替 ([F]キー)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 border border-slate-700 flex items-center gap-1.5 transition">
+          <svg id="fs-icon-enter" class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+          <svg id="fs-icon-exit" class="w-3.5 h-3.5 text-sky-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4l5 5m0 0H5m4 0V5m11-1l-5 5m0 0h4m-4 0V5M4 20l5-5m0 0H5m4 0v4m11 1l-5-5m0 0h4m-4 0v4"/></svg>
+          <span class="hidden md:inline">全画面</span>
+          <span id="fullscreen-status" class="text-[10px] bg-slate-700 text-slate-300 px-1 rounded">OFF</span>
+        </button>
+
         <button id="btn-sound" title="音声ON/OFF" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-sm flex items-center justify-center">
           <svg id="icon-sound-on" class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
           <svg id="icon-sound-off" class="w-4 h-4 text-slate-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
@@ -1991,6 +1999,9 @@
       if (e.key === 'm' || e.key === 'M') {
         toggleGrid();
       }
+      if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      }
       if (e.key === 's' || e.key === 'S') {
         playSound('click');
         const order = ['all', 'positive', 'negative'];
@@ -2095,6 +2106,70 @@
         iconSoundOn.classList.add('hidden');
         iconSoundOff.classList.remove('hidden');
       }
+    });
+
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+    const fsStatusEl = document.getElementById('fullscreen-status');
+    const fsIconEnter = document.getElementById('fs-icon-enter');
+    const fsIconExit = document.getElementById('fs-icon-exit');
+
+    function isFullscreen() {
+      return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+    }
+
+    function toggleFullscreen() {
+      playSound('click');
+      if (!isFullscreen()) {
+        const el = document.documentElement;
+        if (el.requestFullscreen) {
+          el.requestFullscreen().catch(() => {});
+        } else if (el.webkitRequestFullscreen) {
+          el.webkitRequestFullscreen();
+        } else if (el.mozRequestFullScreen) {
+          el.mozRequestFullScreen();
+        } else if (el.msRequestFullscreen) {
+          el.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+    }
+
+    function updateFullscreenUI() {
+      if (!btnFullscreen || !fsStatusEl) return;
+      const fs = isFullscreen();
+      if (fs) {
+        fsStatusEl.textContent = 'ON';
+        fsStatusEl.className = 'text-[10px] bg-sky-400 text-slate-950 font-bold px-1 rounded';
+        btnFullscreen.className = 'px-2.5 py-1.5 rounded-lg bg-sky-950/70 hover:bg-sky-900/80 text-xs text-sky-300 border border-sky-500/50 flex items-center gap-1.5 transition shadow-sm';
+        if (fsIconEnter) fsIconEnter.classList.add('hidden');
+        if (fsIconExit) fsIconExit.classList.remove('hidden');
+      } else {
+        fsStatusEl.textContent = 'OFF';
+        fsStatusEl.className = 'text-[10px] bg-slate-700 text-slate-300 px-1 rounded';
+        btnFullscreen.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 border border-slate-700 flex items-center gap-1.5 transition';
+        if (fsIconEnter) fsIconEnter.classList.remove('hidden');
+        if (fsIconExit) fsIconExit.classList.add('hidden');
+      }
+      setTimeout(() => {
+        resizeCanvas();
+      }, 100);
+    }
+
+    if (btnFullscreen) {
+      btnFullscreen.addEventListener('click', toggleFullscreen);
+    }
+
+    ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
+      document.addEventListener(evt, updateFullscreenUI);
     });
 
     const resizeObserver = new ResizeObserver(() => {
