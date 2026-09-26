@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2点を通る直線の式マスター</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX CSS & JS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=M+PLUS+Rounded+1c:wght@500;700;800&family=Fira+Code:wght@500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"M PLUS Rounded 1c"', 'Inter', 'sans-serif'],
+            mono: ['"Fira Code"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'M PLUS Rounded 1c', 'Inter', sans-serif;
+    }
+    /* PC画面でスクロール防止 */
+    @media (min-width: 768px) {
+      html, body {
+        height: 100vh;
+        max-height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+    }
+    .katex {
+      font-size: 1.1em;
+    }
+    .choice-btn {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .choice-btn:active {
+      transform: scale(0.985);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+      70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+    .pulse-ring {
+      animation: pulseRing 2s infinite;
+    }
+    @keyframes confettiDrop {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(140px) rotate(360deg); opacity: 0; }
+    }
+    .confetti-piece {
+      position: absolute;
+      animation: confettiDrop 2.5s ease-out infinite;
+    }
+    /* カスタムスクロールバー */
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 0.8);
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(71, 85, 105, 1);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white overflow-hidden">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-3 py-1.5 sm:px-6 flex-shrink-0">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
+      <!-- Title & Logo -->
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/25 text-white font-bold text-sm">
+          📍
+        </div>
+        <div>
+          <h1 class="text-sm sm:text-base font-bold tracking-tight text-white flex items-center gap-1.5">
+            2点から直線の式 <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-semibold px-1.5 py-0.5 rounded-full border border-emerald-500/30">Master</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 hidden sm:block">2つの座標から傾きと切片を即座に見抜く特訓</p>
+        </div>
+      </div>
+
+      <!-- App Switcher Tabs -->
+      <div class="flex items-center bg-slate-950/80 p-0.5 rounded-lg border border-slate-700/80 text-xs flex-shrink-0 shadow-inner">
+        <a href="index.html" class="px-2 py-0.5 rounded text-slate-400 hover:text-white font-medium flex items-center gap-1 transition" title="文章題・条件から式を求める特訓アプリへ">
+          <span>📝</span>
+          <span class="hidden md:inline">文章題・特訓</span>
+        </a>
+        <a href="graph.html" class="px-2 py-0.5 rounded text-slate-400 hover:text-white font-medium flex items-center gap-1 transition" title="方眼グラフから式を読み取る特訓へ">
+          <span>📈</span>
+          <span class="hidden md:inline">グラフマスター</span>
+        </a>
+        <a href="line.html" class="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold flex items-center gap-1 shadow-sm">
+          <span>📍</span>
+          <span class="hidden md:inline">2点から直線</span>
+        </a>
+      </div>
+
+      <!-- Header Controls & Sound -->
+      <div class="flex items-center space-x-1.5">
+        <button id="fullscreenToggleBtn" onclick="app.toggleFullscreen()" title="全画面表示切替 ([F]キー)" class="px-2 py-1 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1 transition">
+          <span>⛶</span>
+          <span class="hidden sm:inline" id="fullscreenText">全画面</span>
+        </button>
+
+        <button id="soundToggleBtn" onclick="app.toggleSound()" title="効果音切替 ([S]キー)" class="px-2 py-1 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1 transition">
+          <span id="soundIcon">🔊</span>
+          <span class="hidden sm:inline" id="soundText">音ON</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 min-h-0 max-w-6xl w-full mx-auto px-2 sm:px-4 py-1.5 sm:py-2 flex flex-col justify-between overflow-hidden">
+    
+    <!-- Top Mode Selector & Stats Bar -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-xl px-2.5 py-1.5 mb-1.5 shadow-sm backdrop-blur flex-shrink-0">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        
+        <!-- Mode Tabs -->
+        <div class="flex flex-wrap items-center gap-1">
+          <span class="text-[11px] text-slate-400 font-semibold mr-1">出題:</span>
+          <button onclick="app.setMode('all')" id="mode-all" class="px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-bold transition bg-emerald-600 text-white shadow-sm">
+            🎲 全範囲ランダム
+          </button>
+          <button onclick="app.setMode('preset')" id="mode-preset" class="px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-medium transition bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-750">
+            📖 特訓問題集 (全38問)
+          </button>
+          <button onclick="app.setMode('special')" id="mode-special" class="px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-medium transition bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-750">
+            ⚠️ x=c / y=d 特殊 (31問)
+          </button>
+          <button onclick="app.setMode('integers')" id="mode-integers" class="px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-medium transition bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-750">
+            🌱 整数傾き
+          </button>
+          <button onclick="app.setMode('fractions')" id="mode-fractions" class="px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-medium transition bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-750">
+            ⚡ 分数傾き
+          </button>
+        </div>
+
+        <!-- Stats Counter -->
+        <div class="flex items-center gap-2.5 text-xs">
+          <!-- Streak -->
+          <div class="flex items-center gap-1 bg-slate-950/70 border border-slate-800 px-2.5 py-0.5 rounded-lg">
+            <span class="text-amber-400 font-bold">🔥 連勝:</span>
+            <span id="streakCount" class="font-mono text-sm sm:text-base font-extrabold text-amber-300">0</span>
+            <span class="text-slate-500 font-mono text-[11px]">/ 目標</span>
+            <select id="targetStreakSelect" onchange="app.setTargetStreak(this.value)" class="bg-slate-800 text-amber-400 font-bold text-[11px] rounded px-1 py-0.2 border border-slate-700 cursor-pointer">
+              <option value="5">5問</option>
+              <option value="10" selected>10問</option>
+              <option value="15">15問</option>
+              <option value="0">なし</option>
+            </select>
+          </div>
+          <!-- Accuracy -->
+          <div class="flex items-center gap-1 bg-slate-950/70 border border-slate-800 px-2.5 py-0.5 rounded-lg">
+            <span class="text-slate-400">正解率:</span>
+            <span id="accuracyRate" class="font-mono text-sm sm:text-base font-bold text-emerald-400">0%</span>
+            <span id="scoreFraction" class="text-slate-500 font-mono text-[10px]">(0/0)</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Question & Workspace Card -->
+    <div class="flex-1 min-h-0 bg-gradient-to-b from-slate-900/95 to-slate-900/80 border border-slate-800 rounded-2xl p-2.5 sm:p-3.5 shadow-xl relative flex flex-col overflow-hidden">
+      <!-- Problem Header -->
+      <div class="flex items-center justify-between border-b border-slate-800/80 pb-1.5 mb-2 flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <span id="problemBadge" class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-xs px-2 py-0.5 rounded-md">
+            第 1 問
+          </span>
+          <span id="problemTag" class="text-xs text-slate-400">
+            2点を通る直線の方程式
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Toggle Graph View -->
+          <button id="toggleGraphBtn" onclick="app.toggleGraph()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700 text-xs flex items-center gap-1.5 transition">
+            <span>📈</span>
+            <span id="graphToggleText">グラフを表示</span>
+          </button>
+          <!-- Auto Advance -->
+          <button id="autoAdvanceBtn" onclick="app.toggleAutoAdvance()" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 border border-slate-700 text-xs flex items-center gap-1 transition">
+            <span>⏩ 自動:</span>
+            <span id="autoAdvanceStatus" class="font-bold text-slate-400">OFF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2-Column Split: Left (Points + Graph) vs Right (Choices + Explanation) -->
+      <div class="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-3.5 items-stretch overflow-hidden">
+        
+        <!-- Left Column: Problem description, 2 Points, and optional Graph -->
+        <div class="md:col-span-5 flex flex-col justify-center items-center bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 relative overflow-hidden text-center">
+          <div class="text-slate-400 text-xs sm:text-sm mb-1.5 font-medium flex-shrink-0">
+            次の2点を通る直線の方程式を求めよ。
+          </div>
+
+          <!-- Coordinates Container -->
+          <div class="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-4 my-1 bg-slate-900/90 border border-slate-750 px-4 py-2.5 rounded-xl shadow-inner flex-shrink-0">
+            <div class="flex items-center gap-1.5">
+              <span class="w-6 h-6 rounded-md bg-rose-500/20 border border-rose-500/40 text-rose-300 font-extrabold flex items-center justify-center text-xs shadow-sm">
+                A
+              </span>
+              <span id="coordA" class="font-mono text-xl sm:text-2xl font-extrabold text-white tracking-wide">
+                (2, 3)
+              </span>
+            </div>
+
+            <span class="text-slate-500 text-lg font-bold">,</span>
+
+            <div class="flex items-center gap-1.5">
+              <span class="w-6 h-6 rounded-md bg-sky-500/20 border border-sky-500/40 text-sky-300 font-extrabold flex items-center justify-center text-xs shadow-sm">
+                B
+              </span>
+              <span id="coordB" class="font-mono text-xl sm:text-2xl font-extrabold text-white tracking-wide">
+                (-1, 6)
+              </span>
+            </div>
+          </div>
+
+          <!-- Collapsible Graph View (Canvas) -->
+          <div id="graphContainer" class="hidden mt-2 w-full flex flex-col items-center flex-1 min-h-0 justify-center">
+            <div class="text-[10px] text-slate-400 mb-0.5 flex items-center justify-between w-full max-w-[280px] px-1">
+              <span>方眼プレビュー</span>
+              <span class="text-emerald-400">赤: A / 青: B</span>
+            </div>
+            <canvas id="pointCanvas" width="300" height="175" class="rounded-lg border border-slate-800 bg-slate-900 max-h-[175px] w-auto shadow"></canvas>
+          </div>
+        </div>
+
+        <!-- Right Column: 4 Choices + Explanation Box -->
+        <div class="md:col-span-7 flex flex-col justify-start min-h-0 overflow-hidden">
+          
+          <!-- Choices Header -->
+          <div class="text-xs font-semibold text-slate-400 mb-1.5 flex items-center justify-between flex-shrink-0">
+            <span>直線の式を選択：</span>
+            <span class="text-slate-500 text-[11px] hidden sm:inline">キー [1] [2] [3] [4] 対応</span>
+          </div>
+
+          <!-- 4 Choices Grid -->
+          <div id="choicesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-shrink-0">
+            <!-- Button 1 -->
+            <button id="choice-0" onclick="app.selectChoice(0)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">1</span>
+                <span id="formula-0" class="text-base sm:text-lg font-bold text-white">$y = -x + 5$</span>
+              </div>
+              <div id="icon-0" class="text-lg opacity-0 transition"></div>
+            </button>
+
+            <!-- Button 2 -->
+            <button id="choice-1" onclick="app.selectChoice(1)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">2</span>
+                <span id="formula-1" class="text-base sm:text-lg font-bold text-white">$y = x + 1$</span>
+              </div>
+              <div id="icon-1" class="text-lg opacity-0 transition"></div>
+            </button>
+
+            <!-- Button 3 -->
+            <button id="choice-2" onclick="app.selectChoice(2)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">3</span>
+                <span id="formula-2" class="text-base sm:text-lg font-bold text-white">$y = -x - 5$</span>
+              </div>
+              <div id="icon-2" class="text-lg opacity-0 transition"></div>
+            </button>
+
+            <!-- Button 4 -->
+            <button id="choice-3" onclick="app.selectChoice(3)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">4</span>
+                <span id="formula-3" class="text-base sm:text-lg font-bold text-white">$y = -3x + 9$</span>
+              </div>
+              <div id="icon-3" class="text-lg opacity-0 transition"></div>
+            </button>
+          </div>
+
+          <!-- Explanation & Result Drawer (Scrollable internally if needed) -->
+          <div id="resultBox" class="hidden flex-1 min-h-0 mt-2 bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 sm:p-3 flex flex-col overflow-hidden animate-pop">
+            <!-- Result Top Bar: Badge, Formula, Next Button -->
+            <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2 mb-2 flex-shrink-0">
+              <div class="flex items-center gap-2">
+                <div id="resultIconBadge" class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-extrabold text-base flex items-center justify-center border border-emerald-500/30">
+                  ◯
+                </div>
+                <div>
+                  <div id="resultTitle" class="font-extrabold text-sm sm:text-base text-emerald-400">
+                    正解！素晴らしい！
+                  </div>
+                  <div class="text-[11px] text-slate-400" id="resultSubtitle">
+                    正解の式：<span id="correctFormulaText" class="font-bold text-white font-mono">y = -x + 5</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Next Button -->
+              <button id="nextBtn" onclick="app.nextProblem()" class="px-4 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs shadow-md shadow-emerald-600/30 flex items-center gap-1.5 transition transform active:scale-95 flex-shrink-0">
+                <span>次の問題</span>
+                <span class="text-[10px] opacity-75 hidden sm:inline">[Enter]</span>
+                <span>➔</span>
+              </button>
+            </div>
+
+            <!-- Step-by-Step Math Walkthrough (Internal Scrollable) -->
+            <div class="flex-1 min-h-0 overflow-y-auto custom-scroll pr-1 space-y-1.5 text-xs sm:text-sm">
+              <div class="font-bold text-slate-300 flex items-center gap-1 text-[11px] sm:text-xs">
+                <span>💡</span>
+                <span>解き方のステップ解説：</span>
+              </div>
+
+              <div id="explanationSteps" class="bg-slate-900/90 border border-slate-800 rounded-lg p-2.5 space-y-2 text-slate-200">
+                <!-- Dynamically populated math steps -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Celebration Modal (Goal Streak Reached) -->
+    <div id="goalModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-slate-900 border-2 border-amber-400/80 rounded-2xl p-5 sm:p-6 max-w-sm w-full text-center relative shadow-2xl shadow-amber-500/20 animate-pop">
+        <div id="confettiContainer" class="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl"></div>
+        <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 font-extrabold text-2xl flex items-center justify-center mx-auto mb-3">
+          🏆
+        </div>
+        <h2 class="text-xl font-black text-amber-300 mb-1.5">目標達成おめでとう！</h2>
+        <p id="goalModalText" class="text-slate-300 text-xs sm:text-sm mb-4">
+          見事、連続正解目標を達成しました！2点を通る直線の式の求め方は完全にマスターできています。
+        </p>
+        <button onclick="app.closeGoalModal()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition">
+          特訓を続ける
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 py-1.5 text-center text-[11px] text-slate-500 flex-shrink-0">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-0.5">
+      <span>一次関数マスターシリーズ &copy; 2026</span>
+      <span>キー操作: [1-4] 選択 | [Enter/Space] 次へ | [G] グラフ | [S] 音声 | [F] 全画面</span>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    /* --- Web Audio Synthesizer --- */
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playCorrect() {
+        if (!this.enabled) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        // C5 -> G5 chord sound
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+        osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+        
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      }
+      playWrong() {
+        if (!this.enabled) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(196, now); // G3
+        osc.frequency.setValueAtTime(185, now + 0.15); // F#3
+        
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+      playFanfare() {
+        if (!this.enabled) return;
+        this.init();
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          const start = this.ctx.currentTime + idx * 0.12;
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, start);
+          gain.gain.setValueAtTime(0.25, start);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.5);
+          osc.start(start);
+          osc.stop(start + 0.5);
+        });
+      }
+    }
+
+    /* --- Fraction & Math Utilities --- */
+    function gcd(a, b) {
+      a = Math.abs(a);
+      b = Math.abs(b);
+      while (b) {
+        let t = b;
+        b = a % b;
+        a = t;
+      }
+      return a || 1;
+    }
+
+    class Fraction {
+      constructor(num, den = 1) {
+        if (den === 0) throw new Error("Division by zero");
+        if (den < 0) {
+          num = -num;
+          den = -den;
+        }
+        const g = gcd(num, den);
+        this.num = num / g;
+        this.den = den / g;
+      }
+      add(other) {
+        return new Fraction(this.num * other.den + other.num * this.den, this.den * other.den);
+      }
+      sub(other) {
+        return new Fraction(this.num * other.den - other.num * this.den, this.den * other.den);
+      }
+      mul(other) {
+        return new Fraction(this.num * other.num, this.den * other.den);
+      }
+      div(other) {
+        return new Fraction(this.num * other.den, this.den * other.num);
+      }
+      isZero() {
+        return this.num === 0;
+      }
+      isInteger() {
+        return this.den === 1;
+      }
+      toTex(isCoefficient = false) {
+        if (this.num === 0) return "0";
+        if (this.den === 1) {
+          if (isCoefficient) {
+            if (this.num === 1) return "";
+            if (this.num === -1) return "-";
+          }
+          return `${this.num}`;
+        }
+        const sign = this.num < 0 ? "-" : "";
+        const absNum = Math.abs(this.num);
+        return `${sign}\\frac{${absNum}}{${this.den}}`;
+      }
+      toSignedTex() {
+        if (this.num === 0) return "";
+        if (this.num > 0) {
+          return "+ " + this.toTex();
+        } else {
+          return "- " + new Fraction(Math.abs(this.num), this.den).toTex();
+        }
+      }
+      toString() {
+        if (this.den === 1) return `${this.num}`;
+        return `${this.num}/${this.den}`;
+      }
+    }
+
+    /* --- Master Problem Dataset (Total: 38 Problems) --- */
+    // Textbook 8 problems + 30 added problems (14 of x=const, 14 of y=const, 2 linear)
+    const PRESET_PROBLEMS = [
+      // --- Original 8 Problems from Textbook Photo ---
+      { p1: [2, 3], p2: [-1, 6], note: "問題14 (1)" },
+      { p1: [3, 0], p2: [9, 2], note: "問題14 (2)" },
+      { p1: [7, -2], p2: [7, 5], note: "問題14 (3)" },
+      { p1: [2, 0], p2: [0, 4], note: "問題14 (4)" },
+      { p1: [-4, -8], p2: [1, -8], note: "問題14 (5)" },
+      { p1: [-3, 4], p2: [-3, -2], note: "問題14 (6)" },
+      { p1: [10, -5], p2: [-6, 7], note: "問題14 (7)" },
+      { p1: [0, -2], p2: [5, 0], note: "問題14 (8)" },
+
+      // --- 14 Additional x = 定数 (Vertical Lines) ---
+      { p1: [1, 3], p2: [1, -4], note: "特訓問題 9" },
+      { p1: [4, 0], p2: [4, 6], note: "特訓問題 10" },
+      { p1: [-2, 5], p2: [-2, -1], note: "特訓問題 11" },
+      { p1: [-5, -3], p2: [-5, 2], note: "特訓問題 12" },
+      { p1: [0, 2], p2: [0, -7], note: "特訓問題 13" },
+      { p1: [3, -6], p2: [3, -2], note: "特訓問題 14" },
+      { p1: [-1, 8], p2: [-1, 0], note: "特訓問題 15" },
+      { p1: [6, 1], p2: [6, 9], note: "特訓問題 16" },
+      { p1: [-4, 7], p2: [-4, -7], note: "特訓問題 17" },
+      { p1: [2, -5], p2: [2, 5], note: "特訓問題 18" },
+      { p1: [5, 0], p2: [5, -3], note: "特訓問題 19" },
+      { p1: [-6, 4], p2: [-6, 10], note: "特訓問題 20" },
+      { p1: [8, -2], p2: [8, 3], note: "特訓問題 21" },
+      { p1: [-8, -4], p2: [-8, 6], note: "特訓問題 22" },
+
+      // --- 14 Additional y = 定数 (Horizontal Lines) ---
+      { p1: [3, 2], p2: [-4, 2], note: "特訓問題 23" },
+      { p1: [1, -3], p2: [6, -3], note: "特訓問題 24" },
+      { p1: [5, 0], p2: [-2, 0], note: "特訓問題 25" },
+      { p1: [0, 5], p2: [7, 5], note: "特訓問題 26" },
+      { p1: [-3, -1], p2: [4, -1], note: "特訓問題 27" },
+      { p1: [-6, 4], p2: [-1, 4], note: "特訓問題 28" },
+      { p1: [2, -5], p2: [8, -5], note: "特訓問題 29" },
+      { p1: [-2, 6], p2: [5, 6], note: "特訓問題 30" },
+      { p1: [-7, -4], p2: [3, -4], note: "特訓問題 31" },
+      { p1: [4, 3], p2: [-4, 3], note: "特訓問題 32" },
+      { p1: [0, -2], p2: [-5, -2], note: "特訓問題 33" },
+      { p1: [3, 7], p2: [-2, 7], note: "特訓問題 34" },
+      { p1: [1, -6], p2: [-6, -6], note: "特訓問題 35" },
+      { p1: [-5, 8], p2: [2, 8], note: "特訓問題 36" },
+
+      // --- 2 Additional Linear Function Problems ---
+      { p1: [1, -1], p2: [4, 5], note: "特訓問題 37" },
+      { p1: [-3, 3], p2: [3, -1], note: "特訓問題 38" }
+    ];
+
+    // Filtered subset for special lines (x=c and y=d combined, 31 problems)
+    const SPECIAL_PROBLEMS = PRESET_PROBLEMS.filter(p => p.p1[0] === p.p2[0] || p.p1[1] === p.p2[1]);
+
+    /* --- Main App Class --- */
+    class TwoPointsApp {
+      constructor() {
+        this.sound = new SoundEngine();
+        this.mode = 'all'; // 'all', 'preset', 'special', 'integers', 'fractions'
+        this.presetIndex = 0;
+        this.specialIndex = 0;
+        this.streak = 0;
+        this.targetStreak = 10;
+        this.totalCount = 0;
+        this.correctCount = 0;
+        this.showGraph = false;
+        this.autoAdvance = false;
+        this.currentProblem = null;
+        this.answered = false;
+        this.autoTimer = null;
+
+        this.initEventListeners();
+      }
+
+      initEventListeners() {
+        window.addEventListener('keydown', (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+          
+          if (['1', '2', '3', '4'].includes(e.key)) {
+            const idx = parseInt(e.key) - 1;
+            if (!this.answered) {
+              this.selectChoice(idx);
+            }
+          } else if (e.key === ' ' || e.key === 'Enter') {
+            if (this.answered) {
+              e.preventDefault();
+              this.nextProblem();
+            }
+          } else if (e.key.toLowerCase() === 'g') {
+            this.toggleGraph();
+          } else if (e.key.toLowerCase() === 's') {
+            this.toggleSound();
+          } else if (e.key.toLowerCase() === 'f') {
+            this.toggleFullscreen();
+          }
+        });
+      }
+
+      setMode(mode) {
+        this.mode = mode;
+        const allModes = ['all', 'preset', 'special', 'integers', 'fractions'];
+        allModes.forEach(m => {
+          const btn = document.getElementById(`mode-${m}`);
+          if (btn) {
+            if (m === mode) {
+              btn.className = "px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-bold transition bg-emerald-600 text-white shadow-sm";
+            } else {
+              btn.className = "px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-medium transition bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-750";
+            }
+          }
+        });
+        if (mode === 'preset') {
+          this.presetIndex = 0;
+        } else if (mode === 'special') {
+          this.specialIndex = 0;
+        }
+        this.generateProblem();
+      }
+
+      setTargetStreak(val) {
+        this.targetStreak = parseInt(val, 10);
+      }
+
+      toggleGraph() {
+        this.showGraph = !this.showGraph;
+        const container = document.getElementById('graphContainer');
+        const text = document.getElementById('graphToggleText');
+        if (this.showGraph) {
+          container.classList.remove('hidden');
+          text.innerText = "グラフを隠す";
+          this.drawGraph();
+        } else {
+          container.classList.add('hidden');
+          text.innerText = "グラフを表示";
+        }
+      }
+
+      toggleSound() {
+        this.sound.enabled = !this.sound.enabled;
+        const icon = document.getElementById('soundIcon');
+        const text = document.getElementById('soundText');
+        if (this.sound.enabled) {
+          icon.innerText = "🔊";
+          text.innerText = "音ON";
+          this.sound.playCorrect();
+        } else {
+          icon.innerText = "🔇";
+          text.innerText = "音OFF";
+        }
+      }
+
+      toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+          document.getElementById('fullscreenText').innerText = "解除";
+        } else {
+          document.exitFullscreen().catch(() => {});
+          document.getElementById('fullscreenText').innerText = "全画面";
+        }
+      }
+
+      toggleAutoAdvance() {
+        this.autoAdvance = !this.autoAdvance;
+        const status = document.getElementById('autoAdvanceStatus');
+        const btn = document.getElementById('autoAdvanceBtn');
+        if (this.autoAdvance) {
+          status.innerText = "ON";
+          status.className = "font-bold text-emerald-400";
+          btn.className = "px-2.5 py-1 rounded-lg bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 text-xs flex items-center gap-1 transition";
+        } else {
+          status.innerText = "OFF";
+          status.className = "font-bold text-slate-400";
+          btn.className = "px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 border border-slate-700 text-xs flex items-center gap-1 transition";
+        }
+      }
+
+      // Generate a formula representation object
+      createEquation(p1, p2) {
+        const [x1, y1] = p1;
+        const [x2, y2] = p2;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+
+        if (dx === 0) {
+          // Vertical line: x = x1
+          return {
+            type: 'vertical',
+            c: x1,
+            tex: `x = ${x1}`,
+            plain: `x = ${x1}`,
+            p1, p2
+          };
+        }
+
+        if (dy === 0) {
+          // Horizontal line: y = y1
+          return {
+            type: 'horizontal',
+            c: y1,
+            tex: `y = ${y1}`,
+            plain: `y = ${y1}`,
+            p1, p2
+          };
+        }
+
+        const slope = new Fraction(dy, dx);
+        // b = y1 - a * x1
+        const intercept = new Fraction(y1).sub(slope.mul(new Fraction(x1)));
+
+        let slopeTex = slope.toTex(true);
+        let interceptTex = intercept.toSignedTex();
+        let tex = `y = ${slopeTex}x`;
+        if (interceptTex) {
+          tex += ` ${interceptTex}`;
+        }
+
+        return {
+          type: 'linear',
+          slope,
+          intercept,
+          tex,
+          plain: `y = ${slope.toString()}x + ${intercept.toString()}`,
+          p1, p2
+        };
+      }
+
+      // Generate realistic distractor options
+      generateDistractors(correct) {
+        const distractors = new Set();
+        const correctTex = correct.tex;
+
+        if (correct.type === 'vertical') {
+          // Correct: x = c
+          distractors.add(`y = ${correct.c}`);
+          distractors.add(`x = ${-correct.c}`);
+          distractors.add(`y = x + ${correct.c}`);
+          distractors.add(`y = ${correct.c}x`);
+          distractors.add(`x = 0`);
+        } else if (correct.type === 'horizontal') {
+          // Correct: y = c
+          distractors.add(`x = ${correct.c}`);
+          distractors.add(`y = ${-correct.c}`);
+          distractors.add(`y = x ${correct.c >= 0 ? '+ ' + correct.c : '- ' + Math.abs(correct.c)}`);
+          distractors.add(`y = ${correct.c}x`);
+        } else {
+          // Standard linear: y = ax + b
+          const a = correct.slope;
+          const b = correct.intercept;
+
+          // 1. Sign error in slope (-a)
+          const slopeNeg = new Fraction(-a.num, a.den);
+          let tex1 = `y = ${slopeNeg.toTex(true)}x ${b.toSignedTex()}`;
+          distractors.add(tex1.trim());
+
+          // 2. Sign error in intercept (-b)
+          const bNeg = new Fraction(-b.num, b.den);
+          let tex2 = `y = ${a.toTex(true)}x ${bNeg.toSignedTex()}`;
+          distractors.add(tex2.trim());
+
+          // 3. Both sign error (-a, -b)
+          let tex3 = `y = ${slopeNeg.toTex(true)}x ${bNeg.toSignedTex()}`;
+          distractors.add(tex3.trim());
+
+          // 4. Inverted slope (dx / dy instead of dy / dx)
+          if (a.num !== 0) {
+            const slopeInv = new Fraction(a.den, a.num);
+            let tex4 = `y = ${slopeInv.toTex(true)}x ${b.toSignedTex()}`;
+            distractors.add(tex4.trim());
+          }
+
+          // 5. Special line confusion
+          distractors.add(`x = ${correct.p1[0]}`);
+          distractors.add(`y = ${correct.p1[1]}`);
+
+          // 6. Slope without intercept
+          distractors.add(`y = ${a.toTex(true)}x`);
+        }
+
+        // Filter out correct option
+        distractors.delete(correctTex);
+
+        // Pick 3 unique distractors
+        const choices = [correctTex];
+        const distractorArray = Array.from(distractors).filter(t => t !== correctTex);
+        // Shuffle distractors
+        distractorArray.sort(() => Math.random() - 0.5);
+
+        for (let d of distractorArray) {
+          if (choices.length >= 4) break;
+          choices.push(d);
+        }
+
+        // Fallback if needed
+        while (choices.length < 4) {
+          const fake = `y = ${choices.length}x + 1`;
+          if (!choices.includes(fake)) choices.push(fake);
+        }
+
+        // Shuffle choices
+        choices.sort(() => Math.random() - 0.5);
+        return choices;
+      }
+
+      generateProblem() {
+        if (this.autoTimer) clearTimeout(this.autoTimer);
+        this.answered = false;
+
+        let p1, p2, note = "";
+
+        if (this.mode === 'preset') {
+          const prob = PRESET_PROBLEMS[this.presetIndex];
+          p1 = prob.p1;
+          p2 = prob.p2;
+          note = `${prob.note} (${this.presetIndex + 1}/38)`;
+          this.presetIndex = (this.presetIndex + 1) % PRESET_PROBLEMS.length;
+        } else if (this.mode === 'special') {
+          const prob = SPECIAL_PROBLEMS[this.specialIndex];
+          p1 = prob.p1;
+          p2 = prob.p2;
+          note = `特訓問題 (${this.specialIndex + 1}/${SPECIAL_PROBLEMS.length})`;
+          this.specialIndex = (this.specialIndex + 1) % SPECIAL_PROBLEMS.length;
+        } else if (this.mode === 'integers') {
+          // Slope is an integer (-4 .. 4, except 0)
+          const slopes = [-4, -3, -2, -1, 1, 2, 3, 4];
+          const a = slopes[Math.floor(Math.random() * slopes.length)];
+          const b = Math.floor(Math.random() * 15) - 7;
+          const x1 = Math.floor(Math.random() * 9) - 4;
+          let x2 = Math.floor(Math.random() * 9) - 4;
+          if (x2 === x1) x2 = x1 + 2;
+          const y1 = a * x1 + b;
+          const y2 = a * x2 + b;
+          p1 = [x1, y1];
+          p2 = [x2, y2];
+          note = "直線の式を求めよ";
+        } else if (this.mode === 'fractions') {
+          // Fraction slope
+          const dens = [2, 3, 4, 5];
+          const den = dens[Math.floor(Math.random() * dens.length)];
+          let num = Math.floor(Math.random() * 9) - 4;
+          if (num === 0) num = 1;
+          if (gcd(num, den) !== 1) num = 1;
+          const x1 = Math.floor(Math.random() * 9) - 4;
+          let x2 = x1 + den * (Math.random() < 0.5 ? 1 : 2) * (Math.random() < 0.5 ? 1 : -1);
+          const y1 = Math.floor(Math.random() * 9) - 4;
+          const y2 = y1 + num * ((x2 - x1) / den);
+          p1 = [x1, y1];
+          p2 = [x2, y2];
+          note = "直線の式を求めよ";
+        } else {
+          // 'all' Mode: Mix of preset 38 problems + dynamic generation
+          const r = Math.random();
+          if (r < 0.35) {
+            // Pick from the 38 preset problems
+            const prob = PRESET_PROBLEMS[Math.floor(Math.random() * PRESET_PROBLEMS.length)];
+            p1 = prob.p1;
+            p2 = prob.p2;
+            note = prob.note;
+          } else if (r < 0.55) {
+            // Dynamic Special line (x=c or y=d)
+            const isVert = Math.random() < 0.5;
+            const c = Math.floor(Math.random() * 15) - 7;
+            const v1 = Math.floor(Math.random() * 13) - 6;
+            let v2 = Math.floor(Math.random() * 13) - 6;
+            if (v1 === v2) v2 = v1 + 3;
+            p1 = isVert ? [c, v1] : [v1, c];
+            p2 = isVert ? [c, v2] : [v2, c];
+            note = "直線の式を求めよ";
+          } else if (r < 0.80) {
+            // Integers
+            const slopes = [-3, -2, -1, 1, 2, 3];
+            const a = slopes[Math.floor(Math.random() * slopes.length)];
+            const b = Math.floor(Math.random() * 13) - 6;
+            const x1 = Math.floor(Math.random() * 9) - 4;
+            let x2 = Math.floor(Math.random() * 9) - 4;
+            if (x2 === x1) x2 = x1 + 2;
+            p1 = [x1, a * x1 + b];
+            p2 = [x2, a * x2 + b];
+            note = "直線の式を求めよ";
+          } else {
+            // Fractions
+            const den = [2, 3, 4][Math.floor(Math.random() * 3)];
+            let num = [-3, -2, -1, 1, 2, 3][Math.floor(Math.random() * 6)];
+            if (gcd(num, den) !== 1) num = 1;
+            const x1 = Math.floor(Math.random() * 7) - 3;
+            const x2 = x1 + den * (Math.random() < 0.5 ? 1 : -1);
+            const y1 = Math.floor(Math.random() * 7) - 3;
+            const y2 = y1 + num * ((x2 - x1) / den);
+            p1 = [x1, y1];
+            p2 = [x2, y2];
+            note = "直線の式を求めよ";
+          }
+        }
+
+        const eq = this.createEquation(p1, p2);
+        const choices = this.generateDistractors(eq);
+        const correctIndex = choices.indexOf(eq.tex);
+
+        this.currentProblem = {
+          p1, p2, eq, choices, correctIndex, note
+        };
+
+        this.renderProblem();
+        if (this.showGraph) {
+          this.drawGraph();
+        }
+      }
+
+      renderProblem() {
+        const { p1, p2, choices, note } = this.currentProblem;
+        
+        document.getElementById('coordA').innerText = `(${p1[0]}, ${p1[1]})`;
+        document.getElementById('coordB').innerText = `(${p2[0]}, ${p2[1]})`;
+        document.getElementById('problemBadge').innerText = `第 ${this.totalCount + 1} 問`;
+        document.getElementById('problemTag').innerText = note || "2点を通る直線の方程式";
+
+        // Reset Choice Buttons
+        for (let i = 0; i < 4; i++) {
+          const btn = document.getElementById(`choice-${i}`);
+          const formulaSpan = document.getElementById(`formula-${i}`);
+          const iconSpan = document.getElementById(`icon-${i}`);
+
+          btn.disabled = false;
+          btn.className = "choice-btn group relative p-4 rounded-2xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow-md text-left cursor-pointer";
+          iconSpan.className = "text-xl opacity-0 transition";
+          iconSpan.innerHTML = "";
+
+          formulaSpan.innerHTML = `$${choices[i]}$`;
+        }
+
+        // Hide result drawer
+        document.getElementById('resultBox').classList.add('hidden');
+
+        // Re-render KaTeX
+        safeRenderMath(document.getElementById('choicesGrid'));
+      }
+
+      selectChoice(idx) {
+        if (this.answered) return;
+        this.answered = true;
+        this.totalCount++;
+
+        const isCorrect = idx === this.currentProblem.correctIndex;
+        const correctIdx = this.currentProblem.correctIndex;
+
+        // Visual feedback on buttons
+        for (let i = 0; i < 4; i++) {
+          const btn = document.getElementById(`choice-${i}`);
+          const icon = document.getElementById(`icon-${i}`);
+          btn.disabled = true;
+
+          if (i === correctIdx) {
+            btn.className = "choice-btn relative p-4 rounded-2xl bg-emerald-950/70 border-2 border-emerald-500 flex items-center justify-between shadow-lg shadow-emerald-500/10 text-left";
+            icon.className = "text-2xl opacity-100 text-emerald-400 font-black";
+            icon.innerHTML = "◯";
+          } else if (i === idx && !isCorrect) {
+            btn.className = "choice-btn relative p-4 rounded-2xl bg-rose-950/70 border-2 border-rose-500 flex items-center justify-between shadow-lg shadow-rose-500/10 text-left";
+            icon.className = "text-2xl opacity-100 text-rose-400 font-black";
+            icon.innerHTML = "✕";
+          } else {
+            btn.className = "choice-btn relative p-4 rounded-2xl bg-slate-900/40 border-2 border-slate-800/40 opacity-50 flex items-center justify-between text-left";
+          }
+        }
+
+        // Stats update
+        if (isCorrect) {
+          this.correctCount++;
+          this.streak++;
+          this.sound.playCorrect();
+          document.getElementById('resultIconBadge').className = "w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 font-extrabold text-lg flex items-center justify-center border border-emerald-500/30";
+          document.getElementById('resultIconBadge').innerHTML = "◯";
+          document.getElementById('resultTitle').className = "font-extrabold text-base sm:text-lg text-emerald-400";
+          document.getElementById('resultTitle').innerText = "正解！ 素晴らしい！";
+        } else {
+          this.streak = 0;
+          this.sound.playWrong();
+          document.getElementById('resultIconBadge').className = "w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 font-extrabold text-lg flex items-center justify-center border border-rose-500/30";
+          document.getElementById('resultIconBadge').innerHTML = "✕";
+          document.getElementById('resultTitle').className = "font-extrabold text-base sm:text-lg text-rose-400";
+          document.getElementById('resultTitle').innerText = "おしい！ 復習しよう！";
+        }
+
+        this.updateStatsDisplay();
+        this.renderExplanation();
+
+        // Reveal answer line on graph if open
+        if (this.showGraph) {
+          this.drawGraph();
+        }
+
+        // Show result box
+        const resultBox = document.getElementById('resultBox');
+        resultBox.classList.remove('hidden');
+
+        // Check Goal Streak
+        if (this.targetStreak > 0 && this.streak === this.targetStreak && isCorrect) {
+          this.sound.playFanfare();
+          this.showGoalCelebration();
+        }
+
+        // Auto Advance
+        if (this.autoAdvance) {
+          this.autoTimer = setTimeout(() => {
+            this.nextProblem();
+          }, isCorrect ? 1600 : 3500);
+        }
+      }
+
+      renderExplanation() {
+        const { p1, p2, eq } = this.currentProblem;
+        const [x1, y1] = p1;
+        const [x2, y2] = p2;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+
+        document.getElementById('correctFormulaText').innerText = eq.plain;
+        const stepsContainer = document.getElementById('explanationSteps');
+
+        let html = '';
+
+        if (eq.type === 'vertical') {
+          html = `
+            <div class="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              <span class="font-bold text-amber-400">Point:</span>
+              2つの点の $x$ 座標を確認すると、ともに <span class="font-bold text-white">$x = ${x1}$</span> です。
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              $y$ の値がどんな値であっても、$x$ は常に ${x1} となるため、この直線の方程式は
+              <div class="mt-1 text-center font-extrabold text-lg text-emerald-300">
+                $$x = ${x1}$$
+              </div>
+              となります（$y$軸に平行な垂直な直線）。
+            </div>
+          `;
+        } else if (eq.type === 'horizontal') {
+          html = `
+            <div class="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              <span class="font-bold text-amber-400">Point:</span>
+              2つの点の $y$ 座標を確認すると、ともに <span class="font-bold text-white">$y = ${y1}$</span> です。
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              傾き $a = \\frac{${y2} - (${y1})}{${x2} - (${x1})} = 0$ となり、変化の割合が0です。
+              したがって、この直線の方程式は
+              <div class="mt-1 text-center font-extrabold text-lg text-emerald-300">
+                $$y = ${y1}$$
+              </div>
+              となります（$x$軸に平行な水平な直線）。
+            </div>
+          `;
+        } else {
+          // Standard linear equation
+          const slope = eq.slope;
+          const intercept = eq.intercept;
+
+          const dxSign = x1 < 0 ? `(${x1})` : `${x1}`;
+          const dySign = y1 < 0 ? `(${y1})` : `${y1}`;
+          
+          html = `
+            <div class="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              <span class="font-bold text-sky-400">Step 1: 傾き（変化の割合 $a$）を求める</span>
+              <div class="mt-1">
+                $$a = \\frac{y_2 - y_1}{x_2 - x_1} = \\frac{${y2} - ${dySign}}{${x2} - ${dxSign}} = \\frac{${dy}}{${dx}} = ${slope.toTex()}$$
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+              <span class="font-bold text-amber-400">Step 2: 切片 $b$ を求める</span>
+              <div class="mt-1">
+                求める直線を $y = ${slope.toTex(true)}x + b$ とおき、点 $(${x1}, ${y1})$ を代入します。
+                $$${y1} = ${slope.toTex(true)} \\times (${x1}) + b$$
+                $$b = ${y1} - (${slope.mul(new Fraction(x1)).toTex()}) = ${intercept.toTex()}$$
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-lg bg-emerald-950/50 border border-emerald-500/30">
+              <span class="font-bold text-emerald-400">Step 3: 直線の式をまとめる</span>
+              <div class="mt-1 text-center text-lg font-extrabold text-emerald-300">
+                $$${eq.tex}$$
+              </div>
+            </div>
+          `;
+        }
+
+        stepsContainer.innerHTML = html;
+
+        safeRenderMath(stepsContainer);
+      }
+
+      updateStatsDisplay() {
+        document.getElementById('streakCount').innerText = this.streak;
+        const rate = this.totalCount > 0 ? Math.round((this.correctCount / this.totalCount) * 100) : 0;
+        document.getElementById('accuracyRate').innerText = `${rate}%`;
+        document.getElementById('scoreFraction').innerText = `(${this.correctCount}/${this.totalCount})`;
+      }
+
+      nextProblem() {
+        this.generateProblem();
+      }
+
+      showGoalCelebration() {
+        const modal = document.getElementById('goalModal');
+        const container = document.getElementById('confettiContainer');
+        container.innerHTML = '';
+
+        // Generate confetti pieces
+        const colors = ['#f59e0b', '#10b981', '#38bdf8', '#ec4899', '#a855f7'];
+        for (let i = 0; i < 35; i++) {
+          const piece = document.createElement('div');
+          piece.className = 'confetti-piece';
+          piece.style.left = `${Math.random() * 100}%`;
+          piece.style.top = `${Math.random() * 20}%`;
+          piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          piece.style.width = `${Math.random() * 8 + 6}px`;
+          piece.style.height = `${Math.random() * 8 + 6}px`;
+          piece.style.animationDelay = `${Math.random() * 1.5}s`;
+          container.appendChild(piece);
+        }
+
+        document.getElementById('goalModalText').innerText = 
+          `目標の「連続正解 ${this.targetStreak} 問」を達成しました！直線の式を導く力がしっかり身についています！`;
+
+        modal.classList.remove('hidden');
+      }
+
+      closeGoalModal() {
+        document.getElementById('goalModal').classList.add('hidden');
+        this.nextProblem();
+      }
+
+      drawGraph() {
+        const canvas = document.getElementById('pointCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const { p1, p2, eq } = this.currentProblem;
+        const [x1, y1] = p1;
+        const [x2, y2] = p2;
+
+        // Determine coordinate bounds
+        const maxCoord = Math.max(
+          Math.abs(x1), Math.abs(x2),
+          Math.abs(y1), Math.abs(y2),
+          6
+        ) + 2;
+
+        const originX = width / 2;
+        const originY = height / 2;
+        const scale = Math.min((width - 40) / (2 * maxCoord), (height - 40) / (2 * maxCoord));
+
+        const toCanvasX = (x) => originX + x * scale;
+        const toCanvasY = (y) => originY - y * scale;
+
+        // Draw Grid
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1;
+
+        for (let x = -maxCoord; x <= maxCoord; x++) {
+          ctx.beginPath();
+          ctx.moveTo(toCanvasX(x), 0);
+          ctx.lineTo(toCanvasX(x), height);
+          ctx.stroke();
+        }
+        for (let y = -maxCoord; y <= maxCoord; y++) {
+          ctx.beginPath();
+          ctx.moveTo(0, toCanvasY(y));
+          ctx.lineTo(width, toCanvasY(y));
+          ctx.stroke();
+        }
+
+        // Draw Axes
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1.8;
+
+        // X axis
+        ctx.beginPath();
+        ctx.moveTo(0, originY);
+        ctx.lineTo(width, originY);
+        ctx.stroke();
+
+        // Y axis
+        ctx.beginPath();
+        ctx.moveTo(originX, 0);
+        ctx.lineTo(originX, height);
+        ctx.stroke();
+
+        // Axis arrows
+        ctx.fillStyle = '#64748b';
+        ctx.beginPath();
+        ctx.moveTo(width - 5, originY - 4);
+        ctx.lineTo(width, originY);
+        ctx.lineTo(width - 5, originY + 4);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(originX - 4, 5);
+        ctx.lineTo(originX, 0);
+        ctx.lineTo(originX + 4, 5);
+        ctx.fill();
+
+        // Draw Line and Slope Triangle ONLY AFTER ANSWERED
+        if (this.answered) {
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = '#10b981';
+          ctx.beginPath();
+
+          if (eq.type === 'vertical') {
+            const cx = toCanvasX(eq.c);
+            ctx.moveTo(cx, 0);
+            ctx.lineTo(cx, height);
+          } else if (eq.type === 'horizontal') {
+            const cy = toCanvasY(eq.c);
+            ctx.moveTo(0, cy);
+            ctx.lineTo(width, cy);
+          } else {
+            const a = eq.slope.num / eq.slope.den;
+            const b = eq.intercept.num / eq.intercept.den;
+            const xLeft = -maxCoord - 2;
+            const xRight = maxCoord + 2;
+            ctx.moveTo(toCanvasX(xLeft), toCanvasY(a * xLeft + b));
+            ctx.lineTo(toCanvasX(xRight), toCanvasY(a * xRight + b));
+          }
+          ctx.stroke();
+
+          // Draw Slope Triangle (if not vertical or horizontal)
+          if (eq.type === 'linear') {
+            ctx.setLineDash([3, 3]);
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(toCanvasX(x1), toCanvasY(y1));
+            ctx.lineTo(toCanvasX(x2), toCanvasY(y1));
+            ctx.lineTo(toCanvasX(x2), toCanvasY(y2));
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+        }
+
+        // Draw Point A
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(toCanvasX(x1), toCanvasY(y1), 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Label A
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillStyle = '#fda4af';
+        ctx.fillText(`A(${x1}, ${y1})`, toCanvasX(x1) + 8, toCanvasY(y1) - 6);
+
+        // Draw Point B
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(toCanvasX(x2), toCanvasY(y2), 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Label B
+        ctx.fillStyle = '#7dd3fc';
+        ctx.fillText(`B(${x2}, ${y2})`, toCanvasX(x2) + 8, toCanvasY(y2) - 6);
+      }
+    }
+
+    // Helper to safely render KaTeX with retry if still loading CDN
+    function safeRenderMath(element) {
+      if (!element) return;
+      if (window.renderMathInElement) {
+        try {
+          renderMathInElement(element, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false }
+            ],
+            throwOnError: false
+          });
+        } catch (e) {
+          console.error("KaTeX render error:", e);
+        }
+      } else {
+        setTimeout(() => safeRenderMath(element), 150);
+      }
+    }
+
+    // Initialize application when KaTeX & DOM ready
+    let app;
+    window.addEventListener('DOMContentLoaded', () => {
+      app = new TwoPointsApp();
+      // Ensure initial problem generation
+      const checkKaTeXAndStart = () => {
+        if (window.renderMathInElement) {
+          app.generateProblem();
+        } else {
+          setTimeout(checkKaTeXAndStart, 100);
+        }
+      };
+      checkKaTeXAndStart();
+    });
+  </script>
+</body>
+</html>
