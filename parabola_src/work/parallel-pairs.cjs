@@ -1,0 +1,16 @@
+const fs=require('fs');let s=fs.readFileSync('dist/app.js','utf8');
+s=s.replace("const options=shuffled([answer,answer-1,answer+1,answer+(answer<0?-2:2)]);return {a,points,missing,answer,options,answered:false};", "const slope=a*(A+B),wrongX=answer+(answer<0?-1:1),wrongSlope=-slope;const options=shuffled([{x:answer,slope},{x:wrongX,slope},{x:answer,slope:wrongSlope},{x:wrongX,slope:wrongSlope}]);return {a,points,missing,answer,slope,options,answered:false};");
+s=s.replace('？のx座標を4択から選ぶんだ！','x座標と、AB・CDに共通する傾きを選ぼう。');
+s=s.replace("'</em> のx座標は？'", "'</em> のx座標と傾きは？'");
+s=s.replace("'<button class=\"choice parallel-choice\" data-i=\"'+i+'\"><span class=\"key\">'+(i+1)+'</span><span>'+frac(v)+'</span></button>'", "'<button class=\"choice parallel-pair\" data-i=\"'+i+'\"><span class=\"key\">'+(i+1)+'</span><span class=\"combination\"><span>x = '+frac(v.x)+'</span><span class=\"choice-area\">傾き '+frac(v.slope)+'</span></span></button>'");
+s=s.replace('3つのx座標から、残りの1つを求めよう。','残りのx座標と、共通の傾きを求めよう。');
+s=s.replace('<div class="math">u + v = s + t</div>','<div class="math">u + v = s + t</div><div class="math">傾き = a(u + v) = a(s + t)</div>');
+s=s.replace('const good=state.options[i]===state.answer;', 'const correct=v=>v.x===state.answer&&v.slope===state.slope;const good=correct(state.options[i]);');
+s=s.replace('if(state.options[j]===state.answer)', 'if(correct(state.options[j]))');
+s=s.replace("'おしい！ 正解は '+frac(ans)+' だぞ。'", "'おしい！ 緑の組み合わせが正解だぞ。'");
+s=s.replace("+frac(ans)+'</div>';$('score').textContent", "+frac(ans)+'</div><div class=\"calculation\">傾き：'+frac(state.a)+' × ('+term(p.A)+' ＋ '+term(p.B)+') = '+frac(state.slope)+'</div>';$('score').textContent");
+fs.writeFileSync('dist/app.js',s);
+let html=fs.readFileSync('dist/index.html','utf8').replace('残り1点のx座標を答える','残り1点のx座標と傾きを答える');fs.writeFileSync('dist/index.html',html);
+fs.appendFileSync('dist/style.css','\n.parallel-pair{font-size:25px}.parallel-pair .choice-area{font-size:21px}\n');
+html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+fs.readFileSync('dist/style.css','utf8')+'</style>').replace('<script src="app.js"></script>','<script>'+s+'</script>');fs.writeFileSync('outputs/放物線の面積道場.html',html);
+const vm=require('vm'),assert=require('assert');const f=s.slice(s.indexOf('function makeParallelQuestion()'),s.indexOf('function renderParallel()'));const ctx=vm.createContext({ri:(a,b)=>Math.floor(Math.random()*(b-a+1))+a,shuffled:a=>a});vm.runInContext(f,ctx);for(let i=0;i<10000;i++){const q=vm.runInContext('makeParallelQuestion()',ctx);assert.equal(q.slope,q.a*(q.points.C+q.points.D));assert.equal(q.answer,q.points[q.missing]);assert.equal(new Set(q.options.map(v=>JSON.stringify(v))).size,4);assert.equal(q.options.filter(v=>v.x===q.answer&&v.slope===q.slope).length,1);}console.log('10000 combination questions verified.');

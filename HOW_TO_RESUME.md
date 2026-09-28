@@ -1,6 +1,6 @@
 # Antigravity で別のPCから開発を再開する手順書
 
-このアプリ（一次関数の式 特訓アプリ）を、別のPCの Antigravity で引き続き開発するための手順です。
+このプロジェクト（中学数学 関数マスター道場 / henkanowariai）を、別のPCの Antigravity で引き続き開発するための手順です。
 
 ---
 
