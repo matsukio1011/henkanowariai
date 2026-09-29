@@ -243,87 +243,122 @@
       <!-- 2-Column Split: Left (Points + Graph) vs Right (Choices + Explanation) -->
       <div class="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-3.5 items-stretch overflow-hidden">
         
-        <!-- Left Column: Problem description, 2 Points, and optional Graph -->
+        <!-- Left Column: Problem description, 2 Points, and optional Graph (Step 1) OR Big Graph (Step 2) -->
         <div class="md:col-span-5 flex flex-col justify-center items-center bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 relative overflow-hidden text-center">
-          <div class="text-slate-400 text-xs sm:text-sm mb-1.5 font-medium flex-shrink-0">
-            次の2点を通る直線の方程式を求めよ。
-          </div>
-
-          <!-- Coordinates Container -->
-          <div class="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-4 my-1 bg-slate-900/90 border border-slate-750 px-4 py-2.5 rounded-xl shadow-inner flex-shrink-0">
-            <div class="flex items-center gap-1.5">
-              <span class="w-6 h-6 rounded-md bg-rose-500/20 border border-rose-500/40 text-rose-300 font-extrabold flex items-center justify-center text-xs shadow-sm">
-                A
-              </span>
-              <span id="coordA" class="font-mono text-xl sm:text-2xl font-extrabold text-white tracking-wide">
-                (2, 3)
-              </span>
+          
+          <!-- Step 1 Container -->
+          <div id="step1Container" class="w-full flex flex-col justify-center items-center flex-1 min-h-0">
+            <div class="text-slate-400 text-xs sm:text-sm mb-1.5 font-medium flex-shrink-0">
+              次の2点を通る直線の方程式を求めよ。
             </div>
 
-            <span class="text-slate-500 text-lg font-bold">,</span>
+            <!-- Coordinates Container -->
+            <div class="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-4 my-1 bg-slate-900/90 border border-slate-750 px-4 py-2.5 rounded-xl shadow-inner flex-shrink-0">
+              <div class="flex items-center gap-1.5">
+                <span class="w-6 h-6 rounded-md bg-rose-500/20 border border-rose-500/40 text-rose-300 font-extrabold flex items-center justify-center text-xs shadow-sm">
+                  A
+                </span>
+                <span id="coordA" class="font-mono text-xl sm:text-2xl font-extrabold text-white tracking-wide">
+                  (2, 3)
+                </span>
+              </div>
 
-            <div class="flex items-center gap-1.5">
-              <span class="w-6 h-6 rounded-md bg-sky-500/20 border border-sky-500/40 text-sky-300 font-extrabold flex items-center justify-center text-xs shadow-sm">
-                B
-              </span>
-              <span id="coordB" class="font-mono text-xl sm:text-2xl font-extrabold text-white tracking-wide">
-                (-1, 6)
-              </span>
+              <span class="text-slate-500 text-lg font-bold">,</span>
+
+              <div class="flex items-center gap-1.5">
+                <span class="w-6 h-6 rounded-md bg-sky-500/20 border border-sky-500/40 text-sky-300 font-extrabold flex items-center justify-center text-xs shadow-sm">
+                  B
+                </span>
+                <span id="coordB" class="font-mono text-xl sm:text-2xl font-extrabold text-white tracking-wide">
+                  (-1, 6)
+                </span>
+              </div>
+            </div>
+
+            <!-- Collapsible Graph View (Canvas) -->
+            <div id="graphContainer" class="hidden mt-2 w-full flex flex-col items-center flex-1 min-h-0 justify-center">
+              <div class="text-[10px] text-slate-400 mb-0.5 flex items-center justify-between w-full max-w-[280px] px-1">
+                <span>方眼プレビュー</span>
+                <span class="text-emerald-400">赤: A / 青: B</span>
+              </div>
+              <canvas id="pointCanvas" width="300" height="175" class="rounded-lg border border-slate-800 bg-slate-900 max-h-[175px] w-auto shadow"></canvas>
             </div>
           </div>
 
-          <!-- Collapsible Graph View (Canvas) -->
-          <div id="graphContainer" class="hidden mt-2 w-full flex flex-col items-center flex-1 min-h-0 justify-center">
-            <div class="text-[10px] text-slate-400 mb-0.5 flex items-center justify-between w-full max-w-[280px] px-1">
-              <span>方眼プレビュー</span>
-              <span class="text-emerald-400">赤: A / 青: B</span>
+          <!-- Step 2 Container (Big Graph Area) -->
+          <div id="step2Container" class="hidden w-full h-full flex flex-col items-stretch justify-between flex-1 min-h-0 animate-pop">
+            <!-- Header for Step 2 -->
+            <div class="flex items-center justify-between px-1 mb-1 text-left flex-shrink-0">
+              <div class="flex items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-bold">
+                  Step 2
+                </span>
+                <span class="text-xs font-bold text-white">4本の直線の式を連続判定！</span>
+              </div>
+              <div class="text-[10px] text-slate-400 font-mono">
+                <span class="text-rose-400 font-bold">A</span><span id="step2CoordA"></span> / <span class="text-sky-400 font-bold">B</span><span id="step2CoordB"></span>
+              </div>
             </div>
-            <canvas id="pointCanvas" width="300" height="175" class="rounded-lg border border-slate-800 bg-slate-900 max-h-[175px] w-auto shadow"></canvas>
+
+            <!-- Full-space Big Canvas -->
+            <div class="relative w-full flex-1 min-h-0 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 overflow-hidden shadow-inner">
+              <canvas id="bigGraphCanvas" width="600" height="420" class="w-full h-full object-contain"></canvas>
+            </div>
           </div>
+
         </div>
 
         <!-- Right Column: 4 Choices + Explanation Box -->
         <div class="md:col-span-7 flex flex-col justify-start min-h-0 overflow-hidden">
           
           <!-- Choices Header -->
-          <div class="text-xs font-semibold text-slate-400 mb-1.5 flex items-center justify-between flex-shrink-0">
-            <span>直線の式を選択：</span>
-            <span class="text-slate-500 text-[11px] hidden sm:inline">キー [1] [2] [3] [4] 対応</span>
+          <div class="flex items-center justify-between mb-1.5 flex-shrink-0">
+            <div class="flex items-center gap-2">
+              <span id="choicesHeaderTitle" class="text-xs font-semibold text-slate-300">直線の式を選択：</span>
+              <!-- Step 2 Progress Badges (① ② ③ ④) -->
+              <div id="step2ProgressDots" class="hidden flex items-center gap-1">
+                <span id="dot-0" class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border border-slate-700 bg-slate-800 text-slate-400">①</span>
+                <span id="dot-1" class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border border-slate-700 bg-slate-800 text-slate-400">②</span>
+                <span id="dot-2" class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border border-slate-700 bg-slate-800 text-slate-400">③</span>
+                <span id="dot-3" class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border border-slate-700 bg-slate-800 text-slate-400">④</span>
+              </div>
+            </div>
+            <span id="choicesHeaderHint" class="text-slate-500 text-[11px] hidden sm:inline">キー [1] [2] [3] [4] 対応</span>
           </div>
 
           <!-- 4 Choices Grid -->
           <div id="choicesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-shrink-0">
             <!-- Button 1 -->
-            <button id="choice-0" onclick="app.selectChoice(0)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
+            <button id="choice-0" onclick="app.handleChoiceClick(0)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
               <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">1</span>
+                <span id="badge-0" class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">1</span>
                 <span id="formula-0" class="text-base sm:text-lg font-bold text-white">$y = -x + 5$</span>
               </div>
               <div id="icon-0" class="text-lg opacity-0 transition"></div>
             </button>
 
             <!-- Button 2 -->
-            <button id="choice-1" onclick="app.selectChoice(1)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
+            <button id="choice-1" onclick="app.handleChoiceClick(1)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
               <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">2</span>
+                <span id="badge-1" class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">2</span>
                 <span id="formula-1" class="text-base sm:text-lg font-bold text-white">$y = x + 1$</span>
               </div>
               <div id="icon-1" class="text-lg opacity-0 transition"></div>
             </button>
 
             <!-- Button 3 -->
-            <button id="choice-2" onclick="app.selectChoice(2)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
+            <button id="choice-2" onclick="app.handleChoiceClick(2)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
               <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">3</span>
+                <span id="badge-2" class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">3</span>
                 <span id="formula-2" class="text-base sm:text-lg font-bold text-white">$y = -x - 5$</span>
               </div>
               <div id="icon-2" class="text-lg opacity-0 transition"></div>
             </button>
 
             <!-- Button 4 -->
-            <button id="choice-3" onclick="app.selectChoice(3)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
+            <button id="choice-3" onclick="app.handleChoiceClick(3)" class="choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left">
               <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">4</span>
+                <span id="badge-3" class="w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition">4</span>
                 <span id="formula-3" class="text-base sm:text-lg font-bold text-white">$y = -3x + 9$</span>
               </div>
               <div id="icon-3" class="text-lg opacity-0 transition"></div>
@@ -615,6 +650,16 @@
         this.answered = false;
         this.autoTimer = null;
 
+        // Step 2 (Sequential 4-line formula selection) properties
+        this.step = 1; // 1: 最初の式選択, 2: グラフ4直線の連続選択
+        this.subStep = 0; // 0..3 (①..④)
+        this.subStepAnswered = false;
+        this.subStepTimer = null;
+        this.formulaChoices = [];
+        this.lineColors = ['#38bdf8', '#34d399', '#fbbf24', '#f472b6']; // ①スカイ, ②エメラルド, ③アンバー, ④ピンク
+        this.lineColorNames = ['スカイブルー', 'エメラルド', 'アンバー', 'ローズピンク'];
+        this.lineLabels = ['①', '②', '③', '④'];
+
         this.initEventListeners();
       }
 
@@ -624,11 +669,9 @@
           
           if (['1', '2', '3', '4'].includes(e.key)) {
             const idx = parseInt(e.key) - 1;
-            if (!this.answered) {
-              this.selectChoice(idx);
-            }
+            this.handleChoiceClick(idx);
           } else if (e.key === ' ' || e.key === 'Enter') {
-            if (this.answered) {
+            if (this.answered && this.step === 1) {
               e.preventDefault();
               this.nextProblem();
             }
@@ -640,6 +683,23 @@
             this.toggleFullscreen();
           }
         });
+      }
+
+      handleChoiceClick(idx) {
+        if (this.step === 1) {
+          if (!this.answered) {
+            this.selectChoice(idx);
+          }
+        } else if (this.step === 2) {
+          if (!this.subStepAnswered) {
+            this.selectSubStepChoice(idx);
+          }
+        }
+      }
+
+      isSpecialLine() {
+        return this.currentProblem && this.currentProblem.eq && 
+          (this.currentProblem.eq.type === 'vertical' || this.currentProblem.eq.type === 'horizontal');
       }
 
       setMode(mode) {
@@ -847,9 +907,41 @@
         return choices;
       }
 
+      // Special line choices generation: generates exactly 4 distinct line objects
+      generateSpecialChoices(correct) {
+        const c = correct.c;
+        const isVert = correct.type === 'vertical';
+        
+        let cOpposite = -c;
+        if (c === 0) cOpposite = 2;
+
+        const items = [
+          { type: isVert ? 'vertical' : 'horizontal', c: c },
+          { type: isVert ? 'horizontal' : 'vertical', c: c },
+          { type: isVert ? 'vertical' : 'horizontal', c: cOpposite },
+          { type: isVert ? 'horizontal' : 'vertical', c: cOpposite }
+        ];
+
+        items.forEach(it => {
+          if (it.type === 'vertical') {
+            it.tex = `x = ${it.c}`;
+            it.plain = `x = ${it.c}`;
+          } else {
+            it.tex = `y = ${it.c}`;
+            it.plain = `y = ${it.c}`;
+          }
+        });
+
+        // Shuffle choices
+        items.sort(() => Math.random() - 0.5);
+        return items;
+      }
+
       generateProblem() {
         if (this.autoTimer) clearTimeout(this.autoTimer);
         this.answered = false;
+        this.step = 1;
+        this.step2Answered = false;
 
         let p1, p2, note = "";
 
@@ -938,11 +1030,20 @@
         }
 
         const eq = this.createEquation(p1, p2);
-        const choices = this.generateDistractors(eq);
+        let choices, choicesData;
+        
+        if (eq.type === 'vertical' || eq.type === 'horizontal') {
+          choicesData = this.generateSpecialChoices(eq);
+          choices = choicesData.map(c => c.tex);
+        } else {
+          choices = this.generateDistractors(eq);
+          choicesData = null;
+        }
+
         const correctIndex = choices.indexOf(eq.tex);
 
         this.currentProblem = {
-          p1, p2, eq, choices, correctIndex, note
+          p1, p2, eq, choices, choicesData, correctIndex, note
         };
 
         this.renderProblem();
@@ -952,6 +1053,19 @@
       }
 
       renderProblem() {
+        this.step = 1;
+        this.answered = false;
+        this.subStep = 0;
+        this.subStepAnswered = false;
+        if (this.subStepTimer) clearTimeout(this.subStepTimer);
+
+        // Reset Containers
+        document.getElementById('step1Container').classList.remove('hidden');
+        document.getElementById('step2Container').classList.add('hidden');
+        document.getElementById('step2ProgressDots').classList.add('hidden');
+        document.getElementById('choicesHeaderTitle').innerText = "直線の式を選択：";
+        document.getElementById('choicesHeaderHint').innerText = "キー [1] [2] [3] [4] 対応";
+
         const { p1, p2, choices, note } = this.currentProblem;
         
         document.getElementById('coordA').innerText = `(${p1[0]}, ${p1[1]})`;
@@ -962,12 +1076,20 @@
         // Reset Choice Buttons
         for (let i = 0; i < 4; i++) {
           const btn = document.getElementById(`choice-${i}`);
+          const badgeSpan = document.getElementById(`badge-${i}`);
           const formulaSpan = document.getElementById(`formula-${i}`);
           const iconSpan = document.getElementById(`icon-${i}`);
 
           btn.disabled = false;
-          btn.className = "choice-btn group relative p-4 rounded-2xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow-md text-left cursor-pointer";
-          iconSpan.className = "text-xl opacity-0 transition";
+          btn.className = "choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left cursor-pointer";
+          
+          badgeSpan.className = "w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition";
+          badgeSpan.style.backgroundColor = '';
+          badgeSpan.style.color = '';
+          badgeSpan.style.border = '';
+          badgeSpan.innerText = `${i + 1}`;
+
+          iconSpan.className = "text-lg opacity-0 transition";
           iconSpan.innerHTML = "";
 
           formulaSpan.innerHTML = `$${choices[i]}$`;
@@ -982,10 +1104,28 @@
 
       selectChoice(idx) {
         if (this.answered) return;
+        const isCorrect = idx === this.currentProblem.correctIndex;
+        const isSpecial = this.isSpecialLine();
+
+        // If correct and special line (x=c or y=c), proceed to Step 2 (Sequential 4-line formula selection)
+        if (isCorrect && isSpecial) {
+          this.sound.playCorrect();
+          const btn = document.getElementById(`choice-${idx}`);
+          const icon = document.getElementById(`icon-${idx}`);
+          btn.className = "choice-btn relative p-2.5 sm:p-3 rounded-xl bg-emerald-950/70 border-2 border-emerald-500 flex items-center justify-between shadow-lg shadow-emerald-500/10 text-left";
+          icon.className = "text-xl opacity-100 text-emerald-400 font-black";
+          icon.innerHTML = "◯";
+
+          // Short delay then start Step 2
+          setTimeout(() => {
+            this.startStep2();
+          }, 350);
+          return;
+        }
+
+        // Standard flow (either incorrect or not a special line)
         this.answered = true;
         this.totalCount++;
-
-        const isCorrect = idx === this.currentProblem.correctIndex;
         const correctIdx = this.currentProblem.correctIndex;
 
         // Visual feedback on buttons
@@ -995,15 +1135,15 @@
           btn.disabled = true;
 
           if (i === correctIdx) {
-            btn.className = "choice-btn relative p-4 rounded-2xl bg-emerald-950/70 border-2 border-emerald-500 flex items-center justify-between shadow-lg shadow-emerald-500/10 text-left";
-            icon.className = "text-2xl opacity-100 text-emerald-400 font-black";
+            btn.className = "choice-btn relative p-2.5 sm:p-3 rounded-xl bg-emerald-950/70 border-2 border-emerald-500 flex items-center justify-between shadow-lg shadow-emerald-500/10 text-left";
+            icon.className = "text-xl opacity-100 text-emerald-400 font-black";
             icon.innerHTML = "◯";
           } else if (i === idx && !isCorrect) {
-            btn.className = "choice-btn relative p-4 rounded-2xl bg-rose-950/70 border-2 border-rose-500 flex items-center justify-between shadow-lg shadow-rose-500/10 text-left";
-            icon.className = "text-2xl opacity-100 text-rose-400 font-black";
+            btn.className = "choice-btn relative p-2.5 sm:p-3 rounded-xl bg-rose-950/70 border-2 border-rose-500 flex items-center justify-between shadow-lg shadow-rose-500/10 text-left";
+            icon.className = "text-xl opacity-100 text-rose-400 font-black";
             icon.innerHTML = "✕";
           } else {
-            btn.className = "choice-btn relative p-4 rounded-2xl bg-slate-900/40 border-2 border-slate-800/40 opacity-50 flex items-center justify-between text-left";
+            btn.className = "choice-btn relative p-2.5 sm:p-3 rounded-xl bg-slate-900/40 border-2 border-slate-800/40 opacity-50 flex items-center justify-between text-left";
           }
         }
 
@@ -1012,16 +1152,16 @@
           this.correctCount++;
           this.streak++;
           this.sound.playCorrect();
-          document.getElementById('resultIconBadge').className = "w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 font-extrabold text-lg flex items-center justify-center border border-emerald-500/30";
+          document.getElementById('resultIconBadge').className = "w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-extrabold text-base flex items-center justify-center border border-emerald-500/30";
           document.getElementById('resultIconBadge').innerHTML = "◯";
-          document.getElementById('resultTitle').className = "font-extrabold text-base sm:text-lg text-emerald-400";
+          document.getElementById('resultTitle').className = "font-extrabold text-sm sm:text-base text-emerald-400";
           document.getElementById('resultTitle').innerText = "正解！ 素晴らしい！";
         } else {
           this.streak = 0;
           this.sound.playWrong();
-          document.getElementById('resultIconBadge').className = "w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 font-extrabold text-lg flex items-center justify-center border border-rose-500/30";
+          document.getElementById('resultIconBadge').className = "w-7 h-7 rounded-lg bg-rose-500/20 text-rose-400 font-extrabold text-base flex items-center justify-center border border-rose-500/30";
           document.getElementById('resultIconBadge').innerHTML = "✕";
-          document.getElementById('resultTitle').className = "font-extrabold text-base sm:text-lg text-rose-400";
+          document.getElementById('resultTitle').className = "font-extrabold text-sm sm:text-base text-rose-400";
           document.getElementById('resultTitle').innerText = "おしい！ 復習しよう！";
         }
 
@@ -1038,17 +1178,493 @@
         resultBox.classList.remove('hidden');
 
         // Check Goal Streak
+        let reachedGoal = false;
         if (this.targetStreak > 0 && this.streak === this.targetStreak && isCorrect) {
           this.sound.playFanfare();
           this.showGoalCelebration();
+          reachedGoal = true;
         }
 
-        // Auto Advance
-        if (this.autoAdvance) {
+        // Auto Advance: 正解時はどの問題でも自動的に次の問題へ進む（テンポよく約900ms後）
+        if (isCorrect && !reachedGoal) {
           this.autoTimer = setTimeout(() => {
             this.nextProblem();
-          }, isCorrect ? 1600 : 3500);
+          }, 900);
+        } else if (!isCorrect && this.autoAdvance) {
+          // 不正解時に「自動」がONの場合のみ3.5秒後に次へ
+          this.autoTimer = setTimeout(() => {
+            this.nextProblem();
+          }, 3500);
         }
+      }
+
+      startStep2() {
+        this.step = 2;
+        this.subStep = 0;
+        this.subStepAnswered = false;
+        if (this.subStepTimer) clearTimeout(this.subStepTimer);
+
+        // Switch Left Column to Big Graph Area
+        document.getElementById('step1Container').classList.add('hidden');
+        document.getElementById('step2Container').classList.remove('hidden');
+        document.getElementById('step2ProgressDots').classList.remove('hidden');
+
+        const { p1, p2, choicesData } = this.currentProblem;
+        document.getElementById('step2CoordA').innerText = `(${p1[0]}, ${p1[1]})`;
+        document.getElementById('step2CoordB').innerText = `(${p2[0]}, ${p2[1]})`;
+
+        // The 4 formulas to choose from (consistent order across sub-steps)
+        this.formulaChoices = choicesData.map(c => c.tex);
+
+        // Render first sub-step (Line 0: ①)
+        this.renderSubStep();
+      }
+
+      renderSubStep() {
+        this.subStepAnswered = false;
+        const sub = this.subStep;
+        const color = this.lineColors[sub];
+        const label = this.lineLabels[sub];
+        const colorName = this.lineColorNames[sub];
+
+        // Update Progress Dots
+        for (let i = 0; i < 4; i++) {
+          const dot = document.getElementById(`dot-${i}`);
+          if (i < sub) {
+            // Already solved correctly
+            dot.className = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+            dot.innerHTML = "✓";
+            dot.style.backgroundColor = '';
+            dot.style.borderColor = '';
+            dot.style.color = '';
+          } else if (i === sub) {
+            // Current target line
+            dot.className = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black border-2 shadow-md shadow-emerald-500/20 animate-pulse";
+            dot.style.backgroundColor = color;
+            dot.style.borderColor = '#ffffff';
+            dot.style.color = '#0f172a';
+            dot.innerHTML = this.lineLabels[i];
+          } else {
+            // Upcoming
+            dot.className = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border border-slate-800 bg-slate-900 text-slate-500";
+            dot.style.backgroundColor = '';
+            dot.style.borderColor = '';
+            dot.style.color = '';
+            dot.innerHTML = this.lineLabels[i];
+          }
+        }
+
+        // Header Title
+        const headerTitle = document.getElementById('choicesHeaderTitle');
+        headerTitle.innerHTML = `
+          <span>直線 <span class="px-1.5 py-0.5 rounded font-bold text-xs" style="background:${color}25; color:${color}; border:1px solid ${color}66">${label} (${colorName})</span> の式は？</span>
+        `;
+
+        // Set Choice Buttons to the 4 formulas
+        for (let i = 0; i < 4; i++) {
+          const btn = document.getElementById(`choice-${i}`);
+          const badgeSpan = document.getElementById(`badge-${i}`);
+          const formulaSpan = document.getElementById(`formula-${i}`);
+          const iconSpan = document.getElementById(`icon-${i}`);
+
+          btn.disabled = false;
+          btn.className = "choice-btn group relative p-2.5 sm:p-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 border-2 border-slate-700/80 hover:border-emerald-500/60 flex items-center justify-between transition-all shadow text-left cursor-pointer";
+          
+          badgeSpan.className = "w-6 h-6 rounded-md bg-slate-700/80 group-hover:bg-emerald-600 text-slate-300 group-hover:text-white font-mono font-bold text-xs flex items-center justify-center transition";
+          badgeSpan.style.backgroundColor = '';
+          badgeSpan.style.color = '';
+          badgeSpan.style.border = '';
+          badgeSpan.innerText = `${i + 1}`;
+
+          iconSpan.className = "text-lg opacity-0 transition";
+          iconSpan.innerHTML = "";
+
+          formulaSpan.innerHTML = `$${this.formulaChoices[i]}$`;
+        }
+
+        // Hide result box if visible
+        document.getElementById('resultBox').classList.add('hidden');
+
+        safeRenderMath(document.getElementById('choicesGrid'));
+
+        // Draw Big Graph highlighting current line
+        this.drawBigGraph(sub);
+      }
+
+      selectSubStepChoice(idx) {
+        if (this.subStepAnswered) return;
+        this.subStepAnswered = true;
+
+        const sub = this.subStep;
+        const targetChoice = this.currentProblem.choicesData[sub];
+        const selectedTex = this.formulaChoices[idx];
+        const isCorrect = (selectedTex === targetChoice.tex);
+
+        // Find which button has the correct formula
+        const correctBtnIdx = this.formulaChoices.indexOf(targetChoice.tex);
+
+        // Button visuals
+        for (let i = 0; i < 4; i++) {
+          const btn = document.getElementById(`choice-${i}`);
+          const icon = document.getElementById(`icon-${i}`);
+          btn.disabled = true;
+
+          if (i === correctBtnIdx) {
+            btn.className = "choice-btn relative p-2.5 sm:p-3 rounded-xl bg-emerald-950/70 border-2 border-emerald-500 flex items-center justify-between shadow-lg shadow-emerald-500/10 text-left";
+            icon.className = "text-xl opacity-100 text-emerald-400 font-black";
+            icon.innerHTML = "◯";
+          } else if (i === idx && !isCorrect) {
+            btn.className = "choice-btn relative p-2.5 sm:p-3 rounded-xl bg-rose-950/70 border-2 border-rose-500 flex items-center justify-between shadow-lg shadow-rose-500/10 text-left";
+            icon.className = "text-xl opacity-100 text-rose-400 font-black";
+            icon.innerHTML = "✕";
+          } else {
+            btn.className = "choice-btn relative p-2.5 sm:p-3 rounded-xl bg-slate-900/40 border-2 border-slate-800/40 opacity-50 flex items-center justify-between text-left";
+          }
+        }
+
+        if (isCorrect) {
+          this.sound.playCorrect();
+
+          // Highlight target line on graph as verified
+          this.drawBigGraph(sub, true);
+
+          // Advance to next line or complete automatically!
+          this.subStepTimer = setTimeout(() => {
+            if (this.subStep < 3) {
+              this.subStep++;
+              this.renderSubStep();
+            } else {
+              // Complete all 4 lines!
+              this.completeStep2();
+            }
+          }, 450);
+        } else {
+          this.sound.playWrong();
+
+          // Briefly show incorrect state, then allow retry on current line
+          this.subStepTimer = setTimeout(() => {
+            this.renderSubStep();
+          }, 1100);
+        }
+      }
+
+      completeStep2() {
+        this.answered = true;
+        this.totalCount++;
+        this.correctCount++;
+        this.streak++;
+        this.updateStatsDisplay();
+
+        this.sound.playFanfare();
+
+        // Update all progress dots to checked
+        for (let i = 0; i < 4; i++) {
+          const dot = document.getElementById(`dot-${i}`);
+          dot.className = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-emerald-500 text-slate-950 font-black";
+          dot.innerHTML = "✓";
+        }
+
+        // Header message
+        document.getElementById('choicesHeaderTitle').innerHTML = 
+          `<span class="text-emerald-400 font-bold flex items-center gap-1">🎉 全4直線の式を完全制覇！</span>`;
+
+        // Redraw Big Graph with all lines glowing
+        this.drawBigGraph('all_correct');
+
+        // Check goal celebration
+        if (this.targetStreak > 0 && this.streak === this.targetStreak) {
+          this.showGoalCelebration();
+          return;
+        }
+
+        // Automatically advance to next problem as requested!
+        this.autoTimer = setTimeout(() => {
+          this.nextProblem();
+        }, 900);
+      }
+
+      drawBadge(ctx, text, x, y, color, isActive = false) {
+        ctx.save();
+        ctx.font = isActive ? 'bold 12px sans-serif' : 'bold 11px sans-serif';
+        const metrics = ctx.measureText(text);
+        const textWidth = metrics.width;
+        const boxWidth = Math.max(textWidth + 8, 20);
+        const boxHeight = 17;
+        const boxX = x - boxWidth / 2;
+        const boxY = y - boxHeight / 2;
+
+        // Background pill
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+        ctx.strokeStyle = isActive ? color : color + 'aa';
+        ctx.lineWidth = isActive ? 2 : 1.2;
+
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 4);
+        } else {
+          ctx.rect(boxX, boxY, boxWidth, boxHeight);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        if (isActive) {
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 10;
+        }
+
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, x, y + 0.5);
+        ctx.restore();
+      }
+
+      drawBigGraph(activeIdx = null, isSubCorrect = false) {
+        const canvas = document.getElementById('bigGraphCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        const width = 600;
+        const height = 420;
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const { p1, p2, choicesData } = this.currentProblem;
+        const [x1, y1] = p1;
+        const [x2, y2] = p2;
+
+        // Coordinate bounds
+        let maxCoord = Math.max(
+          Math.abs(x1), Math.abs(x2),
+          Math.abs(y1), Math.abs(y2),
+          6
+        );
+        if (choicesData) {
+          choicesData.forEach(c => {
+            if (c.c !== undefined) maxCoord = Math.max(maxCoord, Math.abs(c.c));
+          });
+        }
+        maxCoord += 2;
+        if (maxCoord < 7) maxCoord = 7;
+
+        const originX = width / 2;
+        const originY = height / 2;
+        const scale = Math.min((width - 60) / (2 * maxCoord), (height - 60) / (2 * maxCoord));
+
+        const toCanvasX = (x) => originX + x * scale;
+        const toCanvasY = (y) => originY - y * scale;
+
+        // 1. Background
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(0, 0, width, height);
+
+        // 2. Grid lines
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1;
+        for (let x = -maxCoord; x <= maxCoord; x++) {
+          ctx.beginPath();
+          ctx.moveTo(toCanvasX(x), 0);
+          ctx.lineTo(toCanvasX(x), height);
+          ctx.stroke();
+        }
+        for (let y = -maxCoord; y <= maxCoord; y++) {
+          ctx.beginPath();
+          ctx.moveTo(0, toCanvasY(y));
+          ctx.lineTo(width, toCanvasY(y));
+          ctx.stroke();
+        }
+
+        // 3. Axes
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 2;
+        // X axis
+        ctx.beginPath();
+        ctx.moveTo(0, originY);
+        ctx.lineTo(width, originY);
+        ctx.stroke();
+        // Y axis
+        ctx.beginPath();
+        ctx.moveTo(originX, 0);
+        ctx.lineTo(originX, height);
+        ctx.stroke();
+
+        // Axis arrows
+        ctx.fillStyle = '#64748b';
+        ctx.beginPath();
+        ctx.moveTo(width - 8, originY - 5);
+        ctx.lineTo(width, originY);
+        ctx.lineTo(width - 8, originY + 5);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(originX - 5, 8);
+        ctx.lineTo(originX, 0);
+        ctx.lineTo(originX + 5, 8);
+        ctx.fill();
+
+        // Axis labels
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText('x', width - 15, originY - 8);
+        ctx.fillText('y', originX + 8, 16);
+        ctx.fillText('O', originX - 14, originY + 14);
+
+        // Number ticks
+        const tickStep = maxCoord > 10 ? 4 : 2;
+        ctx.font = '10px sans-serif';
+        ctx.fillStyle = '#64748b';
+        for (let n = -maxCoord + 1; n <= maxCoord - 1; n++) {
+          if (n === 0) continue;
+          if (n % tickStep === 0) {
+            ctx.fillText(n, toCanvasX(n) - 5, originY + 13);
+            ctx.fillText(n, originX + 5, toCanvasY(n) + 4);
+          }
+        }
+
+        // 4. Draw 4 Candidate Lines
+        const colors = this.lineColors;
+        const labels = this.lineLabels;
+
+        if (choicesData) {
+          choicesData.forEach((choice, i) => {
+            const isActive = (activeIdx === 'all_correct' || i === activeIdx);
+            const isCompleted = (typeof activeIdx === 'number' && i < activeIdx);
+
+            ctx.save();
+            ctx.strokeStyle = colors[i];
+
+            if (activeIdx === 'all_correct') {
+              ctx.lineWidth = 4;
+              ctx.shadowColor = colors[i];
+              ctx.shadowBlur = 12;
+            } else if (isActive) {
+              ctx.lineWidth = 4.5;
+              ctx.shadowColor = colors[i];
+              ctx.shadowBlur = isSubCorrect ? 18 : 12;
+            } else if (isCompleted) {
+              ctx.lineWidth = 2.2;
+              ctx.globalAlpha = 0.65;
+            } else {
+              ctx.lineWidth = 2;
+              ctx.globalAlpha = 0.4;
+            }
+
+            ctx.beginPath();
+            if (choice.type === 'vertical') {
+              const cx = toCanvasX(choice.c);
+              ctx.moveTo(cx, 0);
+              ctx.lineTo(cx, height);
+            } else if (choice.type === 'horizontal') {
+              const cy = toCanvasY(choice.c);
+              ctx.moveTo(0, cy);
+              ctx.lineTo(width, cy);
+            }
+            ctx.stroke();
+            ctx.restore();
+
+            // Label Badge (①, ②, ③, ④) on Line Ends
+            let badgeX, badgeY;
+            const badgeRadius = isActive ? 14 : 12;
+
+            if (choice.type === 'vertical') {
+              badgeX = toCanvasX(choice.c);
+              badgeY = toCanvasY(maxCoord - 1.2 - (i % 2) * 1.5);
+              if (badgeY < 25) badgeY = 25;
+            } else {
+              badgeY = toCanvasY(choice.c);
+              badgeX = toCanvasX(maxCoord - 1.2 - (i % 2) * 1.5);
+              if (badgeX > width - 25) badgeX = width - 25;
+            }
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI * 2);
+            ctx.fillStyle = colors[i];
+            ctx.fill();
+            ctx.strokeStyle = isActive ? '#ffffff' : '#0f172a';
+            ctx.lineWidth = isActive ? 2.5 : 1.5;
+            ctx.stroke();
+
+            ctx.font = isActive ? 'bold 13px sans-serif' : 'bold 11px sans-serif';
+            ctx.fillStyle = '#0f172a';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(labels[i], badgeX, badgeY + 0.5);
+            ctx.restore();
+
+            // 4-b. Intercept Dot & Number Badge on Axes
+            if (choice.type === 'vertical') {
+              // x-intercept at (choice.c, 0)
+              const intX = toCanvasX(choice.c);
+              const intY = originY;
+
+              // Axis dot
+              ctx.save();
+              ctx.fillStyle = colors[i];
+              ctx.beginPath();
+              ctx.arc(intX, intY, isActive ? 4.5 : 3.5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineWidth = 1.5;
+              ctx.stroke();
+              ctx.restore();
+
+              // x-intercept number badge
+              const targetY = originY + (choice.c === 0 ? 20 : 18);
+              this.drawBadge(ctx, `${choice.c}`, intX, targetY, colors[i], isActive);
+
+            } else if (choice.type === 'horizontal') {
+              // y-intercept at (0, choice.c)
+              const intX = originX;
+              const intY = toCanvasY(choice.c);
+
+              // Axis dot
+              ctx.save();
+              ctx.fillStyle = colors[i];
+              ctx.beginPath();
+              ctx.arc(intX, intY, isActive ? 4.5 : 3.5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineWidth = 1.5;
+              ctx.stroke();
+              ctx.restore();
+
+              // y-intercept number badge
+              const targetX = originX - 18;
+              this.drawBadge(ctx, `${choice.c}`, targetX, intY, colors[i], isActive);
+            }
+          });
+        }
+
+        // 5. Draw Given Points A & B
+        // Point A
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(toCanvasX(x1), toCanvasY(y1), 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillStyle = '#fda4af';
+        ctx.textAlign = 'left';
+        ctx.fillText(`A(${x1}, ${y1})`, toCanvasX(x1) + 8, toCanvasY(y1) - 6);
+
+        // Point B
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(toCanvasX(x2), toCanvasY(y2), 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        ctx.fillStyle = '#7dd3fc';
+        ctx.textAlign = 'left';
+        ctx.fillText(`B(${x2}, ${y2})`, toCanvasX(x2) + 8, toCanvasY(y2) - 6);
       }
 
       renderExplanation() {
@@ -1127,7 +1743,6 @@
         }
 
         stepsContainer.innerHTML = html;
-
         safeRenderMath(stepsContainer);
       }
 
@@ -1281,6 +1896,58 @@
             ctx.lineTo(toCanvasX(x2), toCanvasY(y2));
             ctx.stroke();
             ctx.setLineDash([]);
+          }
+
+          // Draw Intercepts on Axes (Step 1 answered)
+          if (eq.type === 'vertical') {
+            const intX = toCanvasX(eq.c);
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(intX, originY, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            this.drawBadge(ctx, `${eq.c}`, intX, originY + 16, '#10b981', true);
+          } else if (eq.type === 'horizontal') {
+            const intY = toCanvasY(eq.c);
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(originX, intY, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            this.drawBadge(ctx, `${eq.c}`, originX - 18, intY, '#10b981', true);
+          } else if (eq.type === 'linear') {
+            // y-intercept at (0, b)
+            const bVal = eq.intercept.num / eq.intercept.den;
+            const intY = toCanvasY(bVal);
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(originX, intY, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            this.drawBadge(ctx, `${eq.intercept.toString()}`, originX - 18, intY, '#10b981', true);
+
+            // x-intercept at (-b/a, 0)
+            if (eq.slope.num !== 0) {
+              const xFrac = new Fraction(-eq.intercept.num, eq.intercept.den).div(eq.slope);
+              const xVal = xFrac.num / xFrac.den;
+              const intX = toCanvasX(xVal);
+              if (intX >= 0 && intX <= width) {
+                ctx.fillStyle = '#10b981';
+                ctx.beginPath();
+                ctx.arc(intX, originY, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                this.drawBadge(ctx, `${xFrac.toString()}`, intX, originY + 16, '#10b981', true);
+              }
+            }
           }
         }
 
