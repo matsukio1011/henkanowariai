@@ -254,27 +254,7 @@
           線分比 <span class="text-amber-300 font-black text-lg">AB : BC : CD</span> を最も簡単な整数の比で求めなさい。
         </p>
 
-        <!-- 4点の座標カード一覧 -->
-        <div class="grid grid-cols-4 gap-1.5 p-2 rounded-xl bg-slate-950/70 border border-slate-800">
-          <div class="flex flex-col items-center bg-rose-950/30 border border-rose-500/30 rounded-lg p-1.5 text-center">
-            <span class="text-[10px] font-bold text-rose-400">点 A</span>
-            <span id="coord-card-A" class="font-mono text-xs font-semibold text-rose-200 mt-0.5">-</span>
-          </div>
-          <div class="flex flex-col items-center bg-amber-950/30 border border-amber-500/30 rounded-lg p-1.5 text-center">
-            <span class="text-[10px] font-bold text-amber-400">点 B</span>
-            <span id="coord-card-B" class="font-mono text-xs font-semibold text-amber-200 mt-0.5">-</span>
-          </div>
-          <div class="flex flex-col items-center bg-emerald-950/30 border border-emerald-500/30 rounded-lg p-1.5 text-center">
-            <span class="text-[10px] font-bold text-emerald-400">点 C</span>
-            <span id="coord-card-C" class="font-mono text-xs font-semibold text-emerald-200 mt-0.5">-</span>
-          </div>
-          <div class="flex flex-col items-center bg-cyan-950/30 border border-cyan-500/30 rounded-lg p-1.5 text-center">
-            <span class="text-[10px] font-bold text-cyan-400">点 D</span>
-            <span id="coord-card-D" class="font-mono text-xs font-semibold text-cyan-200 mt-0.5">-</span>
-          </div>
-        </div>
-
-        <p class="text-xs text-slate-400 mt-2 flex items-center justify-between">
+        <p class="text-xs text-slate-400 mt-3 flex items-center justify-between">
           <span>キー <span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">1</span>〜<span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">4</span> で即答</span>
           <span class="text-slate-500 hidden sm:inline">[X]xのみ [Y]yのみ [B]両方</span>
         </p>
@@ -977,51 +957,58 @@
         // 点の光彩リング
         ctx.save();
         ctx.beginPath();
-        ctx.arc(pix.x, pix.y, 9, 0, Math.PI * 2);
+        ctx.arc(pix.x, pix.y, 11, 0, Math.PI * 2);
         ctx.fillStyle = `${pt.color}33`;
         ctx.fill();
 
-        // 点本体
+        // 点本体（少し大きめで明瞭）
         ctx.beginPath();
-        ctx.arc(pix.x, pix.y, 5.5, 0, Math.PI * 2);
+        ctx.arc(pix.x, pix.y, 6.5, 0, Math.PI * 2);
         ctx.fillStyle = pt.color;
         ctx.fill();
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2.5;
         ctx.strokeStyle = '#ffffff';
         ctx.stroke();
         ctx.restore();
 
-        // 点のラベル文字列
+        // 点のラベル文字列（x座標のみのときは A(3, a) のように表示）
+        const varLetters = ['a', 'b', 'c', 'd'];
+        const vLetter = varLetters[idx] || 'a';
+
         let labelText = '';
         if (mode === 'both') {
           labelText = `${pt.name}(${pt.x}, ${pt.y})`;
         } else if (mode === 'x') {
-          labelText = `${pt.name}(x=${pt.x})`;
+          labelText = `${pt.name}(${pt.x}, ${vLetter})`;
         } else if (mode === 'y') {
-          labelText = `${pt.name}(y=${pt.y})`;
+          labelText = `${pt.name}(${vLetter}, ${pt.y})`;
         }
 
-        // ラベル配置位置（直線の向きに合わせて見やすく配置）
+        // ラベル配置位置（フォントを大きくして見やすく強調）
         ctx.save();
-        ctx.font = 'bold 12px "M PLUS Rounded 1c", "Fira Code", monospace';
+        ctx.font = 'bold 17px "M PLUS Rounded 1c", "Fira Code", monospace';
         const textMetrics = ctx.measureText(labelText);
         const textWidth = textMetrics.width;
 
-        // 点の左上または右下にオフセット
-        let offX = 12;
-        let offY = -12;
-        if (pt.y > 4) offY = 18;
-        if (pt.x > 4) offX = -textWidth - 12;
+        // 点からのオフセット（重なり防止）
+        let offX = 14;
+        let offY = -18;
+        if (pt.y > 4) offY = 24;
+        if (pt.x > 3.5) offX = -textWidth - 14;
 
-        const labelX = pix.x + offX;
-        const labelY = pix.y + offY;
+        let labelX = pix.x + offX;
+        let labelY = pix.y + offY;
 
-        // ラベル背景ピル
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+        // 画面端からはみ出さないようクランプ
+        labelX = Math.max(12, Math.min(canvasWidth - textWidth - 14, labelX));
+        labelY = Math.max(22, Math.min(canvasHeight - 20, labelY));
+
+        // ラベル背景ピル（大きめのパディング）
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
         ctx.strokeStyle = pt.color;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.roundRect(labelX - 4, labelY - 11, textWidth + 8, 18, 4);
+        ctx.roundRect(labelX - 7, labelY - 14, textWidth + 14, 28, 6);
         ctx.fill();
         ctx.stroke();
 
@@ -1029,7 +1016,7 @@
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(labelText, labelX, labelY - 2);
+        ctx.fillText(labelText, labelX, labelY);
         ctx.restore();
       });
     }
@@ -1138,11 +1125,6 @@
     const coordInstruction = document.getElementById('coord-instruction');
     const badgeCoordMode = document.getElementById('badge-coord-mode');
 
-    const coordCardA = document.getElementById('coord-card-A');
-    const coordCardB = document.getElementById('coord-card-B');
-    const coordCardC = document.getElementById('coord-card-C');
-    const coordCardD = document.getElementById('coord-card-D');
-
     // 座標表示モードの更新
     function setCoordMode(mode) {
       state.coordMode = mode;
@@ -1168,25 +1150,7 @@
         coordInstruction.textContent = 'x座標でもy座標でもどちらでも比が求まる！';
       }
 
-      updateCoordCards();
       drawGraph();
-    }
-
-    function updateCoordCards() {
-      if (!state.currentQuestion) return;
-      const pts = state.currentQuestion.points;
-      const mode = state.coordMode;
-
-      const formatCard = (pt) => {
-        if (mode === 'both') return `(${pt.x}, ${pt.y})`;
-        if (mode === 'x') return `x = ${pt.x}`;
-        if (mode === 'y') return `y = ${pt.y}`;
-      };
-
-      coordCardA.textContent = formatCard(pts[0]);
-      coordCardB.textContent = formatCard(pts[1]);
-      coordCardC.textContent = formatCard(pts[2]);
-      coordCardD.textContent = formatCard(pts[3]);
     }
 
     // 新しい問題をロード
@@ -1200,9 +1164,6 @@
       // 直線の式表示
       const q = state.currentQuestion;
       lineEqDisplay.textContent = formatEquationString(q.slope, q.intercept);
-
-      // 座標カードの更新
-      updateCoordCards();
 
       // 4択ボタンの描画
       choicesContainer.innerHTML = '';
@@ -1279,6 +1240,27 @@
       const dx = q.deltaX;
       const dy = q.deltaY;
       const pts = q.points;
+      const mode = state.coordMode;
+
+      let modeExplanationHeader = '';
+      let stepLines = '';
+      if (mode === 'y') {
+        modeExplanationHeader = '💡 解法のポイント（y座標の差に注目）：';
+        stepLines = `
+          <div>・AB間のy増分: ${pts[1].y} - (${pts[0].y}) = <span class="text-rose-400 font-bold">${dy[0]}</span></div>
+          <div>・BC間のy増分: ${pts[2].y} - (${pts[1].y}) = <span class="text-amber-400 font-bold">${dy[1]}</span></div>
+          <div>・CD間のy増分: ${pts[3].y} - (${pts[2].y}) = <span class="text-emerald-400 font-bold">${dy[2]}</span></div>
+        `;
+      } else {
+        modeExplanationHeader = mode === 'x' 
+          ? '💡 解法のポイント（x座標の差に注目・y座標は未知の文字でもOK！）：' 
+          : '💡 解法のポイント（x座標またはy座標の差に注目）：';
+        stepLines = `
+          <div>・AB間のx増分: ${pts[1].x} - (${pts[0].x}) = <span class="text-rose-400 font-bold">${dx[0]}</span></div>
+          <div>・BC間のx増分: ${pts[2].x} - (${pts[1].x}) = <span class="text-amber-400 font-bold">${dx[1]}</span></div>
+          <div>・CD間のx増分: ${pts[3].x} - (${pts[2].x}) = <span class="text-emerald-400 font-bold">${dx[2]}</span></div>
+        `;
+      }
 
       feedbackContent.innerHTML = `
         <div class="flex items-center gap-2">
@@ -1287,11 +1269,9 @@
             : '<span class="text-rose-400 font-black flex items-center gap-1.5"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg> 不正解… 正解は ' + q.correctAnswer + '</span>'}
         </div>
         <div class="text-xs text-slate-300 space-y-1.5 mt-1 leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-          <p class="font-bold text-sky-300">💡 解法のポイント（x座標またはy座標の差に注目）：</p>
+          <p class="font-bold text-sky-300">${modeExplanationHeader}</p>
           <div class="font-mono text-[11px] text-slate-300 pl-1 space-y-0.5">
-            <div>・AB間の増分: Δx = ${pts[1].x} - (${pts[0].x}) = <span class="text-rose-400 font-bold">${dx[0]}</span> (Δy = ${dy[0]})</div>
-            <div>・BC間の増分: Δx = ${pts[2].x} - (${pts[1].x}) = <span class="text-amber-400 font-bold">${dx[1]}</span> (Δy = ${dy[1]})</div>
-            <div>・CD間の増分: Δx = ${pts[3].x} - (${pts[2].x}) = <span class="text-emerald-400 font-bold">${dx[2]}</span> (Δy = ${dy[2]})</div>
+            ${stepLines}
           </div>
           <p class="text-slate-300 text-[11px] pt-1 border-t border-slate-800">
             比は <span class="font-mono text-amber-300 font-bold">${dx[0]} : ${dx[1]} : ${dx[2]}</span>
