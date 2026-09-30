@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一次関数 線分比マスター | 直線上の点と比の特訓</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & M PLUS Rounded 1c & Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Fira+Code:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"M PLUS Rounded 1c"', 'Inter', 'sans-serif'],
+            mono: ['"Fira Code"', 'monospace'],
+          },
+          colors: {
+            math: {
+              grid: '#334155',
+              axis: '#94a3b8',
+              line: '#38bdf8',
+              pointA: '#f43f5e',
+              pointB: '#f59e0b',
+              pointC: '#10b981',
+              pointD: '#06b6d4',
+              correct: '#10b981',
+              wrong: '#ef4444',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 全画面スクロール防止（PC 1画面収まり） */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* 選択肢ボタンの波紋・押し心地エフェクト */
+    .choice-btn {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .choice-btn:active {
+      transform: scale(0.985);
+    }
+
+    /* パルスアニメーション */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-ring {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+
+    /* 点マーカーのパルス */
+    @keyframes glow-point {
+      0%, 100% { filter: drop-shadow(0 0 3px currentColor); }
+      50% { filter: drop-shadow(0 0 9px currentColor); }
+    }
+    .glow-point {
+      animation: glow-point 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 flex flex-col h-screen font-sans">
+  <!-- ヘッダーバー -->
+  <header class="h-14 bg-slate-900/90 border-b border-slate-800 px-3 md:px-6 flex items-center justify-between flex-shrink-0 z-10 backdrop-blur gap-2">
+    <!-- タイトルとロゴ -->
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-pink-500 via-amber-500 to-emerald-500 flex items-center justify-center font-bold text-white shadow-md shadow-amber-500/20 text-xs">
+        AB:
+      </div>
+      <div>
+        <h1 class="font-bold text-sm md:text-lg tracking-wide text-slate-100 flex items-center gap-2">
+          一次関数 線分比マスター
+          <span class="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono hidden sm:inline">AB:BC:CD</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- アプリ切替タブ -->
+    <div class="flex items-center bg-slate-950/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/80 text-xs flex-shrink-0 shadow-inner">
+      <a href="index.html" class="px-2 py-1 rounded-lg text-slate-400 hover:text-white font-medium flex items-center gap-1 transition" title="総合ポータルへ">
+        <span>🏠</span>
+        <span class="hidden md:inline">ポータル</span>
+      </a>
+      <a href="linear.html" class="px-2 py-1 rounded-lg text-slate-400 hover:text-white font-medium flex items-center gap-1 transition" title="文章題・条件から式を求める特訓アプリへ">
+        <span>📝</span>
+        <span class="hidden md:inline">文章題・特訓</span>
+      </a>
+      <a href="graph.html" class="px-2 py-1 rounded-lg text-slate-400 hover:text-white font-medium flex items-center gap-1 transition" title="方眼グラフから式を読み取る特訓へ">
+        <span>📈</span>
+        <span class="hidden md:inline">グラフマスター</span>
+      </a>
+      <a href="line.html" class="px-2 py-1 rounded-lg text-slate-400 hover:text-white font-medium flex items-center gap-1 transition" title="2点の座標から式を求める特訓へ">
+        <span>📍</span>
+        <span class="hidden md:inline">2点から直線</span>
+      </a>
+      <a href="ratio.html" class="px-2 py-1 rounded-lg bg-gradient-to-r from-amber-600 to-pink-600 text-white font-bold flex items-center gap-1 shadow-sm">
+        <span>📏</span>
+        <span class="hidden md:inline">線分比</span>
+      </a>
+      <a href="parabola.html" class="px-2 py-1 rounded-lg text-slate-400 hover:text-white font-medium flex items-center gap-1 transition" title="放物線の公式道場（面積・平行線）へ">
+        <span>∪</span>
+        <span class="hidden md:inline">放物線の公式</span>
+      </a>
+    </div>
+
+    <!-- 統計・スコアボード & コントロール -->
+    <div class="flex items-center gap-2 sm:gap-4">
+      <div class="flex items-center gap-1.5 text-xs sm:text-sm bg-slate-800/80 px-2.5 sm:px-3 py-1 rounded-lg border border-slate-700/60">
+        <span class="text-amber-400 font-bold flex items-center gap-1">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.316.492-.533 1.035-.688 1.58-.266.938-.415 1.947-.442 2.983H7.5a1 1 0 00-.832.445l-3.5 5.5A1 1 0 004 15h6v4a1 1 0 001.707.707l7-7A1 1 0 0018 12h-4.5a15.82 15.82 0 00.395-4.447c.1-.8.25-1.59.45-2.35.1-.38.16-.76.15-1.14a2.97 2.97 0 00-.6-1.51z"/></svg>
+          <span class="hidden sm:inline">連続正解:</span>
+        </span>
+        <span id="stat-streak" class="font-bold text-white font-mono text-base">0</span>
+        <span class="text-slate-500 font-mono">/</span>
+        <div class="flex items-center gap-1" title="目標連続正解数を設定">
+          <span class="text-slate-400 text-xs hidden lg:inline">目標:</span>
+          <select id="target-streak-select" class="bg-slate-700 hover:bg-slate-650 text-amber-300 font-bold text-xs rounded px-1.5 py-0.5 border border-slate-600 focus:outline-none focus:border-amber-400 cursor-pointer transition">
+            <option value="5">5問</option>
+            <option value="10" selected>10問</option>
+            <option value="15">15問</option>
+            <option value="20">20問</option>
+            <option value="0">なし(無制限)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hidden sm:flex items-center gap-1.5 text-xs sm:text-sm bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700/60">
+        <span class="text-slate-400">正解率:</span>
+        <span id="stat-accuracy" class="font-bold text-emerald-400 font-mono text-base">0%</span>
+        <span id="stat-count" class="text-slate-400 text-xs font-mono">(0/0)</span>
+      </div>
+
+      <!-- 設定・トグルボタン類 -->
+      <div class="flex items-center gap-1.5">
+        <!-- 座標表示切替（x座標だけ / y座標だけ / 両方） -->
+        <div class="flex items-center bg-slate-800 p-0.5 rounded-lg border border-slate-700 text-xs" title="座標表示切替 [X]xのみ / [Y]yのみ / [B]両方">
+          <span class="text-slate-400 text-[11px] px-1 hidden xl:inline">表示:</span>
+          <button id="btn-coord-x" data-mode="x" class="coord-mode-btn px-2 py-1 rounded font-bold text-sky-300 bg-sky-950 border border-sky-500/50 transition">
+            xのみ
+          </button>
+          <button id="btn-coord-y" data-mode="y" class="coord-mode-btn px-2 py-1 rounded text-slate-400 hover:text-slate-200 border border-transparent transition">
+            yのみ
+          </button>
+          <button id="btn-coord-both" data-mode="both" class="coord-mode-btn px-2 py-1 rounded text-slate-400 hover:text-slate-200 border border-transparent transition">
+            両方
+          </button>
+        </div>
+
+        <!-- グリッド線(方眼)表示切替ボタン -->
+        <button id="btn-grid-toggle" title="方眼グリッド線を表示/非表示 ([M]キー)" class="px-2.5 py-1.5 rounded-lg bg-sky-950/70 hover:bg-sky-900/80 text-xs text-sky-300 border border-sky-500/50 flex items-center gap-1.5 transition shadow-sm">
+          <span id="grid-dot" class="w-2 h-2 rounded-full bg-sky-400"></span>
+          <span class="hidden md:inline">方眼</span>
+          <span id="grid-status" class="text-[10px] bg-sky-400 text-slate-950 font-bold px-1 rounded">ON</span>
+        </button>
+
+        <!-- ガイド(比・直角三角形)表示切替ボタン -->
+        <button id="btn-hint-toggle" title="x/yの差・補助三角形を表示 ([H]キー)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="hidden md:inline">ガイド</span>
+          <span id="hint-status" class="text-[10px] bg-amber-400/20 text-amber-300 px-1 rounded">OFF</span>
+        </button>
+
+        <!-- 自動送り切替ボタン -->
+        <button id="btn-auto-advance" title="正解時に自動で次の問題へ進む ([A]キー)" class="hidden sm:flex px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 text-xs text-emerald-300 border border-emerald-500/40 items-center gap-1.5 transition">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="hidden lg:inline">自動送り</span>
+          <span id="auto-advance-status" class="text-[10px] bg-emerald-400 text-slate-950 font-bold px-1 rounded">ON</span>
+        </button>
+
+        <!-- 全画面表示切替ボタン -->
+        <button id="btn-fullscreen" title="全画面表示切替 ([F]キー)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 border border-slate-700 flex items-center gap-1.5 transition">
+          <svg id="fs-icon-enter" class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+          <svg id="fs-icon-exit" class="w-3.5 h-3.5 text-sky-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4l5 5m0 0H5m4 0V5m11-1l-5 5m0 0h4m-4 0V5M4 20l5-5m0 0H5m4 0v4m11 1l-5-5m0 0h4m-4 0v4"/></svg>
+          <span class="hidden xl:inline">全画面</span>
+          <span id="fullscreen-status" class="text-[10px] bg-slate-700 text-slate-300 px-1 rounded">OFF</span>
+        </button>
+
+        <!-- 音声ON/OFF -->
+        <button id="btn-sound" title="音声ON/OFF ([S]キー)" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-sm flex items-center justify-center">
+          <svg id="icon-sound-on" class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+          <svg id="icon-sound-off" class="w-4 h-4 text-slate-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインコンテンツレイアウト -->
+  <main class="flex-1 flex flex-col md:flex-row p-3 md:p-4 gap-3 md:gap-4 overflow-hidden min-h-0">
+    
+    <!-- 左側：特大グラフエリア -->
+    <section class="flex-1 bg-slate-900/70 border border-slate-800/90 rounded-2xl relative flex flex-col overflow-hidden shadow-2xl p-2 sm:p-3">
+      <!-- グラフ上部ステータスバー -->
+      <div class="flex items-center justify-between px-2 pb-1.5 text-xs text-slate-400 flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 text-amber-400 font-semibold">
+            <span class="w-3 h-0.5 bg-sky-400 rounded"></span>
+            <span>直線上の点 <span class="font-bold text-rose-400">A</span>, <span class="font-bold text-amber-400">B</span>, <span class="font-bold text-emerald-400">C</span>, <span class="font-bold text-cyan-400">D</span></span>
+          </span>
+          <span class="text-slate-500">|</span>
+          <span id="coord-instruction" class="hidden sm:inline text-slate-300">
+            x座標の差に注目して比を求めよう！
+          </span>
+        </div>
+
+        <div class="flex items-center gap-3 text-[11px] font-mono">
+          <span id="line-eq-display" class="bg-slate-800/80 text-sky-300 px-2 py-0.5 rounded border border-slate-700">y = ax + b</span>
+          <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">Q. <span id="question-index">1</span></span>
+        </div>
+      </div>
+
+      <!-- Canvas ラッパー -->
+      <div id="canvas-container" class="flex-1 relative w-full h-full flex items-center justify-center min-h-0 bg-slate-950/60 rounded-xl border border-slate-800/50 overflow-hidden">
+        <canvas id="graphCanvas" class="block"></canvas>
+      </div>
+    </section>
+
+    <!-- 右側：設問・点座標・4択・解説パネル -->
+    <section class="w-full md:w-96 lg:w-[420px] flex-shrink-0 flex flex-col gap-3 min-h-0 justify-between">
+      
+      <!-- 設問カード -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl flex-shrink-0">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            線分の長さの比
+          </span>
+          <span id="badge-coord-mode" class="text-[10px] bg-sky-950 text-sky-300 px-2 py-0.5 rounded border border-sky-500/40 font-mono">x座標のみ表示中</span>
+        </div>
+
+        <p class="text-base font-bold text-slate-100 leading-snug mb-3">
+          直線上の4点 <span class="text-rose-400">A</span>, <span class="text-amber-400">B</span>, <span class="text-emerald-400">C</span>, <span class="text-cyan-400">D</span> について、<br>
+          線分比 <span class="text-amber-300 font-black text-lg">AB : BC : CD</span> を最も簡単な整数の比で求めなさい。
+        </p>
+
+        <!-- 4点の座標カード一覧 -->
+        <div class="grid grid-cols-4 gap-1.5 p-2 rounded-xl bg-slate-950/70 border border-slate-800">
+          <div class="flex flex-col items-center bg-rose-950/30 border border-rose-500/30 rounded-lg p-1.5 text-center">
+            <span class="text-[10px] font-bold text-rose-400">点 A</span>
+            <span id="coord-card-A" class="font-mono text-xs font-semibold text-rose-200 mt-0.5">-</span>
+          </div>
+          <div class="flex flex-col items-center bg-amber-950/30 border border-amber-500/30 rounded-lg p-1.5 text-center">
+            <span class="text-[10px] font-bold text-amber-400">点 B</span>
+            <span id="coord-card-B" class="font-mono text-xs font-semibold text-amber-200 mt-0.5">-</span>
+          </div>
+          <div class="flex flex-col items-center bg-emerald-950/30 border border-emerald-500/30 rounded-lg p-1.5 text-center">
+            <span class="text-[10px] font-bold text-emerald-400">点 C</span>
+            <span id="coord-card-C" class="font-mono text-xs font-semibold text-emerald-200 mt-0.5">-</span>
+          </div>
+          <div class="flex flex-col items-center bg-cyan-950/30 border border-cyan-500/30 rounded-lg p-1.5 text-center">
+            <span class="text-[10px] font-bold text-cyan-400">点 D</span>
+            <span id="coord-card-D" class="font-mono text-xs font-semibold text-cyan-200 mt-0.5">-</span>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-400 mt-2 flex items-center justify-between">
+          <span>キー <span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">1</span>〜<span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">4</span> で即答</span>
+          <span class="text-slate-500 hidden sm:inline">[X]xのみ [Y]yのみ [B]両方</span>
+        </p>
+      </div>
+
+      <!-- 4択ボタンリスト -->
+      <div id="choices-container" class="grid grid-cols-1 gap-2.5 flex-1 min-h-0 flex-shrink-0">
+        <!-- 4つの選択肢はJSで動的生成 -->
+      </div>
+
+      <!-- フィードバック & 解説エリア -->
+      <div id="feedback-panel" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex-shrink-0 min-h-[145px] flex flex-col justify-between transition-all duration-200">
+        <div id="feedback-content" class="flex flex-col gap-1.5"></div>
+
+        <!-- 次へ進むボタン（回答後にアクティブ化） -->
+        <div class="pt-2 mt-2 border-t border-slate-800/80 flex items-center justify-between relative">
+          <!-- 自動送りプログレスバー -->
+          <div id="auto-advance-bar-wrapper" class="absolute -top-1 left-0 right-0 h-0.5 bg-slate-800 rounded-full overflow-hidden hidden">
+            <div id="auto-advance-bar" class="h-full bg-emerald-400 w-0 transition-all"></div>
+          </div>
+          <span class="text-[11px] text-slate-500 font-mono hidden sm:inline">[Enter] / [Space] で次の問題</span>
+          <button id="btn-next" disabled class="w-full sm:w-auto px-5 py-2 rounded-xl font-bold text-sm bg-slate-800 text-slate-500 cursor-not-allowed transition flex items-center justify-center gap-2">
+            <span id="btn-next-text">次の問題へ</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- 目標連続正解達成時の合格モーダル -->
+  <div id="clear-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+    <canvas id="confetti-canvas" class="absolute inset-0 pointer-events-none w-full h-full"></canvas>
+    <div id="clear-card" class="relative bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border-2 border-amber-400/80 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl shadow-amber-500/25 text-center transform scale-90 transition-transform duration-300 flex flex-col items-center">
+      
+      <!-- トロフィーバッジ -->
+      <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center shadow-lg shadow-amber-400/40 mb-4 animate-bounce">
+        <svg class="w-11 h-11 text-slate-950" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M5 3h14a1 1 0 0 1 1 1v4a6 6 0 0 1-5 5.91V17h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h2v-3.09A6 6 0 0 1 4 8V4a1 1 0 0 1 1-1zm-1 3v2a4 4 0 0 0 3 3.86V6H4zm16 0h-3v4.86A4 4 0 0 0 20 8V6z"/>
+        </svg>
+      </div>
+
+      <span class="text-xs font-bold text-amber-300 uppercase tracking-widest bg-amber-400/10 border border-amber-400/30 px-3 py-1 rounded-full mb-2">
+        MISSION COMPLETE
+      </span>
+
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-wide mb-2">
+        合格！目標達成！
+      </h2>
+
+      <p id="clear-message" class="text-slate-300 text-sm mb-6 leading-relaxed">
+        連続 <span id="clear-target-count" class="text-amber-400 font-bold font-mono text-xl">10</span> 問正解を達成しました！<br>
+        直線上の線分比マスターのコツを完全に掴んでいます！
+      </p>
+
+      <!-- 成績サマリー -->
+      <div class="grid grid-cols-2 gap-3 w-full bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80 mb-6">
+        <div class="flex flex-col items-center">
+          <span class="text-[11px] text-slate-400">総正解率</span>
+          <span id="clear-accuracy" class="text-lg font-bold text-emerald-400 font-mono">100%</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-[11px] text-slate-400">挑戦問題数</span>
+          <span id="clear-total-questions" class="text-lg font-bold text-sky-400 font-mono">10問</span>
+        </div>
+      </div>
+
+      <!-- アクションボタン群 -->
+      <div class="flex flex-col sm:flex-row gap-2.5 w-full">
+        <button id="btn-extend-target" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>さらに+5問挑戦</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </button>
+        <button id="btn-close-modal" class="py-3 px-5 rounded-xl font-bold text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- アプリケーション状態 ---
+    const state = {
+      coordMode: 'x', // 'x': x座標のみ, 'y': y座標のみ, 'both': 両方
+      showGrid: true,
+      showHintGuide: false,
+      autoAdvance: true,
+      soundEnabled: true,
+      targetStreak: 10,
+      currentStreak: 0,
+      totalAnswered: 0,
+      correctCount: 0,
+      questionIndex: 1,
+      currentQuestion: null,
+      answered: false,
+      hasClearedTarget: false,
+      autoAdvanceTimer: null,
+      autoAdvanceAnimFrame: null,
+    };
+
+    // --- Web Audio サウンドエンジン ---
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!state.soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        if (type === 'clear') {
+          // 目標達成ファンファーレ
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const start = now + i * 0.12;
+            const duration = i === 3 ? 0.6 : 0.12;
+            osc.type = i === 3 ? 'triangle' : 'sine';
+            osc.frequency.setValueAtTime(freq, start);
+            gain.gain.setValueAtTime(0.22, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(start);
+            osc.stop(start + duration);
+          });
+          return;
+        }
+
+        if (type === 'correct') {
+          // キラリとした明快なメジャー2和音
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc1.type = 'sine';
+          osc2.type = 'triangle';
+          osc1.frequency.setValueAtTime(523.25, now);
+          osc1.frequency.exponentialRampToValueAtTime(1046.50, now + 0.18);
+          osc2.frequency.setValueAtTime(659.25, now);
+          osc2.frequency.exponentialRampToValueAtTime(1318.51, now + 0.22);
+          gainNode.gain.setValueAtTime(0.18, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc1.connect(gainNode);
+          osc2.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.35);
+          osc2.stop(now + 0.35);
+        } else if (type === 'wrong') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.setValueAtTime(130, now + 0.1);
+          gainNode.gain.setValueAtTime(0.2, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'click') {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, now);
+          gainNode.gain.setValueAtTime(0.05, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        }
+      } catch (e) {
+        console.warn('Audio playback error', e);
+      }
+    }
+
+    // --- 数学ユーティリティ ---
+    function gcd(a, b) {
+      a = Math.abs(a);
+      b = Math.abs(b);
+      while (b) {
+        const t = b;
+        b = a % b;
+        a = t;
+      }
+      return a;
+    }
+
+    function gcd3(a, b, c) {
+      return gcd(gcd(a, b), c);
+    }
+
+    function makeFraction(numerator, denominator = 1) {
+      if (denominator === 0) throw new Error("Denominator cannot be zero");
+      let sign = (numerator * denominator < 0) ? -1 : 1;
+      let num = Math.abs(numerator);
+      let den = Math.abs(denominator);
+      let g = gcd(num, den);
+      num = (num / g) * sign;
+      den = den / g;
+      return { num, den, val: num / den };
+    }
+
+    function formatEquationString(slope, intercept) {
+      let slopeStr = '';
+      if (slope.den === 1) {
+        if (slope.num === 1) slopeStr = 'x';
+        else if (slope.num === -1) slopeStr = '-x';
+        else slopeStr = `${slope.num}x`;
+      } else {
+        slopeStr = `${slope.num}/${slope.den}x`;
+      }
+
+      let bStr = '';
+      if (intercept !== 0) {
+        if (intercept > 0) bStr = ` + ${intercept}`;
+        else bStr = ` - ${Math.abs(intercept)}`;
+      }
+
+      return `y = ${slopeStr}${bStr}`;
+    }
+
+    // --- 問題生成ロジック ---
+    // 比の候補プール (最簡整数比)
+    const RATIO_POOLS = [
+      [1, 1, 1],
+      [1, 2, 1],
+      [2, 1, 1],
+      [1, 1, 2],
+      [1, 2, 2],
+      [2, 1, 2],
+      [2, 2, 1],
+      [1, 3, 1],
+      [1, 1, 3],
+      [3, 1, 1],
+      [1, 2, 3],
+      [3, 2, 1],
+      [2, 3, 1],
+      [1, 3, 2],
+      [2, 1, 3],
+      [3, 1, 2],
+      [2, 3, 2]
+    ];
+
+    // 直線の傾き候補 (p / q)
+    const SLOPE_CANDIDATES = [
+      { p: 1, q: 1 },
+      { p: -1, q: 1 },
+      { p: 2, q: 1 },
+      { p: -2, q: 1 },
+      { p: 1, q: 2 },
+      { p: -1, q: 2 },
+      { p: 3, q: 1 },
+      { p: -3, q: 1 },
+      { p: 2, q: 3 },
+      { p: -2, q: 3 },
+      { p: 3, q: 2 },
+      { p: -3, q: 2 }
+    ];
+
+    function generateQuestion() {
+      // 許容座標範囲: 方眼 [-7, 7]
+      const BOUND_MIN = -6;
+      const BOUND_MAX = 6;
+
+      let validQuestion = null;
+      let attempts = 0;
+
+      while (!validQuestion && attempts < 1000) {
+        attempts++;
+
+        // 1. 基本比 (r1, r2, r3) を選出
+        const baseRatio = RATIO_POOLS[Math.floor(Math.random() * RATIO_POOLS.length)];
+        const [r1, r2, r3] = baseRatio;
+
+        // 2. 倍率 m (1 または 2)
+        // 合計比が小さい場合は m=2 にして「約分が必要な問題」も混ぜる
+        const sumRatio = r1 + r2 + r3;
+        let multiplier = 1;
+        if (sumRatio <= 4 && Math.random() < 0.4) {
+          multiplier = 2;
+        }
+
+        const step1 = r1 * multiplier;
+        const step2 = r2 * multiplier;
+        const step3 = r3 * multiplier;
+        const totalSteps = step1 + step2 + step3;
+
+        // 3. 傾き候補 (p, q) をシャッフルして選出
+        const slopeCand = SLOPE_CANDIDATES[Math.floor(Math.random() * SLOPE_CANDIDATES.length)];
+        const { p, q } = slopeCand;
+        const slope = makeFraction(p, q);
+
+        // x の全変化量 = totalSteps * q
+        // y の全変化量 = totalSteps * p
+        const deltaX_total = totalSteps * q;
+        const deltaY_total = totalSteps * p;
+
+        if (deltaX_total > 12 || Math.abs(deltaY_total) > 12) {
+          continue; // 枠からはみ出るので再試行
+        }
+
+        // 4. 点 A の始点 (xA, yA) を決定
+        // xA の範囲: BOUND_MIN <= xA <= BOUND_MAX - deltaX_total
+        const minXA = Math.max(BOUND_MIN, -7);
+        const maxXA = Math.min(BOUND_MAX - deltaX_total, 7 - deltaX_total);
+        if (minXA > maxXA) continue;
+
+        const xA = Math.floor(Math.random() * (maxXA - minXA + 1)) + minXA;
+        const xB = xA + step1 * q;
+        const xC = xB + step2 * q;
+        const xD = xC + step3 * q;
+
+        // 切片 b を整数になるように調整
+        // yA = (p/q)*xA + b  =>  b = yA - (p/q)*xA
+        // 直線がきれいな整数格子点を通るよう、b を整数にする
+        // そのためには xA が q の倍数であるか、または (p*xA + q*b)/q が整数である必要がある
+        // ここでは yA を整数としてランダムに選び、b = yA - (p/q)*xA が自然な整数になるように選ぶ
+        const minYA = p > 0 ? BOUND_MIN : BOUND_MIN - deltaY_total;
+        const maxYA = p > 0 ? BOUND_MAX - deltaY_total : BOUND_MAX;
+        if (minYA > maxYA) continue;
+
+        const yA = Math.floor(Math.random() * (maxYA - minYA + 1)) + minYA;
+        const yB = yA + step1 * p;
+        const yC = yB + step2 * p;
+        const yD = yC + step3 * p;
+
+        // すべての点が範囲内か確認
+        const allY = [yA, yB, yC, yD];
+        if (Math.min(...allY) < -7 || Math.max(...allY) > 7) continue;
+
+        // 切片 b = yA - (p/q)*xA
+        // b がきれいに整数になるか、または分母が q の既約分数か
+        const bVal = yA - slope.val * xA;
+        // 切片があまりに巨大な場合は除外
+        if (Math.abs(bVal) > 9) continue;
+
+        // 最簡整数比
+        const g = gcd3(step1, step2, step3);
+        const simpR1 = step1 / g;
+        const simpR2 = step2 / g;
+        const simpR3 = step3 / g;
+        const correctRatioStr = `${simpR1} : ${simpR2} : ${simpR3}`;
+
+        // 4つの選択肢を生成
+        const distractors = new Set();
+
+        const addDistractor = (str) => {
+          if (str !== correctRatioStr && !distractors.has(str)) {
+            distractors.add(str);
+            return true;
+          }
+          return false;
+        };
+
+        // 誤答パターン1: 逆順
+        addDistractor(`${simpR3} : ${simpR2} : ${simpR1}`);
+
+        // 誤答パターン2: 順序入れ替え
+        addDistractor(`${simpR2} : ${simpR1} : ${simpR3}`);
+        addDistractor(`${simpR1} : ${simpR3} : ${simpR2}`);
+        addDistractor(`${simpR3} : ${simpR1} : ${simpR2}`);
+
+        // 誤答パターン3: 累積比（AB : AC : AD と誤認）
+        addDistractor(`${simpR1} : ${simpR1 + simpR2} : ${simpR1 + simpR2 + simpR3}`);
+
+        // 誤答パターン4: 約分忘れ（multiplier > 1 の場合）
+        if (multiplier > 1) {
+          addDistractor(`${step1} : ${step2} : ${step3}`);
+        }
+
+        // 誤答パターン5: 僅かなズレ
+        addDistractor(`${simpR1 + 1} : ${simpR2} : ${simpR3}`);
+        addDistractor(`${simpR1} : ${simpR2 + 1} : ${simpR3}`);
+        addDistractor(`${simpR1} : ${simpR2} : ${simpR3 + 1}`);
+        if (simpR2 > 1) addDistractor(`${simpR1} : ${simpR2 - 1} : ${simpR3}`);
+
+        // 選択肢が4つに満たない場合のフォールバック
+        for (const cand of RATIO_POOLS) {
+          if (distractors.size >= 3) break;
+          addDistractor(`${cand[0]} : ${cand[1]} : ${cand[2]}`);
+        }
+
+        const distList = Array.from(distractors).slice(0, 3);
+        const choices = [correctRatioStr, ...distList];
+
+        // シャッフル
+        for (let i = choices.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [choices[i], choices[j]] = [choices[j], choices[i]];
+        }
+
+        validQuestion = {
+          slope,
+          intercept: Math.round(bVal * 10) / 10,
+          points: [
+            { name: 'A', x: xA, y: yA, color: '#f43f5e', border: '#fda4af' },
+            { name: 'B', x: xB, y: yB, color: '#f59e0b', border: '#fde68a' },
+            { name: 'C', x: xC, y: yC, color: '#10b981', border: '#a7f3d0' },
+            { name: 'D', x: xD, y: yD, color: '#06b6d4', border: '#a5f3fc' },
+          ],
+          deltaX: [xB - xA, xC - xB, xD - xC],
+          deltaY: [yB - yA, yC - yB, yD - yC],
+          ratio: [simpR1, simpR2, simpR3],
+          rawRatio: [step1, step2, step3],
+          correctAnswer: correctRatioStr,
+          choices: choices
+        };
+      }
+
+      return validQuestion;
+    }
+
+    // --- Canvas 描画エンジン ---
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvas-container');
+
+    const GRAPH_BOUNDS = {
+      minX: -7,
+      maxX: 7,
+      minY: -7,
+      maxY: 7
+    };
+
+    let canvasWidth = 0;
+    let canvasHeight = 0;
+    let originX = 0;
+    let originY = 0;
+    let unitScale = 36;
+
+    function resizeCanvas() {
+      const rect = container.getBoundingClientRect();
+      const size = Math.min(rect.width, rect.height) - 16;
+      const validSize = Math.max(size, 260);
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = validSize * dpr;
+      canvas.height = validSize * dpr;
+      canvas.style.width = `${validSize}px`;
+      canvas.style.height = `${validSize}px`;
+
+      canvasWidth = validSize;
+      canvasHeight = validSize;
+      originX = validSize / 2;
+      originY = validSize / 2;
+      unitScale = validSize / (GRAPH_BOUNDS.maxX - GRAPH_BOUNDS.minX + 1.2);
+
+      drawGraph();
+    }
+
+    function mathToPixel(x, y) {
+      return {
+        x: originX + x * unitScale,
+        y: originY - y * unitScale
+      };
+    }
+
+    function drawGraph() {
+      if (!canvasWidth || !canvasHeight) return;
+      const dpr = window.devicePixelRatio || 1;
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      if (state.showGrid) {
+        drawGrid();
+      }
+
+      drawAxes();
+
+      if (state.currentQuestion) {
+        // 直線の描画
+        drawLine();
+
+        // ガイド（補助三角形・比）の描画
+        if (state.showHintGuide || state.answered) {
+          drawGuideTriangles();
+        }
+
+        // 点 A, B, C, D の描画（座標ラベル含む）
+        drawPoints();
+      }
+
+      ctx.restore();
+    }
+
+    function drawGrid() {
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#1e293b';
+
+      for (let x = GRAPH_BOUNDS.minX; x <= GRAPH_BOUNDS.maxX; x++) {
+        if (x === 0) continue;
+        const p1 = mathToPixel(x, GRAPH_BOUNDS.minY);
+        const p2 = mathToPixel(x, GRAPH_BOUNDS.maxY);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+
+      for (let y = GRAPH_BOUNDS.minY; y <= GRAPH_BOUNDS.maxY; y++) {
+        if (y === 0) continue;
+        const p1 = mathToPixel(GRAPH_BOUNDS.minX, y);
+        const p2 = mathToPixel(GRAPH_BOUNDS.maxX, y);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+    }
+
+    function drawAxes() {
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#64748b';
+
+      // X軸
+      const xLeft = mathToPixel(GRAPH_BOUNDS.minX, 0);
+      const xRight = mathToPixel(GRAPH_BOUNDS.maxX, 0);
+      ctx.beginPath();
+      ctx.moveTo(xLeft.x, xLeft.y);
+      ctx.lineTo(xRight.x, xRight.y);
+      ctx.stroke();
+
+      // Y軸
+      const yBottom = mathToPixel(0, GRAPH_BOUNDS.minY);
+      const yTop = mathToPixel(0, GRAPH_BOUNDS.maxY);
+      ctx.beginPath();
+      ctx.moveTo(yBottom.x, yBottom.y);
+      ctx.lineTo(yTop.x, yTop.y);
+      ctx.stroke();
+
+      // 矢印
+      ctx.fillStyle = '#64748b';
+      // X矢印
+      ctx.beginPath();
+      ctx.moveTo(xRight.x, xRight.y);
+      ctx.lineTo(xRight.x - 7, xRight.y - 4);
+      ctx.lineTo(xRight.x - 7, xRight.y + 4);
+      ctx.closePath();
+      ctx.fill();
+
+      // Y矢印
+      ctx.beginPath();
+      ctx.moveTo(yTop.x, yTop.y);
+      ctx.lineTo(yTop.x - 4, yTop.y + 7);
+      ctx.lineTo(yTop.x + 4, yTop.y + 7);
+      ctx.closePath();
+      ctx.fill();
+
+      // 軸ラベル
+      ctx.font = 'bold 12px "Fira Code", monospace';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'top';
+      ctx.fillText('x', xRight.x - 4, xRight.y + 7);
+
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('y', yTop.x + 7, yTop.y + 2);
+
+      // 原点 O
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'top';
+      ctx.font = '11px "Fira Code", monospace';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText('O', originX - 4, originY + 3);
+
+      // 目盛り数値（2刻み）
+      ctx.font = '10px "Fira Code", monospace';
+      ctx.fillStyle = '#475569';
+
+      for (let x = GRAPH_BOUNDS.minX; x <= GRAPH_BOUNDS.maxX; x++) {
+        if (x === 0 || Math.abs(x) % 2 !== 0) continue;
+        const pt = mathToPixel(x, 0);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(x.toString(), pt.x, pt.y + 4);
+
+        // 小目盛り
+        ctx.strokeStyle = '#64748b';
+        ctx.beginPath();
+        ctx.moveTo(pt.x, pt.y - 2);
+        ctx.lineTo(pt.x, pt.y + 2);
+        ctx.stroke();
+      }
+
+      for (let y = GRAPH_BOUNDS.minY; y <= GRAPH_BOUNDS.maxY; y++) {
+        if (y === 0 || Math.abs(y) % 2 !== 0) continue;
+        const pt = mathToPixel(0, y);
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(y.toString(), pt.x - 5, pt.y);
+
+        ctx.strokeStyle = '#64748b';
+        ctx.beginPath();
+        ctx.moveTo(pt.x - 2, pt.y);
+        ctx.lineTo(pt.x + 2, pt.y);
+        ctx.stroke();
+      }
+    }
+
+    function drawLine() {
+      const q = state.currentQuestion;
+      const pts = q.points;
+      const pA = pts[0];
+      const pD = pts[3];
+
+      // 直線を少し両端に延長
+      const slopeVal = (pD.y - pA.y) / (pD.x - pA.x);
+      const bVal = pA.y - slopeVal * pA.x;
+
+      const x1 = GRAPH_BOUNDS.minX - 1;
+      const y1 = slopeVal * x1 + bVal;
+      const x2 = GRAPH_BOUNDS.maxX + 1;
+      const y2 = slopeVal * x2 + bVal;
+
+      const pStart = mathToPixel(x1, y1);
+      const pEnd = mathToPixel(x2, y2);
+
+      // 背景グロー
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
+      ctx.beginPath();
+      ctx.moveTo(pStart.x, pStart.y);
+      ctx.lineTo(pEnd.x, pEnd.y);
+      ctx.stroke();
+
+      // 直線本体
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.moveTo(pStart.x, pStart.y);
+      ctx.lineTo(pEnd.x, pEnd.y);
+      ctx.stroke();
+    }
+
+    function drawPoints() {
+      const q = state.currentQuestion;
+      const mode = state.coordMode;
+
+      q.points.forEach((pt, idx) => {
+        const pix = mathToPixel(pt.x, pt.y);
+
+        // 垂線描画（x座標のみ、またはy座標のみモード時）
+        if (mode === 'x' || mode === 'both') {
+          const xOnAxis = mathToPixel(pt.x, 0);
+          ctx.save();
+          ctx.setLineDash([3, 3]);
+          ctx.lineWidth = 1.2;
+          ctx.strokeStyle = `${pt.color}88`;
+          ctx.beginPath();
+          ctx.moveTo(pix.x, pix.y);
+          ctx.lineTo(xOnAxis.x, xOnAxis.y);
+          ctx.stroke();
+
+          // x軸上の目盛り点
+          ctx.fillStyle = pt.color;
+          ctx.beginPath();
+          ctx.arc(xOnAxis.x, xOnAxis.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        if (mode === 'y' || mode === 'both') {
+          const yOnAxis = mathToPixel(0, pt.y);
+          ctx.save();
+          ctx.setLineDash([3, 3]);
+          ctx.lineWidth = 1.2;
+          ctx.strokeStyle = `${pt.color}88`;
+          ctx.beginPath();
+          ctx.moveTo(pix.x, pix.y);
+          ctx.lineTo(yOnAxis.x, yOnAxis.y);
+          ctx.stroke();
+
+          // y軸上の目盛り点
+          ctx.fillStyle = pt.color;
+          ctx.beginPath();
+          ctx.arc(yOnAxis.x, yOnAxis.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // 点の光彩リング
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(pix.x, pix.y, 9, 0, Math.PI * 2);
+        ctx.fillStyle = `${pt.color}33`;
+        ctx.fill();
+
+        // 点本体
+        ctx.beginPath();
+        ctx.arc(pix.x, pix.y, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = pt.color;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+        ctx.restore();
+
+        // 点のラベル文字列
+        let labelText = '';
+        if (mode === 'both') {
+          labelText = `${pt.name}(${pt.x}, ${pt.y})`;
+        } else if (mode === 'x') {
+          labelText = `${pt.name}(x=${pt.x})`;
+        } else if (mode === 'y') {
+          labelText = `${pt.name}(y=${pt.y})`;
+        }
+
+        // ラベル配置位置（直線の向きに合わせて見やすく配置）
+        ctx.save();
+        ctx.font = 'bold 12px "M PLUS Rounded 1c", "Fira Code", monospace';
+        const textMetrics = ctx.measureText(labelText);
+        const textWidth = textMetrics.width;
+
+        // 点の左上または右下にオフセット
+        let offX = 12;
+        let offY = -12;
+        if (pt.y > 4) offY = 18;
+        if (pt.x > 4) offX = -textWidth - 12;
+
+        const labelX = pix.x + offX;
+        const labelY = pix.y + offY;
+
+        // ラベル背景ピル
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+        ctx.strokeStyle = pt.color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(labelX - 4, labelY - 11, textWidth + 8, 18, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        // ラベル文字
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(labelText, labelX, labelY - 2);
+        ctx.restore();
+      });
+    }
+
+    function drawGuideTriangles() {
+      const q = state.currentQuestion;
+      const pts = q.points;
+      const mode = state.coordMode;
+
+      // 3つの区間: AB, BC, CD
+      const segments = [
+        { p1: pts[0], p2: pts[1], r: q.ratio[0], color: '#f43f5e' },
+        { p1: pts[1], p2: pts[2], r: q.ratio[1], color: '#f59e0b' },
+        { p1: pts[2], p2: pts[3], r: q.ratio[2], color: '#10b981' },
+      ];
+
+      segments.forEach((seg, i) => {
+        const pix1 = mathToPixel(seg.p1.x, seg.p1.y);
+        const pix2 = mathToPixel(seg.p2.x, seg.p2.y);
+        const cornerPix = mathToPixel(seg.p2.x, seg.p1.y);
+
+        ctx.save();
+        // 直角三角形の塗りつぶし
+        ctx.fillStyle = `${seg.color}18`;
+        ctx.beginPath();
+        ctx.moveTo(pix1.x, pix1.y);
+        ctx.lineTo(cornerPix.x, cornerPix.y);
+        ctx.lineTo(pix2.x, pix2.y);
+        ctx.closePath();
+        ctx.fill();
+
+        // 三角形の枠線
+        ctx.setLineDash([2, 2]);
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = `${seg.color}aa`;
+        ctx.beginPath();
+        ctx.moveTo(pix1.x, pix1.y);
+        ctx.lineTo(cornerPix.x, cornerPix.y);
+        ctx.lineTo(pix2.x, pix2.y);
+        ctx.stroke();
+        ctx.restore();
+
+        // 線分の中央に比のバブル（①, ②, ③ など）を描画
+        const midX = (pix1.x + pix2.x) / 2;
+        const midY = (pix1.y + pix2.y) / 2;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(midX, midY, 11, 0, Math.PI * 2);
+        ctx.fillStyle = seg.color;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px "Fira Code", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(seg.r.toString(), midX, midY);
+        ctx.restore();
+
+        // x または y の増分ラベル
+        if (mode === 'x' || mode === 'both') {
+          const dx = Math.abs(seg.p2.x - seg.p1.x);
+          const xMidPix = (pix1.x + cornerPix.x) / 2;
+          const yOff = seg.p1.y >= 0 ? cornerPix.y + 12 : cornerPix.y - 6;
+
+          ctx.save();
+          ctx.font = '10px "Fira Code", monospace';
+          ctx.fillStyle = '#94a3b8';
+          ctx.textAlign = 'center';
+          ctx.fillText(`Δx=${dx}`, xMidPix, yOff);
+          ctx.restore();
+        }
+
+        if (mode === 'y' && mode !== 'both') {
+          const dy = Math.abs(seg.p2.y - seg.p1.y);
+          const yMidPix = (cornerPix.y + pix2.y) / 2;
+          const xOff = cornerPix.x > pix1.x ? cornerPix.x + 14 : cornerPix.x - 14;
+
+          ctx.save();
+          ctx.font = '10px "Fira Code", monospace';
+          ctx.fillStyle = '#94a3b8';
+          ctx.textAlign = 'center';
+          ctx.fillText(`Δy=${dy}`, xOff, yMidPix);
+          ctx.restore();
+        }
+      });
+    }
+
+    // --- UI レンダリング & イベント管理 ---
+    const choicesContainer = document.getElementById('choices-container');
+    const feedbackPanel = document.getElementById('feedback-panel');
+    const feedbackContent = document.getElementById('feedback-content');
+    const btnNext = document.getElementById('btn-next');
+    const btnNextText = document.getElementById('btn-next-text');
+    const autoAdvanceBar = document.getElementById('auto-advance-bar');
+    const autoAdvanceBarWrapper = document.getElementById('auto-advance-bar-wrapper');
+
+    const statStreak = document.getElementById('stat-streak');
+    const statAccuracy = document.getElementById('stat-accuracy');
+    const statCount = document.getElementById('stat-count');
+    const questionIndexEl = document.getElementById('question-index');
+    const lineEqDisplay = document.getElementById('line-eq-display');
+    const coordInstruction = document.getElementById('coord-instruction');
+    const badgeCoordMode = document.getElementById('badge-coord-mode');
+
+    const coordCardA = document.getElementById('coord-card-A');
+    const coordCardB = document.getElementById('coord-card-B');
+    const coordCardC = document.getElementById('coord-card-C');
+    const coordCardD = document.getElementById('coord-card-D');
+
+    // 座標表示モードの更新
+    function setCoordMode(mode) {
+      state.coordMode = mode;
+
+      // ボタンのスタイル更新
+      document.querySelectorAll('.coord-mode-btn').forEach(btn => {
+        if (btn.getAttribute('data-mode') === mode) {
+          btn.className = 'coord-mode-btn px-2 py-1 rounded font-bold text-sky-300 bg-sky-950 border border-sky-500/50 transition';
+        } else {
+          btn.className = 'coord-mode-btn px-2 py-1 rounded text-slate-400 hover:text-slate-200 border border-transparent transition';
+        }
+      });
+
+      // バッジと説明テキストの更新
+      if (mode === 'x') {
+        badgeCoordMode.textContent = 'x座標のみ表示中';
+        coordInstruction.textContent = 'x座標の差に注目して比を求めよう！';
+      } else if (mode === 'y') {
+        badgeCoordMode.textContent = 'y座標のみ表示中';
+        coordInstruction.textContent = 'y座標の差に注目して比を求めよう！';
+      } else {
+        badgeCoordMode.textContent = '両方 (x, y) 表示中';
+        coordInstruction.textContent = 'x座標でもy座標でもどちらでも比が求まる！';
+      }
+
+      updateCoordCards();
+      drawGraph();
+    }
+
+    function updateCoordCards() {
+      if (!state.currentQuestion) return;
+      const pts = state.currentQuestion.points;
+      const mode = state.coordMode;
+
+      const formatCard = (pt) => {
+        if (mode === 'both') return `(${pt.x}, ${pt.y})`;
+        if (mode === 'x') return `x = ${pt.x}`;
+        if (mode === 'y') return `y = ${pt.y}`;
+      };
+
+      coordCardA.textContent = formatCard(pts[0]);
+      coordCardB.textContent = formatCard(pts[1]);
+      coordCardC.textContent = formatCard(pts[2]);
+      coordCardD.textContent = formatCard(pts[3]);
+    }
+
+    // 新しい問題をロード
+    function loadNextQuestion() {
+      clearAutoAdvanceTimer();
+      state.answered = false;
+      state.currentQuestion = generateQuestion();
+
+      questionIndexEl.textContent = state.questionIndex;
+
+      // 直線の式表示
+      const q = state.currentQuestion;
+      lineEqDisplay.textContent = formatEquationString(q.slope, q.intercept);
+
+      // 座標カードの更新
+      updateCoordCards();
+
+      // 4択ボタンの描画
+      choicesContainer.innerHTML = '';
+      q.choices.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'choice-btn w-full p-3.5 rounded-xl bg-slate-900 hover:bg-slate-800/90 text-left border border-slate-700/80 hover:border-sky-500/50 text-slate-200 font-bold transition flex items-center justify-between group shadow-md cursor-pointer';
+        btn.setAttribute('data-choice', choice);
+        btn.setAttribute('data-index', idx + 1);
+
+        btn.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-lg bg-slate-800 group-hover:bg-sky-500/20 text-sky-400 font-mono text-sm flex items-center justify-center border border-slate-700 group-hover:border-sky-500/40 transition">
+              ${idx + 1}
+            </span>
+            <span class="font-mono text-base tracking-wide">${choice}</span>
+          </div>
+          <span class="text-xs text-slate-500 group-hover:text-sky-400 transition font-mono">[${idx + 1}]</span>
+        `;
+
+        btn.addEventListener('click', () => handleAnswer(choice, btn));
+        choicesContainer.appendChild(btn);
+      });
+
+      // フィードバックパネル非表示
+      feedbackPanel.classList.add('hidden');
+      btnNext.disabled = true;
+      btnNext.className = 'w-full sm:w-auto px-5 py-2 rounded-xl font-bold text-sm bg-slate-800 text-slate-500 cursor-not-allowed transition flex items-center justify-center gap-2';
+
+      drawGraph();
+    }
+
+    // 回答判定
+    function handleAnswer(selectedChoice, selectedBtn) {
+      if (state.answered) return;
+      state.answered = true;
+      state.totalAnswered++;
+
+      const q = state.currentQuestion;
+      const isCorrect = selectedChoice === q.correctAnswer;
+
+      if (isCorrect) {
+        state.correctCount++;
+        state.currentStreak++;
+        playSound('correct');
+      } else {
+        state.currentStreak = 0;
+        playSound('wrong');
+      }
+
+      updateStats();
+
+      // ボタンのスタイル更新
+      const allBtns = choicesContainer.querySelectorAll('.choice-btn');
+      allBtns.forEach(btn => {
+        const c = btn.getAttribute('data-choice');
+        btn.disabled = true;
+        btn.classList.remove('hover:bg-slate-800/90', 'hover:border-sky-500/50', 'cursor-pointer');
+
+        if (c === q.correctAnswer) {
+          btn.className = 'choice-btn w-full p-3.5 rounded-xl bg-emerald-950/80 border-2 border-emerald-500 text-emerald-200 font-bold flex items-center justify-between shadow-lg shadow-emerald-900/30';
+        } else if (btn === selectedBtn) {
+          btn.className = 'choice-btn w-full p-3.5 rounded-xl bg-rose-950/80 border-2 border-rose-500 text-rose-200 font-bold flex items-center justify-between opacity-90';
+        } else {
+          btn.className = 'choice-btn w-full p-3.5 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-500 font-bold flex items-center justify-between opacity-50';
+        }
+      });
+
+      // 解説パネルの構築
+      feedbackPanel.classList.remove('hidden');
+      btnNext.disabled = false;
+      btnNext.className = 'w-full sm:w-auto px-5 py-2 rounded-xl font-bold text-sm bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-600/30 cursor-pointer transition flex items-center justify-center gap-2';
+
+      const dx = q.deltaX;
+      const dy = q.deltaY;
+      const pts = q.points;
+
+      feedbackContent.innerHTML = `
+        <div class="flex items-center gap-2">
+          ${isCorrect 
+            ? '<span class="text-emerald-400 font-black flex items-center gap-1.5"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> 正解！お見事！</span>' 
+            : '<span class="text-rose-400 font-black flex items-center gap-1.5"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg> 不正解… 正解は ' + q.correctAnswer + '</span>'}
+        </div>
+        <div class="text-xs text-slate-300 space-y-1.5 mt-1 leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+          <p class="font-bold text-sky-300">💡 解法のポイント（x座標またはy座標の差に注目）：</p>
+          <div class="font-mono text-[11px] text-slate-300 pl-1 space-y-0.5">
+            <div>・AB間の増分: Δx = ${pts[1].x} - (${pts[0].x}) = <span class="text-rose-400 font-bold">${dx[0]}</span> (Δy = ${dy[0]})</div>
+            <div>・BC間の増分: Δx = ${pts[2].x} - (${pts[1].x}) = <span class="text-amber-400 font-bold">${dx[1]}</span> (Δy = ${dy[1]})</div>
+            <div>・CD間の増分: Δx = ${pts[3].x} - (${pts[2].x}) = <span class="text-emerald-400 font-bold">${dx[2]}</span> (Δy = ${dy[2]})</div>
+          </div>
+          <p class="text-slate-300 text-[11px] pt-1 border-t border-slate-800">
+            比は <span class="font-mono text-amber-300 font-bold">${dx[0]} : ${dx[1]} : ${dx[2]}</span>
+            ${(dx[0] !== q.ratio[0] || dx[1] !== q.ratio[1] || dx[2] !== q.ratio[2]) 
+              ? `を約分して <span class="font-mono text-emerald-400 font-bold">${q.correctAnswer}</span> となります！` 
+              : `となり、最も簡単な比 <span class="font-mono text-emerald-400 font-bold">${q.correctAnswer}</span> です！`}
+          </p>
+        </div>
+      `;
+
+      // グラフを再描画（ガイドの直角三角形・比のバブルを自動表示）
+      drawGraph();
+
+      // 目標連続正解達成チェック
+      if (state.targetStreak > 0 && state.currentStreak >= state.targetStreak && !state.hasClearedTarget) {
+        state.hasClearedTarget = true;
+        setTimeout(() => {
+          showClearModal();
+        }, 500);
+        return;
+      }
+
+      // 自動送りの実行（正解時のみ）
+      if (isCorrect && state.autoAdvance) {
+        startAutoAdvance();
+      }
+    }
+
+    // 自動送りタイマー
+    function startAutoAdvance() {
+      clearAutoAdvanceTimer();
+      autoAdvanceBarWrapper.classList.remove('hidden');
+      autoAdvanceBar.style.width = '0%';
+
+      const duration = 900; // 0.9秒
+      const startTime = performance.now();
+
+      function animate(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        autoAdvanceBar.style.width = `${progress * 100}%`;
+
+        if (progress < 1) {
+          state.autoAdvanceAnimFrame = requestAnimationFrame(animate);
+        } else {
+          goToNextQuestion();
+        }
+      }
+
+      state.autoAdvanceAnimFrame = requestAnimationFrame(animate);
+    }
+
+    function clearAutoAdvanceTimer() {
+      if (state.autoAdvanceAnimFrame) {
+        cancelAnimationFrame(state.autoAdvanceAnimFrame);
+        state.autoAdvanceAnimFrame = null;
+      }
+      if (autoAdvanceBarWrapper) {
+        autoAdvanceBarWrapper.classList.add('hidden');
+      }
+    }
+
+    function goToNextQuestion() {
+      clearAutoAdvanceTimer();
+      state.questionIndex++;
+      loadNextQuestion();
+    }
+
+    function updateStats() {
+      statStreak.textContent = state.currentStreak;
+      const acc = state.totalAnswered > 0 ? Math.round((state.correctCount / state.totalAnswered) * 100) : 0;
+      statAccuracy.textContent = `${acc}%`;
+      statCount.textContent = `(${state.correctCount}/${state.totalAnswered})`;
+    }
+
+    // --- 目標達成モーダル & 紙吹雪 ---
+    const clearModal = document.getElementById('clear-modal');
+    const clearCard = document.getElementById('clear-card');
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    let confettiAnim = null;
+
+    function showClearModal() {
+      playSound('clear');
+      document.getElementById('clear-target-count').textContent = state.targetStreak;
+      document.getElementById('clear-accuracy').textContent = statAccuracy.textContent;
+      document.getElementById('clear-total-questions').textContent = `${state.totalAnswered}問`;
+
+      clearModal.classList.remove('hidden');
+      setTimeout(() => {
+        clearModal.classList.remove('opacity-0');
+        clearCard.classList.remove('scale-90');
+        clearCard.classList.add('scale-100');
+      }, 10);
+
+      startConfetti();
+    }
+
+    function hideClearModal() {
+      clearModal.classList.add('opacity-0');
+      clearCard.classList.add('scale-90');
+      clearCard.classList.remove('scale-100');
+      stopConfetti();
+      setTimeout(() => {
+        clearModal.classList.add('hidden');
+      }, 300);
+    }
+
+    function startConfetti() {
+      const c = confettiCanvas;
+      const cCtx = c.getContext('2d');
+      c.width = window.innerWidth;
+      c.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#f43f5e', '#f59e0b', '#10b981', '#38bdf8', '#818cf8', '#fbbf24'];
+
+      for (let i = 0; i < 80; i++) {
+        particles.push({
+          x: Math.random() * c.width,
+          y: Math.random() * c.height - c.height,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 4,
+          vy: Math.random() * 4 + 3,
+          rot: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 8
+        });
+      }
+
+      function render() {
+        cCtx.clearRect(0, 0, c.width, c.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.rotSpeed;
+
+          cCtx.save();
+          cCtx.translate(p.x, p.y);
+          cCtx.rotate((p.rot * Math.PI) / 180);
+          cCtx.fillStyle = p.color;
+          cCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          cCtx.restore();
+
+          if (p.y > c.height) {
+            p.y = -10;
+            p.x = Math.random() * c.width;
+          }
+        });
+        confettiAnim = requestAnimationFrame(render);
+      }
+      render();
+    }
+
+    function stopConfetti() {
+      if (confettiAnim) {
+        cancelAnimationFrame(confettiAnim);
+        confettiAnim = null;
+      }
+    }
+
+    // --- イベントリスナー設定 ---
+    btnNext.addEventListener('click', () => {
+      playSound('click');
+      goToNextQuestion();
+    });
+
+    // 座標モードボタン
+    document.querySelectorAll('.coord-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        playSound('click');
+        setCoordMode(btn.getAttribute('data-mode'));
+      });
+    });
+
+    // 方眼トグル
+    const btnGridToggle = document.getElementById('btn-grid-toggle');
+    const gridDot = document.getElementById('grid-dot');
+    const gridStatus = document.getElementById('grid-status');
+    btnGridToggle.addEventListener('click', () => {
+      playSound('click');
+      state.showGrid = !state.showGrid;
+      if (state.showGrid) {
+        gridDot.className = 'w-2 h-2 rounded-full bg-sky-400';
+        gridStatus.className = 'text-[10px] bg-sky-400 text-slate-950 font-bold px-1 rounded';
+        gridStatus.textContent = 'ON';
+        btnGridToggle.className = 'px-2.5 py-1.5 rounded-lg bg-sky-950/70 hover:bg-sky-900/80 text-xs text-sky-300 border border-sky-500/50 flex items-center gap-1.5 transition shadow-sm';
+      } else {
+        gridDot.className = 'w-2 h-2 rounded-full bg-slate-500';
+        gridStatus.className = 'text-[10px] bg-slate-700 text-slate-300 px-1 rounded';
+        gridStatus.textContent = 'OFF';
+        btnGridToggle.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 border border-slate-700 flex items-center gap-1.5 transition';
+      }
+      drawGraph();
+    });
+
+    // ガイドトグル
+    const btnHintToggle = document.getElementById('btn-hint-toggle');
+    const hintStatus = document.getElementById('hint-status');
+    btnHintToggle.addEventListener('click', () => {
+      playSound('click');
+      state.showHintGuide = !state.showHintGuide;
+      if (state.showHintGuide) {
+        hintStatus.className = 'text-[10px] bg-amber-400 text-slate-950 font-bold px-1 rounded';
+        hintStatus.textContent = 'ON';
+        btnHintToggle.className = 'px-2.5 py-1.5 rounded-lg bg-amber-950/80 hover:bg-amber-900 text-xs text-amber-300 border border-amber-500/50 flex items-center gap-1.5 transition shadow-sm';
+      } else {
+        hintStatus.className = 'text-[10px] bg-amber-400/20 text-amber-300 px-1 rounded';
+        hintStatus.textContent = 'OFF';
+        btnHintToggle.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition';
+      }
+      drawGraph();
+    });
+
+    // 自動送りトグル
+    const btnAutoAdvance = document.getElementById('btn-auto-advance');
+    const autoAdvanceStatus = document.getElementById('auto-advance-status');
+    btnAutoAdvance.addEventListener('click', () => {
+      playSound('click');
+      state.autoAdvance = !state.autoAdvance;
+      if (state.autoAdvance) {
+        autoAdvanceStatus.className = 'text-[10px] bg-emerald-400 text-slate-950 font-bold px-1 rounded';
+        autoAdvanceStatus.textContent = 'ON';
+        btnAutoAdvance.className = 'hidden sm:flex px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 text-xs text-emerald-300 border border-emerald-500/40 items-center gap-1.5 transition';
+      } else {
+        autoAdvanceStatus.className = 'text-[10px] bg-slate-700 text-slate-300 px-1 rounded';
+        autoAdvanceStatus.textContent = 'OFF';
+        btnAutoAdvance.className = 'hidden sm:flex px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 border border-slate-700 items-center gap-1.5 transition';
+        clearAutoAdvanceTimer();
+      }
+    });
+
+    // 目標連勝変更
+    document.getElementById('target-streak-select').addEventListener('change', (e) => {
+      playSound('click');
+      state.targetStreak = parseInt(e.target.value, 10);
+      state.hasClearedTarget = false;
+    });
+
+    // 全画面トグル
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+    const fsIconEnter = document.getElementById('fs-icon-enter');
+    const fsIconExit = document.getElementById('fs-icon-exit');
+    const fullscreenStatus = document.getElementById('fullscreen-status');
+    btnFullscreen.addEventListener('click', () => {
+      playSound('click');
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      if (document.fullscreenElement) {
+        fsIconEnter.classList.add('hidden');
+        fsIconExit.classList.remove('hidden');
+        fullscreenStatus.textContent = 'ON';
+        fullscreenStatus.className = 'text-[10px] bg-sky-500 text-slate-950 font-bold px-1 rounded';
+      } else {
+        fsIconEnter.classList.remove('hidden');
+        fsIconExit.classList.add('hidden');
+        fullscreenStatus.textContent = 'OFF';
+        fullscreenStatus.className = 'text-[10px] bg-slate-700 text-slate-300 px-1 rounded';
+      }
+      setTimeout(resizeCanvas, 100);
+    });
+
+    // サウンドトグル
+    const btnSound = document.getElementById('btn-sound');
+    const iconSoundOn = document.getElementById('icon-sound-on');
+    const iconSoundOff = document.getElementById('icon-sound-off');
+    btnSound.addEventListener('click', () => {
+      state.soundEnabled = !state.soundEnabled;
+      if (state.soundEnabled) {
+        iconSoundOn.classList.remove('hidden');
+        iconSoundOff.classList.add('hidden');
+        playSound('click');
+      } else {
+        iconSoundOn.classList.add('hidden');
+        iconSoundOff.classList.remove('hidden');
+      }
+    });
+
+    // モーダルボタン
+    document.getElementById('btn-extend-target').addEventListener('click', () => {
+      playSound('click');
+      state.targetStreak += 5;
+      state.hasClearedTarget = false;
+      const sel = document.getElementById('target-streak-select');
+      // セレクトに値がなければ追加
+      if (!Array.from(sel.options).some(o => o.value == state.targetStreak)) {
+        const opt = document.createElement('option');
+        opt.value = state.targetStreak;
+        opt.textContent = `${state.targetStreak}問`;
+        sel.appendChild(opt);
+      }
+      sel.value = state.targetStreak;
+      hideClearModal();
+      goToNextQuestion();
+    });
+
+    document.getElementById('btn-close-modal').addEventListener('click', () => {
+      playSound('click');
+      hideClearModal();
+    });
+
+    // キーボードショートカット
+    window.addEventListener('keydown', (e) => {
+      // 1〜4: 選択肢回答
+      if (['1', '2', '3', '4'].includes(e.key) && !state.answered) {
+        const idx = parseInt(e.key, 10) - 1;
+        const btns = choicesContainer.querySelectorAll('.choice-btn');
+        if (btns[idx]) {
+          btns[idx].click();
+        }
+      }
+
+      // Enter / Space: 次へ
+      if ((e.key === 'Enter' || e.key === ' ') && state.answered) {
+        e.preventDefault();
+        goToNextQuestion();
+      }
+
+      // 座標モード切替
+      if (e.key === 'x' || e.key === 'X') {
+        playSound('click');
+        setCoordMode('x');
+      } else if (e.key === 'y' || e.key === 'Y') {
+        playSound('click');
+        setCoordMode('y');
+      } else if (e.key === 'b' || e.key === 'B') {
+        playSound('click');
+        setCoordMode('both');
+      } else if (e.key === 'm' || e.key === 'M') {
+        btnGridToggle.click();
+      } else if (e.key === 'h' || e.key === 'H') {
+        btnHintToggle.click();
+      } else if (e.key === 'a' || e.key === 'A') {
+        btnAutoAdvance.click();
+      } else if (e.key === 'f' || e.key === 'F') {
+        btnFullscreen.click();
+      } else if (e.key === 's' || e.key === 'S') {
+        btnSound.click();
+      }
+    });
+
+    // リサイズ監視
+    window.addEventListener('resize', resizeCanvas);
+
+    // 初期化ロード
+    window.addEventListener('DOMContentLoaded', () => {
+      setCoordMode('x');
+      loadNextQuestion();
+      setTimeout(resizeCanvas, 50);
+    });
+  </script>
+</body>
+</html>
