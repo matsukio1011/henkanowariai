@@ -52,6 +52,24 @@
       -webkit-user-select: none;
     }
 
+    /* 分数表示用のCSS */
+    .fraction {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 3px;
+      line-height: 1.1;
+      font-size: 0.9em;
+    }
+    .fraction .numerator {
+      border-bottom: 1.5px solid currentColor;
+      padding-bottom: 1px;
+    }
+    .fraction .denominator {
+      padding-top: 1px;
+    }
+
     /* 選択肢ボタンの波紋・押し心地エフェクト */
     .choice-btn {
       transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -209,22 +227,30 @@
       
       <!-- 設問カード -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl flex-shrink-0">
-        <div class="flex items-center justify-between gap-2 mb-2">
-          <span class="text-xs font-semibold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+        <div class="flex items-center justify-between gap-2 mb-2.5">
+          <span class="text-xs font-semibold uppercase tracking-wider text-amber-400 flex items-center gap-1.5 flex-shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            線分の長さの比
+            出題モード
           </span>
+          <select id="problem-mode-select" class="bg-slate-800 hover:bg-slate-750 text-amber-300 text-xs font-semibold rounded-lg px-2 py-1 border border-amber-500/30 focus:outline-none focus:border-amber-400 cursor-pointer transition shadow-inner">
+            <option value="ratio4" selected>4点から比 (AB:BC:CD)</option>
+            <option value="internal">2点から内分点の座標 (m : n)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span id="problem-type-title" class="text-xs font-bold text-slate-300">線分の長さの比</span>
           <span id="badge-coord-mode" class="text-[10px] bg-sky-950 text-sky-300 px-2 py-0.5 rounded border border-sky-500/40 font-mono">x座標のみ表示中</span>
         </div>
 
-        <p class="text-base font-bold text-slate-100 leading-snug mb-3">
+        <p id="question-text" class="text-base font-bold text-slate-100 leading-snug mb-3">
           直線上の4点 <span class="text-rose-400">A</span>, <span class="text-amber-400">B</span>, <span class="text-emerald-400">C</span>, <span class="text-cyan-400">D</span> について、<br>
           線分比 <span class="text-amber-300 font-black text-lg">AB : BC : CD</span> を最も簡単な整数の比で求めなさい。
         </p>
 
         <p class="text-xs text-slate-400 mt-3 flex items-center justify-between">
           <span>キー <span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">1</span>〜<span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">4</span> で即答</span>
-          <span class="text-slate-500 hidden sm:inline">[X]x [Y]y [B]両方 [R]ランダム</span>
+          <span class="text-slate-500 hidden sm:inline">[P]モード [X]x [Y]y [B]両方 [R]ランダム</span>
         </p>
       </div>
 
@@ -307,6 +333,7 @@
   <script>
     // --- アプリケーション状態 ---
     const state = {
+      problemMode: 'ratio4', // 'ratio4': 4点から比 (AB:BC:CD), 'internal': 2点から内分点の座標 (m:n)
       coordSetting: 'x', // 'x': xのみ, 'y': yのみ, 'both': 両方, 'random': 問題ごとにランダム
       coordMode: 'x',    // 現在の問で実際に適用中の表示モード ('x' | 'y' | 'both')
       showGrid: true,
@@ -461,6 +488,45 @@
       return `y = ${slopeStr}${bStr}`;
     }
 
+    // 分数表示ヘルパー (HTML)
+    function formatFracHTML(frac) {
+      if (typeof frac === 'number') frac = makeFraction(frac, 1);
+      if (frac.den === 1) return `${frac.num}`;
+      const isNeg = frac.num < 0;
+      const absNum = Math.abs(frac.num);
+      const signStr = isNeg ? '−' : '';
+      return `${signStr}<span class="fraction"><span class="numerator">${absNum}</span><span class="denominator">${frac.den}</span></span>`;
+    }
+
+    // 分数表示ヘルパー (プレーンテキスト)
+    function formatFracText(frac) {
+      if (typeof frac === 'number') frac = makeFraction(frac, 1);
+      if (frac.den === 1) return `${frac.num}`;
+      return `${frac.num}/${frac.den}`;
+    }
+
+    // 座標フォーマット (HTML)
+    function formatCoordChoiceHTML(xFrac, yFrac, mode) {
+      if (mode === 'x') {
+        return `x = ${formatFracHTML(xFrac)}`;
+      } else if (mode === 'y') {
+        return `y = ${formatFracHTML(yFrac)}`;
+      } else {
+        return `(${formatFracHTML(xFrac)}, ${formatFracHTML(yFrac)})`;
+      }
+    }
+
+    // 座標フォーマット (プレーンテキスト、重複排除用)
+    function formatCoordChoiceText(xFrac, yFrac, mode) {
+      if (mode === 'x') {
+        return `x=${formatFracText(xFrac)}`;
+      } else if (mode === 'y') {
+        return `y=${formatFracText(yFrac)}`;
+      } else {
+        return `(${formatFracText(xFrac)},${formatFracText(yFrac)})`;
+      }
+    }
+
     // --- 問題生成ロジック ---
     // 比の候補プール (最簡整数比)
     const RATIO_POOLS = [
@@ -499,7 +565,7 @@
       { p: -3, q: 2 }
     ];
 
-    function generateQuestion() {
+    function generate4PointRatioQuestion() {
       // 許容座標範囲: 方眼 [-7, 7]
       const BOUND_MIN = -6;
       const BOUND_MAX = 6;
@@ -632,6 +698,7 @@
         }
 
         validQuestion = {
+          type: 'ratio4',
           slope,
           intercept: Math.round(bVal * 10) / 10,
           points: [
@@ -645,11 +712,181 @@
           ratio: [simpR1, simpR2, simpR3],
           rawRatio: [step1, step2, step3],
           correctAnswer: correctRatioStr,
-          choices: choices
+          choices: choices.map(c => ({ text: c, html: c }))
         };
       }
 
       return validQuestion;
+    }
+
+    // 内分比候補ペア [m, n]
+    const INTERNAL_RATIOS = [
+      [1, 1], // 中点 (1:1)
+      [1, 2], [2, 1],
+      [1, 3], [3, 1],
+      [2, 3], [3, 2],
+      [1, 4], [4, 1]
+    ];
+
+    function generateInternalDivisionQuestion() {
+      const BOUND_MIN = -6;
+      const BOUND_MAX = 6;
+      let attempts = 0;
+      let valid = null;
+
+      while (!valid && attempts < 1000) {
+        attempts++;
+
+        // 1. 比 m : n を選出
+        const ratio = INTERNAL_RATIOS[Math.floor(Math.random() * INTERNAL_RATIOS.length)];
+        const [m, n] = ratio;
+        const total = m + n;
+
+        // 2. 点 A(xA, yA) を決定
+        const xA = Math.floor(Math.random() * (BOUND_MAX - BOUND_MIN + 1)) + BOUND_MIN;
+        const yA = Math.floor(Math.random() * (BOUND_MAX - BOUND_MIN + 1)) + BOUND_MIN;
+
+        // 3. 点 B(xB, yB) を決定 (内分点の分母が 1, 2, 3 のいずれかになるように選ぶ)
+        const wantInteger = Math.random() < 0.5;
+
+        let deltaX, deltaY;
+        if (wantInteger) {
+          const maxK = Math.floor(12 / total) || 1;
+          const kxOptions = [];
+          for (let k = -maxK; k <= maxK; k++) {
+            if (k !== 0 && xA + k * total >= BOUND_MIN && xA + k * total <= BOUND_MAX) {
+              kxOptions.push(k);
+            }
+          }
+          if (kxOptions.length === 0) continue;
+          deltaX = kxOptions[Math.floor(Math.random() * kxOptions.length)] * total;
+
+          const kyOptions = [];
+          for (let k = -maxK; k <= maxK; k++) {
+            if (k !== 0 && yA + k * total >= BOUND_MIN && yA + k * total <= BOUND_MAX) {
+              kyOptions.push(k);
+            }
+          }
+          if (kyOptions.length === 0) continue;
+          deltaY = kyOptions[Math.floor(Math.random() * kyOptions.length)] * total;
+        } else {
+          const dxOptions = [];
+          for (let dx = -10; dx <= 10; dx++) {
+            if (dx === 0 || xA + dx < BOUND_MIN || xA + dx > BOUND_MAX) continue;
+            const testXP = makeFraction(n * xA + m * (xA + dx), total);
+            if (testXP.den === 2 || testXP.den === 3) {
+              dxOptions.push(dx);
+            }
+          }
+          if (dxOptions.length === 0) continue;
+          deltaX = dxOptions[Math.floor(Math.random() * dxOptions.length)];
+
+          const dyOptions = [];
+          for (let dy = -10; dy <= 10; dy++) {
+            if (dy === 0 || yA + dy < BOUND_MIN || yA + dy > BOUND_MAX) continue;
+            const testYP = makeFraction(n * yA + m * (yA + dy), total);
+            if (testYP.den <= 3) {
+              dyOptions.push(dy);
+            }
+          }
+          if (dyOptions.length === 0) continue;
+          deltaY = dyOptions[Math.floor(Math.random() * dyOptions.length)];
+        }
+
+        const xB = xA + deltaX;
+        const yB = yA + deltaY;
+
+        // 内分点 P(xP, yP) の計算
+        const xP = makeFraction(n * xA + m * xB, total);
+        const yP = makeFraction(n * yA + m * yB, total);
+
+        if (xP.den > 3 || yP.den > 3) continue;
+
+        // 逆比 n : m の内分点 (最大トラップ誤答)
+        const xP_rev = makeFraction(m * xA + n * xB, total);
+        const yP_rev = makeFraction(m * yA + n * yB, total);
+
+        // 中点
+        const xP_mid = makeFraction(xA + xB, 2);
+        const yP_mid = makeFraction(yA + yB, 2);
+
+        const mode = state.coordMode; // 'x' | 'y' | 'both'
+
+        const correctText = formatCoordChoiceText(xP, yP, mode);
+        const correctHTML = formatCoordChoiceHTML(xP, yP, mode);
+
+        const distractors = new Map();
+        const addDistractor = (fx, fy) => {
+          if (fx.den > 3 || fy.den > 3) return false;
+          const t = formatCoordChoiceText(fx, fy, mode);
+          if (t !== correctText && !distractors.has(t)) {
+            distractors.set(t, formatCoordChoiceHTML(fx, fy, mode));
+            return true;
+          }
+          return false;
+        };
+
+        // 誤答候補の追加
+        if (m !== n) addDistractor(xP_rev, yP_rev);
+        if (m !== n) addDistractor(xP_mid, yP_mid);
+        if (mode === 'both' && formatFracText(xP) !== formatFracText(yP)) {
+          addDistractor(yP, xP);
+        }
+        addDistractor(makeFraction(-xP.num, xP.den), yP);
+        addDistractor(xP, makeFraction(-yP.num, yP.den));
+
+        const offsets = [1, -1, 2, -2];
+        for (const off of offsets) {
+          if (distractors.size >= 4) break;
+          addDistractor(makeFraction(xP.num + off * xP.den, xP.den), yP);
+          addDistractor(xP, makeFraction(yP.num + off * yP.den, yP.den));
+          addDistractor(makeFraction(xP.num + off * xP.den, xP.den), makeFraction(yP.num + off * yP.den, yP.den));
+        }
+
+        let fb = 1;
+        while (distractors.size < 3) {
+          addDistractor(makeFraction(xP.num + fb * xP.den, xP.den), makeFraction(yP.num - fb * yP.den, yP.den));
+          fb = fb > 0 ? -fb : -fb + 1;
+        }
+
+        const distEntries = Array.from(distractors.entries()).slice(0, 3);
+        const choices = [
+          { text: correctText, html: correctHTML },
+          ...distEntries.map(([t, h]) => ({ text: t, html: h }))
+        ];
+
+        for (let i = choices.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [choices[i], choices[j]] = [choices[j], choices[i]];
+        }
+
+        const slopeFrac = makeFraction(deltaY, deltaX);
+        const bVal = yA - slopeFrac.val * xA;
+
+        valid = {
+          type: 'internal',
+          ratio: [m, n],
+          pointA: { name: 'A', x: xA, y: yA, color: '#f43f5e' },
+          pointB: { name: 'B', x: xB, y: yB, color: '#06b6d4' },
+          pointP: { name: 'P', fracX: xP, fracY: yP, x: xP.val, y: yP.val, color: '#10b981' },
+          deltaX: deltaX,
+          deltaY: deltaY,
+          slope: slopeFrac,
+          intercept: Math.round(bVal * 10) / 10,
+          correctAnswer: correctText,
+          correctAnswerHTML: correctHTML,
+          choices: choices
+        };
+      }
+
+      return valid;
+    }
+
+    function generateQuestion() {
+      if (state.problemMode === 'internal') {
+        return generateInternalDivisionQuestion();
+      }
+      return generate4PointRatioQuestion();
     }
 
     // --- Canvas 描画エンジン ---
@@ -712,16 +949,20 @@
       drawAxes();
 
       if (state.currentQuestion) {
-        // 直線の描画
-        drawLine();
+        if (state.currentQuestion.type === 'internal') {
+          drawInternalDivision();
+        } else {
+          // 直線の描画
+          drawLine();
 
-        // ガイド（補助三角形・比）の描画（回答後の解説時のみ表示）
-        if (state.answered) {
-          drawGuideTriangles();
+          // ガイド（補助三角形・比）の描画（回答後の解説時のみ表示）
+          if (state.answered) {
+            drawGuideTriangles();
+          }
+
+          // 点 A, B, C, D の描画（座標ラベル含む）
+          drawPoints();
         }
-
-        // 点 A, B, C, D の描画（座標ラベル含む）
-        drawPoints();
       }
 
       ctx.restore();
@@ -1076,6 +1317,321 @@
       });
     }
 
+    function drawInternalDivision() {
+      const q = state.currentQuestion;
+      const pA = q.pointA;
+      const pB = q.pointB;
+      const pP = q.pointP;
+      const mode = state.coordMode;
+      const answered = state.answered;
+
+      const pixA = mathToPixel(pA.x, pA.y);
+      const pixB = mathToPixel(pB.x, pB.y);
+      const pixP = mathToPixel(pP.x, pP.y);
+
+      // 1. 直線全体の薄いガイド線（両端延長）
+      const slopeVal = (pB.y - pA.y) / (pB.x - pA.x);
+      const bVal = pA.y - slopeVal * pA.x;
+      const x1 = GRAPH_BOUNDS.minX - 1;
+      const y1 = slopeVal * x1 + bVal;
+      const x2 = GRAPH_BOUNDS.maxX + 1;
+      const y2 = slopeVal * x2 + bVal;
+      const pStart = mathToPixel(x1, y1);
+      const pEnd = mathToPixel(x2, y2);
+
+      ctx.save();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+      ctx.beginPath();
+      ctx.moveTo(pStart.x, pStart.y);
+      ctx.lineTo(pEnd.x, pEnd.y);
+      ctx.stroke();
+      ctx.restore();
+
+      // 2. 線分 AB のハイライト
+      ctx.save();
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.2)';
+      ctx.beginPath();
+      ctx.moveTo(pixA.x, pixA.y);
+      ctx.lineTo(pixB.x, pixB.y);
+      ctx.stroke();
+
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.moveTo(pixA.x, pixA.y);
+      ctx.lineTo(pixB.x, pixB.y);
+      ctx.stroke();
+      ctx.restore();
+
+      // 3. 回答後のガイド（直角三角形と変化量）
+      if (answered) {
+        const cornerP = mathToPixel(pP.x, pA.y);
+        const cornerB = mathToPixel(pB.x, pP.y);
+
+        ctx.save();
+        // A -> P 三角形
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.12)';
+        ctx.beginPath();
+        ctx.moveTo(pixA.x, pixA.y);
+        ctx.lineTo(cornerP.x, cornerP.y);
+        ctx.lineTo(pixP.x, pixP.y);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.setLineDash([2, 2]);
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = '#f43f5eaa';
+        ctx.stroke();
+
+        // P -> B 三角形
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.12)';
+        ctx.beginPath();
+        ctx.moveTo(pixP.x, pixP.y);
+        ctx.lineTo(cornerB.x, cornerB.y);
+        ctx.lineTo(pixB.x, pixB.y);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = '#06b6d4aa';
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 4. 比のバブル (m, n)
+      const midAP = { x: (pixA.x + pixP.x) / 2, y: (pixA.y + pixP.y) / 2 };
+      const midPB = { x: (pixP.x + pixB.x) / 2, y: (pixP.y + pixB.y) / 2 };
+
+      const drawRatioBubble = (pt, text, color) => {
+        ctx.save();
+        const dx = pixB.x - pixA.x;
+        const dy = pixB.y - pixA.y;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        let nx = -dy / len;
+        let ny = dx / len;
+        if (ny > 0) { nx = -nx; ny = -ny; }
+        const offDist = 15;
+        const bx = pt.x + nx * offDist;
+        const by = pt.y + ny * offDist;
+
+        ctx.beginPath();
+        ctx.arc(bx, by, 11, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px "Fira Code", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, bx, by);
+        ctx.restore();
+      };
+
+      drawRatioBubble(midAP, q.ratio[0].toString(), '#f59e0b');
+      drawRatioBubble(midPB, q.ratio[1].toString(), '#10b981');
+
+      // 5. 点 A, B の描画
+      const pts = [
+        { pt: pA, name: 'A', varLetter: 'a', color: '#f43f5e' },
+        { pt: pB, name: 'B', varLetter: 'b', color: '#06b6d4' }
+      ];
+
+      pts.forEach(({ pt, name, varLetter, color }) => {
+        const pix = mathToPixel(pt.x, pt.y);
+
+        if (mode === 'x' || mode === 'both') {
+          const xOnAxis = mathToPixel(pt.x, 0);
+          ctx.save();
+          ctx.setLineDash([3, 3]);
+          ctx.lineWidth = 1.2;
+          ctx.strokeStyle = `${color}88`;
+          ctx.beginPath();
+          ctx.moveTo(pix.x, pix.y);
+          ctx.lineTo(xOnAxis.x, xOnAxis.y);
+          ctx.stroke();
+
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(xOnAxis.x, xOnAxis.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        if (mode === 'y' || mode === 'both') {
+          const yOnAxis = mathToPixel(0, pt.y);
+          ctx.save();
+          ctx.setLineDash([3, 3]);
+          ctx.lineWidth = 1.2;
+          ctx.strokeStyle = `${color}88`;
+          ctx.beginPath();
+          ctx.moveTo(pix.x, pix.y);
+          ctx.lineTo(yOnAxis.x, yOnAxis.y);
+          ctx.stroke();
+
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(yOnAxis.x, yOnAxis.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(pix.x, pix.y, 11, 0, Math.PI * 2);
+        ctx.fillStyle = `${color}33`;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(pix.x, pix.y, 6.5, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+        ctx.restore();
+
+        let labelText = '';
+        if (mode === 'both') {
+          labelText = `${name}(${pt.x}, ${pt.y})`;
+        } else if (mode === 'x') {
+          labelText = `${name}(${pt.x}, ${varLetter})`;
+        } else if (mode === 'y') {
+          labelText = `${name}(${varLetter}, ${pt.y})`;
+        }
+
+        ctx.save();
+        ctx.font = 'bold 17px "M PLUS Rounded 1c", "Fira Code", monospace';
+        const textMetrics = ctx.measureText(labelText);
+        const textWidth = textMetrics.width;
+
+        let offX = 14;
+        let offY = -18;
+        if (pt.y > 4) offY = 24;
+        if (pt.x > 3.5) offX = -textWidth - 14;
+
+        let labelX = pix.x + offX;
+        let labelY = pix.y + offY;
+        labelX = Math.max(12, Math.min(canvasWidth - textWidth - 14, labelX));
+        labelY = Math.max(22, Math.min(canvasHeight - 20, labelY));
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(labelX - 7, labelY - 14, textWidth + 14, 28, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(labelText, labelX, labelY);
+        ctx.restore();
+      });
+
+      // 6. 内分点 P の描画
+      ctx.save();
+      if (answered) {
+        if (mode === 'x' || mode === 'both') {
+          const xOnAxis = mathToPixel(pP.x, 0);
+          ctx.setLineDash([3, 3]);
+          ctx.lineWidth = 1.2;
+          ctx.strokeStyle = '#10b98188';
+          ctx.beginPath();
+          ctx.moveTo(pixP.x, pixP.y);
+          ctx.lineTo(xOnAxis.x, xOnAxis.y);
+          ctx.stroke();
+
+          ctx.fillStyle = '#10b981';
+          ctx.beginPath();
+          ctx.arc(xOnAxis.x, xOnAxis.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        if (mode === 'y' || mode === 'both') {
+          const yOnAxis = mathToPixel(0, pP.y);
+          ctx.setLineDash([3, 3]);
+          ctx.lineWidth = 1.2;
+          ctx.strokeStyle = '#10b98188';
+          ctx.beginPath();
+          ctx.moveTo(pixP.x, pixP.y);
+          ctx.lineTo(yOnAxis.x, yOnAxis.y);
+          ctx.stroke();
+
+          ctx.fillStyle = '#10b981';
+          ctx.beginPath();
+          ctx.arc(yOnAxis.x, yOnAxis.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      ctx.beginPath();
+      ctx.arc(pixP.x, pixP.y, answered ? 12 : 14, 0, Math.PI * 2);
+      ctx.fillStyle = answered ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.35)';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(pixP.x, pixP.y, 7, 0, Math.PI * 2);
+      ctx.fillStyle = answered ? '#10b981' : '#f59e0b';
+      ctx.fill();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+
+      let labelP = '';
+      if (!answered) {
+        if (mode === 'both') {
+          labelP = 'P(?, ?)';
+        } else if (mode === 'x') {
+          labelP = 'P(?, p)';
+        } else {
+          labelP = 'P(p, ?)';
+        }
+      } else {
+        const xStr = formatFracText(pP.fracX);
+        const yStr = formatFracText(pP.fracY);
+        if (mode === 'both') {
+          labelP = `P(${xStr}, ${yStr})`;
+        } else if (mode === 'x') {
+          labelP = `P(${xStr}, p)`;
+        } else {
+          labelP = `P(p, ${yStr})`;
+        }
+      }
+
+      ctx.font = 'bold 17px "M PLUS Rounded 1c", "Fira Code", monospace';
+      const textMetrics = ctx.measureText(labelP);
+      const textWidth = textMetrics.width;
+
+      let offX = 14;
+      let offY = 24;
+      if (pP.y < -3) offY = -24;
+      if (pP.x > 3.5) offX = -textWidth - 14;
+
+      let labelX = pixP.x + offX;
+      let labelY = pixP.y + offY;
+      labelX = Math.max(12, Math.min(canvasWidth - textWidth - 14, labelX));
+      labelY = Math.max(22, Math.min(canvasHeight - 20, labelY));
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+      ctx.strokeStyle = answered ? '#10b981' : '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(labelX - 7, labelY - 14, textWidth + 14, 28, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = answered ? '#6ee7b7' : '#fde68a';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(labelP, labelX, labelY);
+      ctx.restore();
+    }
+
     // --- UI レンダリング & イベント管理 ---
     const choicesContainer = document.getElementById('choices-container');
     const feedbackPanel = document.getElementById('feedback-panel');
@@ -1115,7 +1671,11 @@
       }
 
       updateCoordModeUI();
-      drawGraph();
+      if (!state.answered) {
+        loadNextQuestion();
+      } else {
+        drawGraph();
+      }
     }
 
     function updateCoordModeUI() {
@@ -1124,13 +1684,19 @@
 
       if (mode === 'x') {
         badgeCoordMode.textContent = isRandom ? 'xのみ (ランダム)' : 'x座標のみ表示中';
-        coordInstruction.textContent = 'x座標の差に注目して比を求めよう！';
+        coordInstruction.textContent = state.problemMode === 'internal' 
+          ? 'x座標から内分点Pのx座標を求めよう！' 
+          : 'x座標の差に注目して比を求めよう！';
       } else if (mode === 'y') {
         badgeCoordMode.textContent = isRandom ? 'yのみ (ランダム)' : 'y座標のみ表示中';
-        coordInstruction.textContent = 'y座標の差に注目して比を求めよう！';
+        coordInstruction.textContent = state.problemMode === 'internal' 
+          ? 'y座標から内分点Pのy座標を求めよう！' 
+          : 'y座標の差に注目して比を求めよう！';
       } else {
         badgeCoordMode.textContent = isRandom ? '両方 (ランダム)' : '両方 (x, y) 表示中';
-        coordInstruction.textContent = 'x座標でもy座標でもどちらでも比が求まる！';
+        coordInstruction.textContent = state.problemMode === 'internal' 
+          ? '公式または増加量から内分点Pの座標を求めよう！' 
+          : 'x座標でもy座標でもどちらでも比が求まる！';
       }
     }
 
@@ -1149,9 +1715,32 @@
       }
       updateCoordModeUI();
 
-      // 直線の式表示
       const q = state.currentQuestion;
-      lineEqDisplay.textContent = formatEquationString(q.slope, q.intercept);
+      const pTitle = document.getElementById('problem-type-title');
+      const qText = document.getElementById('question-text');
+
+      if (q.type === 'internal') {
+        const m = q.ratio[0];
+        const n = q.ratio[1];
+        if (pTitle) pTitle.textContent = `線分の内分点 (${m} : ${n})`;
+
+        if (qText) {
+          if (state.coordMode === 'x') {
+            qText.innerHTML = `2点 <span class="text-rose-400">A</span>, <span class="text-cyan-400">B</span> を結ぶ線分ABを <span class="text-amber-300 font-black text-lg">${m} : ${n}</span> に内分する点 <span class="text-emerald-400 font-bold">P</span> の <span class="text-amber-300 font-black">x座標</span> を求めなさい。`;
+          } else if (state.coordMode === 'y') {
+            qText.innerHTML = `2点 <span class="text-rose-400">A</span>, <span class="text-cyan-400">B</span> を結ぶ線分ABを <span class="text-amber-300 font-black text-lg">${m} : ${n}</span> に内分する点 <span class="text-emerald-400 font-bold">P</span> の <span class="text-amber-300 font-black">y座標</span> を求めなさい。`;
+          } else {
+            qText.innerHTML = `2点 <span class="text-rose-400">A</span>, <span class="text-cyan-400">B</span> を結ぶ線分ABを <span class="text-amber-300 font-black text-lg">${m} : ${n}</span> に内分する点 <span class="text-emerald-400 font-bold">P</span> の <span class="text-amber-300 font-black">座標</span> を求めなさい。`;
+          }
+        }
+        lineEqDisplay.textContent = `比 ${m} : ${n}`;
+      } else {
+        if (pTitle) pTitle.textContent = '線分の長さの比';
+        if (qText) {
+          qText.innerHTML = `直線上の4点 <span class="text-rose-400">A</span>, <span class="text-amber-400">B</span>, <span class="text-emerald-400">C</span>, <span class="text-cyan-400">D</span> について、<br>線分比 <span class="text-amber-300 font-black text-lg">AB : BC : CD</span> を最も簡単な整数の比で求めなさい。`;
+        }
+        lineEqDisplay.textContent = formatEquationString(q.slope, q.intercept);
+      }
 
       // 4択ボタンの描画
       choicesContainer.innerHTML = '';
@@ -1159,7 +1748,7 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'choice-btn w-full p-3.5 rounded-xl bg-slate-900 hover:bg-slate-800/90 text-left border border-slate-700/80 hover:border-sky-500/50 text-slate-200 font-bold transition flex items-center justify-between group shadow-md cursor-pointer';
-        btn.setAttribute('data-choice', choice);
+        btn.setAttribute('data-choice', choice.text);
         btn.setAttribute('data-index', idx + 1);
 
         btn.innerHTML = `
@@ -1167,12 +1756,12 @@
             <span class="w-7 h-7 rounded-lg bg-slate-800 group-hover:bg-sky-500/20 text-sky-400 font-mono text-sm flex items-center justify-center border border-slate-700 group-hover:border-sky-500/40 transition">
               ${idx + 1}
             </span>
-            <span class="font-mono text-base tracking-wide">${choice}</span>
+            <span class="font-mono text-base tracking-wide flex items-center">${choice.html}</span>
           </div>
           <span class="text-xs text-slate-500 group-hover:text-sky-400 transition font-mono">[${idx + 1}]</span>
         `;
 
-        btn.addEventListener('click', () => handleAnswer(choice, btn));
+        btn.addEventListener('click', () => handleAnswer(choice.text, btn));
         choicesContainer.appendChild(btn);
       });
 
@@ -1225,50 +1814,106 @@
       btnNext.disabled = false;
       btnNext.className = 'w-full sm:w-auto px-5 py-2 rounded-xl font-bold text-sm bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-600/30 cursor-pointer transition flex items-center justify-center gap-2';
 
-      const dx = q.deltaX;
-      const dy = q.deltaY;
-      const pts = q.points;
       const mode = state.coordMode;
 
-      let modeExplanationHeader = '';
-      let stepLines = '';
-      if (mode === 'y') {
-        modeExplanationHeader = '💡 解法のポイント（y座標の差に注目）：';
-        stepLines = `
-          <div>・AB間のy増分: ${pts[1].y} - (${pts[0].y}) = <span class="text-rose-400 font-bold">${dy[0]}</span></div>
-          <div>・BC間のy増分: ${pts[2].y} - (${pts[1].y}) = <span class="text-amber-400 font-bold">${dy[1]}</span></div>
-          <div>・CD間のy増分: ${pts[3].y} - (${pts[2].y}) = <span class="text-emerald-400 font-bold">${dy[2]}</span></div>
+      if (q.type === 'internal') {
+        const m = q.ratio[0];
+        const n = q.ratio[1];
+        const total = m + n;
+        const pA = q.pointA;
+        const pB = q.pointB;
+        const pP = q.pointP;
+
+        let explanationHtml = '';
+        if (mode === 'x') {
+          explanationHtml = `
+            <p class="font-bold text-sky-300">💡 内分点の求め方（x座標）：</p>
+            <div class="font-mono text-[11px] text-slate-300 pl-1 space-y-1">
+              <div>・公式: x = (${n} × (${pA.x}) + ${m} × (${pB.x})) / (${m} + ${n})</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= (${n * pA.x} + ${m * pB.x}) / ${total} = <span class="text-emerald-400 font-bold">${formatFracHTML(pP.fracX)}</span></div>
+              <div class="pt-1 text-slate-400">・増加量で考える場合:</div>
+              <div>&nbsp;&nbsp;全増加量 Δx = ${pB.x} - (${pA.x}) = ${q.deltaX}</div>
+              <div>&nbsp;&nbsp;x = ${pA.x} + ${q.deltaX} × (${m}/${total}) = <span class="text-emerald-400 font-bold">${formatFracHTML(pP.fracX)}</span></div>
+            </div>
+          `;
+        } else if (mode === 'y') {
+          explanationHtml = `
+            <p class="font-bold text-sky-300">💡 内分点の求め方（y座標）：</p>
+            <div class="font-mono text-[11px] text-slate-300 pl-1 space-y-1">
+              <div>・公式: y = (${n} × (${pA.y}) + ${m} × (${pB.y})) / (${m} + ${n})</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= (${n * pA.y} + ${m * pB.y}) / ${total} = <span class="text-emerald-400 font-bold">${formatFracHTML(pP.fracY)}</span></div>
+              <div class="pt-1 text-slate-400">・増加量で考える場合:</div>
+              <div>&nbsp;&nbsp;全増加量 Δy = ${pB.y} - (${pA.y}) = ${q.deltaY}</div>
+              <div>&nbsp;&nbsp;y = ${pA.y} + ${q.deltaY} × (${m}/${total}) = <span class="text-emerald-400 font-bold">${formatFracHTML(pP.fracY)}</span></div>
+            </div>
+          `;
+        } else {
+          explanationHtml = `
+            <p class="font-bold text-sky-300">💡 内分点の公式： ((n·xA + m·xB)/(m+n), (n·yA + m·yB)/(m+n))</p>
+            <div class="font-mono text-[11px] text-slate-300 pl-1 space-y-1">
+              <div>・x = (${n}×(${pA.x}) + ${m}×(${pB.x})) / ${total} = <span class="text-emerald-400 font-bold">${formatFracHTML(pP.fracX)}</span></div>
+              <div>・y = (${n}×(${pA.y}) + ${m}×(${pB.y})) / ${total} = <span class="text-emerald-400 font-bold">${formatFracHTML(pP.fracY)}</span></div>
+              <div class="text-emerald-300 pt-0.5">∴ 点P の座標は (${formatFracHTML(pP.fracX)}, ${formatFracHTML(pP.fracY)})</div>
+            </div>
+          `;
+        }
+
+        const correctDisplay = q.correctAnswerHTML || q.correctAnswer;
+        feedbackContent.innerHTML = `
+          <div class="flex items-center gap-2">
+            ${isCorrect 
+              ? '<span class="text-emerald-400 font-black flex items-center gap-1.5"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> 正解！お見事！</span>' 
+              : '<span class="text-rose-400 font-black flex items-center gap-1.5"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg> 不正解… 正解は ' + correctDisplay + '</span>'}
+          </div>
+          <div class="text-xs text-slate-300 space-y-1.5 mt-1 leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+            ${explanationHtml}
+          </div>
         `;
       } else {
-        modeExplanationHeader = mode === 'x' 
-          ? '💡 解法のポイント（x座標の差に注目・y座標は未知の文字でもOK！）：' 
-          : '💡 解法のポイント（x座標またはy座標の差に注目）：';
-        stepLines = `
-          <div>・AB間のx増分: ${pts[1].x} - (${pts[0].x}) = <span class="text-rose-400 font-bold">${dx[0]}</span></div>
-          <div>・BC間のx増分: ${pts[2].x} - (${pts[1].x}) = <span class="text-amber-400 font-bold">${dx[1]}</span></div>
-          <div>・CD間のx増分: ${pts[3].x} - (${pts[2].x}) = <span class="text-emerald-400 font-bold">${dx[2]}</span></div>
+        const dx = q.deltaX;
+        const dy = q.deltaY;
+        const pts = q.points;
+
+        let modeExplanationHeader = '';
+        let stepLines = '';
+        if (mode === 'y') {
+          modeExplanationHeader = '💡 解法のポイント（y座標の差に注目）：';
+          stepLines = `
+            <div>・AB間のy増分: ${pts[1].y} - (${pts[0].y}) = <span class="text-rose-400 font-bold">${dy[0]}</span></div>
+            <div>・BC間のy増分: ${pts[2].y} - (${pts[1].y}) = <span class="text-amber-400 font-bold">${dy[1]}</span></div>
+            <div>・CD間のy増分: ${pts[3].y} - (${pts[2].y}) = <span class="text-emerald-400 font-bold">${dy[2]}</span></div>
+          `;
+        } else {
+          modeExplanationHeader = mode === 'x' 
+            ? '💡 解法のポイント（x座標の差に注目・y座標は未知の文字でもOK！）：' 
+            : '💡 解法のポイント（x座標またはy座標の差に注目）：';
+          stepLines = `
+            <div>・AB間のx増分: ${pts[1].x} - (${pts[0].x}) = <span class="text-rose-400 font-bold">${dx[0]}</span></div>
+            <div>・BC間のx増分: ${pts[2].x} - (${pts[1].x}) = <span class="text-amber-400 font-bold">${dx[1]}</span></div>
+            <div>・CD間のx増分: ${pts[3].x} - (${pts[2].x}) = <span class="text-emerald-400 font-bold">${dx[2]}</span></div>
+          `;
+        }
+
+        feedbackContent.innerHTML = `
+          <div class="flex items-center gap-2">
+            ${isCorrect 
+              ? '<span class="text-emerald-400 font-black flex items-center gap-1.5"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> 正解！お見事！</span>' 
+              : '<span class="text-rose-400 font-black flex items-center gap-1.5"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg> 不正解… 正解は ' + q.correctAnswer + '</span>'}
+          </div>
+          <div class="text-xs text-slate-300 space-y-1.5 mt-1 leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+            <p class="font-bold text-sky-300">${modeExplanationHeader}</p>
+            <div class="font-mono text-[11px] text-slate-300 pl-1 space-y-0.5">
+              ${stepLines}
+            </div>
+            <p class="text-slate-300 text-[11px] pt-1 border-t border-slate-800">
+              比は <span class="font-mono text-amber-300 font-bold">${dx[0]} : ${dx[1]} : ${dx[2]}</span>
+              ${(dx[0] !== q.ratio[0] || dx[1] !== q.ratio[1] || dx[2] !== q.ratio[2]) 
+                ? `を約分して <span class="font-mono text-emerald-400 font-bold">${q.correctAnswer}</span> となります！` 
+                : `となり、最も簡単な比 <span class="font-mono text-emerald-400 font-bold">${q.correctAnswer}</span> です！`}
+            </p>
+          </div>
         `;
       }
-
-      feedbackContent.innerHTML = `
-        <div class="flex items-center gap-2">
-          ${isCorrect 
-            ? '<span class="text-emerald-400 font-black flex items-center gap-1.5"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> 正解！お見事！</span>' 
-            : '<span class="text-rose-400 font-black flex items-center gap-1.5"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg> 不正解… 正解は ' + q.correctAnswer + '</span>'}
-        </div>
-        <div class="text-xs text-slate-300 space-y-1.5 mt-1 leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-          <p class="font-bold text-sky-300">${modeExplanationHeader}</p>
-          <div class="font-mono text-[11px] text-slate-300 pl-1 space-y-0.5">
-            ${stepLines}
-          </div>
-          <p class="text-slate-300 text-[11px] pt-1 border-t border-slate-800">
-            比は <span class="font-mono text-amber-300 font-bold">${dx[0]} : ${dx[1]} : ${dx[2]}</span>
-            ${(dx[0] !== q.ratio[0] || dx[1] !== q.ratio[1] || dx[2] !== q.ratio[2]) 
-              ? `を約分して <span class="font-mono text-emerald-400 font-bold">${q.correctAnswer}</span> となります！` 
-              : `となり、最も簡単な比 <span class="font-mono text-emerald-400 font-bold">${q.correctAnswer}</span> です！`}
-          </p>
-        </div>
-      `;
 
       // グラフを再描画（ガイドの直角三角形・比のバブルを自動表示）
       drawGraph();
@@ -1474,6 +2119,19 @@
       }
     });
 
+    // 出題モード切替 (4点比 / 2点内分点)
+    const problemModeSelect = document.getElementById('problem-mode-select');
+    if (problemModeSelect) {
+      problemModeSelect.addEventListener('change', (e) => {
+        playSound('click');
+        state.problemMode = e.target.value;
+        state.questionIndex = 1;
+        state.currentStreak = 0;
+        updateStats();
+        loadNextQuestion();
+      });
+    }
+
     // 目標連勝変更
     document.getElementById('target-streak-select').addEventListener('change', (e) => {
       playSound('click');
@@ -1585,6 +2243,14 @@
         btnAutoAdvance.click();
       } else if (e.key === 'f' || e.key === 'F') {
         btnFullscreen.click();
+      } else if (e.key === 'p' || e.key === 'P') {
+        playSound('click');
+        state.problemMode = state.problemMode === 'ratio4' ? 'internal' : 'ratio4';
+        if (problemModeSelect) problemModeSelect.value = state.problemMode;
+        state.questionIndex = 1;
+        state.currentStreak = 0;
+        updateStats();
+        loadNextQuestion();
       } else if (e.key === 's' || e.key === 'S') {
         btnSound.click();
       }
