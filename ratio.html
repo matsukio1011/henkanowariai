@@ -124,16 +124,10 @@
         </div>
       </div>
 
-      <div class="hidden sm:flex items-center gap-1.5 text-xs sm:text-sm bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700/60">
-        <span class="text-slate-400">正解率:</span>
-        <span id="stat-accuracy" class="font-bold text-emerald-400 font-mono text-base">0%</span>
-        <span id="stat-count" class="text-slate-400 text-xs font-mono">(0/0)</span>
-      </div>
-
       <!-- 設定・トグルボタン類 -->
       <div class="flex items-center gap-1.5">
-        <!-- 座標表示切替（x座標だけ / y座標だけ / 両方） -->
-        <div class="flex items-center bg-slate-800 p-0.5 rounded-lg border border-slate-700 text-xs" title="座標表示切替 [X]xのみ / [Y]yのみ / [B]両方">
+        <!-- 座標表示切替（xのみ / yのみ / 両方 / ランダム） -->
+        <div class="flex items-center bg-slate-800 p-0.5 rounded-lg border border-slate-700 text-xs" title="座標表示切替 [X]xのみ / [Y]yのみ / [B]両方 / [R]ランダム">
           <span class="text-slate-400 text-[11px] px-1 hidden xl:inline">表示:</span>
           <button id="btn-coord-x" data-mode="x" class="coord-mode-btn px-2 py-1 rounded font-bold text-sky-300 bg-sky-950 border border-sky-500/50 transition">
             xのみ
@@ -144,6 +138,9 @@
           <button id="btn-coord-both" data-mode="both" class="coord-mode-btn px-2 py-1 rounded text-slate-400 hover:text-slate-200 border border-transparent transition">
             両方
           </button>
+          <button id="btn-coord-random" data-mode="random" class="coord-mode-btn px-2 py-1 rounded text-slate-400 hover:text-slate-200 border border-transparent transition" title="問題ごとにランダム ([R]キー)">
+            ランダム
+          </button>
         </div>
 
         <!-- グリッド線(方眼)表示切替ボタン -->
@@ -151,13 +148,6 @@
           <span id="grid-dot" class="w-2 h-2 rounded-full bg-sky-400"></span>
           <span class="hidden md:inline">方眼</span>
           <span id="grid-status" class="text-[10px] bg-sky-400 text-slate-950 font-bold px-1 rounded">ON</span>
-        </button>
-
-        <!-- ガイド(比・直角三角形)表示切替ボタン -->
-        <button id="btn-hint-toggle" title="x/yの差・補助三角形を表示 ([H]キー)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition">
-          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          <span class="hidden md:inline">ガイド</span>
-          <span id="hint-status" class="text-[10px] bg-amber-400/20 text-amber-300 px-1 rounded">OFF</span>
         </button>
 
         <!-- 自動送り切替ボタン -->
@@ -234,7 +224,7 @@
 
         <p class="text-xs text-slate-400 mt-3 flex items-center justify-between">
           <span>キー <span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">1</span>〜<span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">4</span> で即答</span>
-          <span class="text-slate-500 hidden sm:inline">[X]xのみ [Y]yのみ [B]両方</span>
+          <span class="text-slate-500 hidden sm:inline">[X]x [Y]y [B]両方 [R]ランダム</span>
         </p>
       </div>
 
@@ -317,9 +307,9 @@
   <script>
     // --- アプリケーション状態 ---
     const state = {
-      coordMode: 'x', // 'x': x座標のみ, 'y': y座標のみ, 'both': 両方
+      coordSetting: 'x', // 'x': xのみ, 'y': yのみ, 'both': 両方, 'random': 問題ごとにランダム
+      coordMode: 'x',    // 現在の問で実際に適用中の表示モード ('x' | 'y' | 'both')
       showGrid: true,
-      showHintGuide: false,
       autoAdvance: true,
       soundEnabled: true,
       targetStreak: 10,
@@ -725,8 +715,8 @@
         // 直線の描画
         drawLine();
 
-        // ガイド（補助三角形・比）の描画
-        if (state.showHintGuide || state.answered) {
+        // ガイド（補助三角形・比）の描画（回答後の解説時のみ表示）
+        if (state.answered) {
           drawGuideTriangles();
         }
 
@@ -1103,32 +1093,45 @@
     const coordInstruction = document.getElementById('coord-instruction');
     const badgeCoordMode = document.getElementById('badge-coord-mode');
 
-    // 座標表示モードの更新
-    function setCoordMode(mode) {
-      state.coordMode = mode;
+    // 座標表示モードの更新（xのみ / yのみ / 両方 / ランダム）
+    function setCoordMode(setting) {
+      state.coordSetting = setting;
 
       // ボタンのスタイル更新
       document.querySelectorAll('.coord-mode-btn').forEach(btn => {
-        if (btn.getAttribute('data-mode') === mode) {
+        if (btn.getAttribute('data-mode') === setting) {
           btn.className = 'coord-mode-btn px-2 py-1 rounded font-bold text-sky-300 bg-sky-950 border border-sky-500/50 transition';
         } else {
           btn.className = 'coord-mode-btn px-2 py-1 rounded text-slate-400 hover:text-slate-200 border border-transparent transition';
         }
       });
 
-      // バッジと説明テキストの更新
-      if (mode === 'x') {
-        badgeCoordMode.textContent = 'x座標のみ表示中';
-        coordInstruction.textContent = 'x座標の差に注目して比を求めよう！';
-      } else if (mode === 'y') {
-        badgeCoordMode.textContent = 'y座標のみ表示中';
-        coordInstruction.textContent = 'y座標の差に注目して比を求めよう！';
+      // 実際の描画モードを決定
+      if (setting === 'random') {
+        const pool = ['x', 'y', 'both'];
+        state.coordMode = pool[Math.floor(Math.random() * pool.length)];
       } else {
-        badgeCoordMode.textContent = '両方 (x, y) 表示中';
-        coordInstruction.textContent = 'x座標でもy座標でもどちらでも比が求まる！';
+        state.coordMode = setting;
       }
 
+      updateCoordModeUI();
       drawGraph();
+    }
+
+    function updateCoordModeUI() {
+      const mode = state.coordMode;
+      const isRandom = state.coordSetting === 'random';
+
+      if (mode === 'x') {
+        badgeCoordMode.textContent = isRandom ? 'xのみ (ランダム)' : 'x座標のみ表示中';
+        coordInstruction.textContent = 'x座標の差に注目して比を求めよう！';
+      } else if (mode === 'y') {
+        badgeCoordMode.textContent = isRandom ? 'yのみ (ランダム)' : 'y座標のみ表示中';
+        coordInstruction.textContent = 'y座標の差に注目して比を求めよう！';
+      } else {
+        badgeCoordMode.textContent = isRandom ? '両方 (ランダム)' : '両方 (x, y) 表示中';
+        coordInstruction.textContent = 'x座標でもy座標でもどちらでも比が求まる！';
+      }
     }
 
     // 新しい問題をロード
@@ -1138,6 +1141,13 @@
       state.currentQuestion = generateQuestion();
 
       questionIndexEl.textContent = state.questionIndex;
+
+      // ランダム設定の場合は問題ごとにモードを再抽選
+      if (state.coordSetting === 'random') {
+        const pool = ['x', 'y', 'both'];
+        state.coordMode = pool[Math.floor(Math.random() * pool.length)];
+      }
+      updateCoordModeUI();
 
       // 直線の式表示
       const q = state.currentQuestion;
@@ -1321,8 +1331,8 @@
     function updateStats() {
       statStreak.textContent = state.currentStreak;
       const acc = state.totalAnswered > 0 ? Math.round((state.correctCount / state.totalAnswered) * 100) : 0;
-      statAccuracy.textContent = `${acc}%`;
-      statCount.textContent = `(${state.correctCount}/${state.totalAnswered})`;
+      if (statAccuracy) statAccuracy.textContent = `${acc}%`;
+      if (statCount) statCount.textContent = `(${state.correctCount}/${state.totalAnswered})`;
     }
 
     // --- 目標達成モーダル & 紙吹雪 ---
@@ -1333,8 +1343,9 @@
 
     function showClearModal() {
       playSound('clear');
+      const acc = state.totalAnswered > 0 ? Math.round((state.correctCount / state.totalAnswered) * 100) : 0;
       document.getElementById('clear-target-count').textContent = state.targetStreak;
-      document.getElementById('clear-accuracy').textContent = statAccuracy.textContent;
+      document.getElementById('clear-accuracy').textContent = `${acc}%`;
       document.getElementById('clear-total-questions').textContent = `${state.totalAnswered}問`;
 
       clearModal.classList.remove('hidden');
@@ -1441,24 +1452,6 @@
         gridStatus.className = 'text-[10px] bg-slate-700 text-slate-300 px-1 rounded';
         gridStatus.textContent = 'OFF';
         btnGridToggle.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 border border-slate-700 flex items-center gap-1.5 transition';
-      }
-      drawGraph();
-    });
-
-    // ガイドトグル
-    const btnHintToggle = document.getElementById('btn-hint-toggle');
-    const hintStatus = document.getElementById('hint-status');
-    btnHintToggle.addEventListener('click', () => {
-      playSound('click');
-      state.showHintGuide = !state.showHintGuide;
-      if (state.showHintGuide) {
-        hintStatus.className = 'text-[10px] bg-amber-400 text-slate-950 font-bold px-1 rounded';
-        hintStatus.textContent = 'ON';
-        btnHintToggle.className = 'px-2.5 py-1.5 rounded-lg bg-amber-950/80 hover:bg-amber-900 text-xs text-amber-300 border border-amber-500/50 flex items-center gap-1.5 transition shadow-sm';
-      } else {
-        hintStatus.className = 'text-[10px] bg-amber-400/20 text-amber-300 px-1 rounded';
-        hintStatus.textContent = 'OFF';
-        btnHintToggle.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition';
       }
       drawGraph();
     });
@@ -1583,10 +1576,11 @@
       } else if (e.key === 'b' || e.key === 'B') {
         playSound('click');
         setCoordMode('both');
+      } else if (e.key === 'r' || e.key === 'R') {
+        playSound('click');
+        setCoordMode('random');
       } else if (e.key === 'm' || e.key === 'M') {
         btnGridToggle.click();
-      } else if (e.key === 'h' || e.key === 'H') {
-        btnHintToggle.click();
       } else if (e.key === 'a' || e.key === 'A') {
         btnAutoAdvance.click();
       } else if (e.key === 'f' || e.key === 'F') {
