@@ -161,6 +161,13 @@
           </button>
         </div>
 
+        <!-- グラフ表示切替ボタン -->
+        <button id="btn-graph-toggle" title="グラフの表示/非表示切替 ([G]キー)" class="px-2.5 py-1.5 rounded-lg bg-indigo-950/70 hover:bg-indigo-900/80 text-xs text-indigo-300 border border-indigo-500/50 flex items-center gap-1.5 transition shadow-sm cursor-pointer">
+          <span id="graph-dot" class="w-2 h-2 rounded-full bg-indigo-400"></span>
+          <span class="hidden md:inline">グラフ</span>
+          <span id="graph-status" class="text-[10px] bg-indigo-400 text-slate-950 font-bold px-1 rounded">ON</span>
+        </button>
+
         <!-- グリッド線(方眼)表示切替ボタン -->
         <button id="btn-grid-toggle" title="方眼グリッド線を表示/非表示 ([M]キー)" class="px-2.5 py-1.5 rounded-lg bg-sky-950/70 hover:bg-sky-900/80 text-xs text-sky-300 border border-sky-500/50 flex items-center gap-1.5 transition shadow-sm">
           <span id="grid-dot" class="w-2 h-2 rounded-full bg-sky-400"></span>
@@ -219,6 +226,19 @@
       <!-- Canvas ラッパー -->
       <div id="canvas-container" class="flex-1 relative w-full h-full flex items-center justify-center min-h-0 bg-slate-950/60 rounded-xl border border-slate-800/50 overflow-hidden">
         <canvas id="graphCanvas" class="block"></canvas>
+        <div id="graph-off-placeholder" class="hidden flex flex-col items-center justify-center p-6 text-center gap-3">
+          <div class="w-14 h-14 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-center text-3xl shadow-inner">
+            📊
+          </div>
+          <div class="text-slate-200 font-bold text-sm sm:text-base">グラフ非表示中 (計算モード)</div>
+          <p class="text-slate-400 text-xs max-w-xs leading-relaxed">
+            問題文の座標と比から直接計算してみよう！
+          </p>
+          <button id="btn-graph-turn-on" class="mt-1 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition shadow-md shadow-indigo-600/30 flex items-center gap-1.5 cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            グラフを表示する
+          </button>
+        </div>
       </div>
     </section>
 
@@ -240,18 +260,46 @@
 
         <div class="flex items-center justify-between gap-2 mb-2">
           <span id="problem-type-title" class="text-xs font-bold text-slate-300">線分の長さの比</span>
-          <span id="badge-coord-mode" class="text-[10px] bg-sky-950 text-sky-300 px-2 py-0.5 rounded border border-sky-500/40 font-mono">x座標のみ表示中</span>
+          <div class="flex items-center gap-1.5">
+            <button id="btn-toggle-formula" class="hidden px-2.5 py-1 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-300 hover:text-white text-[11px] font-bold items-center gap-1 transition shadow-sm cursor-pointer" title="内分の公式を表示">
+              <span>📐</span>
+              <span id="formula-btn-text">公式を表示</span>
+            </button>
+            <span id="badge-coord-mode" class="text-[10px] bg-sky-950 text-sky-300 px-2 py-0.5 rounded border border-sky-500/40 font-mono">x座標のみ表示中</span>
+          </div>
         </div>
 
-        <p id="question-text" class="text-base font-bold text-slate-100 leading-snug mb-3">
+        <p id="question-text" class="text-base font-bold text-slate-100 leading-snug mb-1">
           直線上の4点 <span class="text-rose-400">A</span>, <span class="text-amber-400">B</span>, <span class="text-emerald-400">C</span>, <span class="text-cyan-400">D</span> について、<br>
           線分比 <span class="text-amber-300 font-black text-lg">AB : BC : CD</span> を最も簡単な整数の比で求めなさい。
         </p>
 
-        <p class="text-xs text-slate-400 mt-3 flex items-center justify-between">
-          <span>キー <span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">1</span>〜<span class="bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-700">4</span> で即答</span>
-          <span class="text-slate-500 hidden sm:inline">[P]モード [X]x [Y]y [B]両方 [R]ランダム</span>
-        </p>
+        <!-- 内分の公式パネル（トグル開閉式） -->
+        <div id="formula-panel" class="hidden my-2.5 p-3 rounded-xl bg-indigo-950/70 border border-indigo-500/40 text-xs text-slate-200 space-y-2 transition-all">
+          <div class="flex items-center justify-between border-b border-indigo-500/30 pb-1.5">
+            <span class="font-bold text-amber-300 flex items-center gap-1">
+              <span>📐</span> 内分点の公式 ($m : n$)
+            </span>
+            <button id="btn-close-formula" class="text-slate-400 hover:text-white text-[10px] px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700 cursor-pointer">閉じる</button>
+          </div>
+          
+          <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800/90 text-center font-mono">
+            <div class="text-slate-400 text-[10px] mb-1">点A($x_A, y_A$), 点B($x_B, y_B$) を $m : n$ に内分する点P:</div>
+            <div class="text-emerald-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-1">
+              <span>P (</span>
+              <span class="fraction"><span class="numerator text-xs">n·x_A + m·x_B</span><span class="denominator text-xs">m + n</span></span>
+              <span>,</span>
+              <span class="fraction"><span class="numerator text-xs">n·y_A + m·y_B</span><span class="denominator text-xs">m + n</span></span>
+              <span>)</span>
+            </div>
+          </div>
+
+          <div class="text-[10px] text-slate-300 space-y-0.5 leading-relaxed bg-slate-900/60 p-1.5 rounded-lg">
+            <p class="font-bold text-sky-300">💡 覚え方のコツ：</p>
+            <p>・分母は「比の足し算 <span class="text-amber-300 font-bold">m + n</span>」</p>
+            <p>・分子は「たすき掛け」：比 <span class="text-amber-300 font-bold">n</span> × 点A ＋ 比 <span class="text-amber-300 font-bold">m</span> × 点B</p>
+          </div>
+        </div>
       </div>
 
       <!-- 4択ボタンリスト -->
@@ -269,7 +317,7 @@
           <div id="auto-advance-bar-wrapper" class="absolute -top-1 left-0 right-0 h-0.5 bg-slate-800 rounded-full overflow-hidden hidden">
             <div id="auto-advance-bar" class="h-full bg-emerald-400 w-0 transition-all"></div>
           </div>
-          <span class="text-[11px] text-slate-500 font-mono hidden sm:inline">[Enter] / [Space] で次の問題</span>
+          <div></div>
           <button id="btn-next" disabled class="w-full sm:w-auto px-5 py-2 rounded-xl font-bold text-sm bg-slate-800 text-slate-500 cursor-not-allowed transition flex items-center justify-center gap-2">
             <span id="btn-next-text">次の問題へ</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
@@ -336,6 +384,7 @@
       problemMode: 'ratio4', // 'ratio4': 4点から比 (AB:BC:CD), 'internal': 2点から内分点の座標 (m:n)
       coordSetting: 'x', // 'x': xのみ, 'y': yのみ, 'both': 両方, 'random': 問題ごとにランダム
       coordMode: 'x',    // 現在の問で実際に適用中の表示モード ('x' | 'y' | 'both')
+      showGraph: true,   // グラフ表示 ON/OFF
       showGrid: true,
       autoAdvance: true,
       soundEnabled: true,
@@ -935,7 +984,7 @@
     }
 
     function drawGraph() {
-      if (!canvasWidth || !canvasHeight) return;
+      if (!canvasWidth || !canvasHeight || !state.showGraph) return;
       const dpr = window.devicePixelRatio || 1;
 
       ctx.save();
@@ -1738,24 +1787,42 @@
       if (q.type === 'internal') {
         const m = q.ratio[0];
         const n = q.ratio[1];
+        const pA = q.pointA;
+        const pB = q.pointB;
         if (pTitle) pTitle.textContent = `線分の内分点 (${m} : ${n})`;
 
         if (qText) {
           if (state.coordMode === 'x') {
-            qText.innerHTML = `2点 <span class="text-rose-400">A</span>, <span class="text-cyan-400">B</span> を結ぶ線分ABを <span class="text-amber-300 font-black text-lg">${m} : ${n}</span> に内分する点 <span class="text-emerald-400 font-bold">P</span> の <span class="text-amber-300 font-black">x座標</span> を求めなさい。`;
+            qText.innerHTML = `2点 <span class="text-rose-400 font-bold">A(${pA.x}, a)</span>, <span class="text-cyan-400 font-bold">B(${pB.x}, b)</span> を結ぶ線分ABを <span class="text-amber-300 font-black text-lg">${m} : ${n}</span> に内分する点 <span class="text-emerald-400 font-bold">P</span> の <span class="text-amber-300 font-black">x座標</span> を求めなさい。`;
           } else if (state.coordMode === 'y') {
-            qText.innerHTML = `2点 <span class="text-rose-400">A</span>, <span class="text-cyan-400">B</span> を結ぶ線分ABを <span class="text-amber-300 font-black text-lg">${m} : ${n}</span> に内分する点 <span class="text-emerald-400 font-bold">P</span> の <span class="text-amber-300 font-black">y座標</span> を求めなさい。`;
+            qText.innerHTML = `2点 <span class="text-rose-400 font-bold">A(a, ${pA.y})</span>, <span class="text-cyan-400 font-bold">B(b, ${pB.y})</span> を結ぶ線分ABを <span class="text-amber-300 font-black text-lg">${m} : ${n}</span> に内分する点 <span class="text-emerald-400 font-bold">P</span> の <span class="text-amber-300 font-black">y座標</span> を求めなさい。`;
           } else {
-            qText.innerHTML = `2点 <span class="text-rose-400">A</span>, <span class="text-cyan-400">B</span> を結ぶ線分ABを <span class="text-amber-300 font-black text-lg">${m} : ${n}</span> に内分する点 <span class="text-emerald-400 font-bold">P</span> の <span class="text-amber-300 font-black">座標</span> を求めなさい。`;
+            qText.innerHTML = `2点 <span class="text-rose-400 font-bold">A(${pA.x}, ${pA.y})</span>, <span class="text-cyan-400 font-bold">B(${pB.x}, ${pB.y})</span> を結ぶ線分ABを <span class="text-amber-300 font-black text-lg">${m} : ${n}</span> に内分する点 <span class="text-emerald-400 font-bold">P</span> の <span class="text-amber-300 font-black">座標</span> を求めなさい。`;
           }
         }
         lineEqDisplay.textContent = `比 ${m} : ${n}`;
+
+        // 公式ボタンを表示
+        const btnToggleFormulaEl = document.getElementById('btn-toggle-formula');
+        if (btnToggleFormulaEl) {
+          btnToggleFormulaEl.classList.remove('hidden');
+          btnToggleFormulaEl.classList.add('inline-flex');
+        }
       } else {
         if (pTitle) pTitle.textContent = '線分の長さの比';
         if (qText) {
           qText.innerHTML = `直線上の4点 <span class="text-rose-400">A</span>, <span class="text-amber-400">B</span>, <span class="text-emerald-400">C</span>, <span class="text-cyan-400">D</span> について、<br>線分比 <span class="text-amber-300 font-black text-lg">AB : BC : CD</span> を最も簡単な整数の比で求めなさい。`;
         }
         lineEqDisplay.textContent = formatEquationString(q.slope, q.intercept);
+
+        // 公式ボタンを非表示
+        const btnToggleFormulaEl = document.getElementById('btn-toggle-formula');
+        const formulaPanelEl = document.getElementById('formula-panel');
+        if (btnToggleFormulaEl) {
+          btnToggleFormulaEl.classList.add('hidden');
+          btnToggleFormulaEl.classList.remove('inline-flex');
+        }
+        if (formulaPanelEl) formulaPanelEl.classList.add('hidden');
       }
 
       // 4択ボタンの描画
@@ -1774,7 +1841,6 @@
             </span>
             <span class="font-mono text-base tracking-wide flex items-center">${choice.html}</span>
           </div>
-          <span class="text-xs text-slate-500 group-hover:text-sky-400 transition font-mono">[${idx + 1}]</span>
         `;
 
         btn.addEventListener('click', () => handleAnswer(choice.text, btn));
@@ -2096,6 +2162,87 @@
       });
     });
 
+    // グラフ表示トグル
+    const btnGraphToggle = document.getElementById('btn-graph-toggle');
+    const graphDot = document.getElementById('graph-dot');
+    const graphStatus = document.getElementById('graph-status');
+    const graphOffPlaceholder = document.getElementById('graph-off-placeholder');
+    const btnGraphTurnOn = document.getElementById('btn-graph-turn-on');
+
+    function setGraphVisible(visible) {
+      state.showGraph = visible;
+      if (state.showGraph) {
+        if (graphDot) graphDot.className = 'w-2 h-2 rounded-full bg-indigo-400';
+        if (graphStatus) {
+          graphStatus.className = 'text-[10px] bg-indigo-400 text-slate-950 font-bold px-1 rounded';
+          graphStatus.textContent = 'ON';
+        }
+        if (btnGraphToggle) btnGraphToggle.className = 'px-2.5 py-1.5 rounded-lg bg-indigo-950/70 hover:bg-indigo-900/80 text-xs text-indigo-300 border border-indigo-500/50 flex items-center gap-1.5 transition shadow-sm cursor-pointer';
+        if (graphOffPlaceholder) {
+          graphOffPlaceholder.classList.add('hidden');
+          graphOffPlaceholder.classList.remove('flex');
+        }
+        if (canvas) canvas.classList.remove('hidden');
+        drawGraph();
+      } else {
+        if (graphDot) graphDot.className = 'w-2 h-2 rounded-full bg-slate-500';
+        if (graphStatus) {
+          graphStatus.className = 'text-[10px] bg-slate-700 text-slate-300 px-1 rounded';
+          graphStatus.textContent = 'OFF';
+        }
+        if (btnGraphToggle) btnGraphToggle.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 border border-slate-700 flex items-center gap-1.5 transition cursor-pointer';
+        if (graphOffPlaceholder) {
+          graphOffPlaceholder.classList.remove('hidden');
+          graphOffPlaceholder.classList.add('flex');
+        }
+        if (canvas) canvas.classList.add('hidden');
+      }
+    }
+
+    if (btnGraphToggle) {
+      btnGraphToggle.addEventListener('click', () => {
+        playSound('click');
+        setGraphVisible(!state.showGraph);
+      });
+    }
+    if (btnGraphTurnOn) {
+      btnGraphTurnOn.addEventListener('click', () => {
+        playSound('click');
+        setGraphVisible(true);
+      });
+    }
+
+    // 内分の公式表示トグル
+    const btnToggleFormula = document.getElementById('btn-toggle-formula');
+    const formulaPanel = document.getElementById('formula-panel');
+    const btnCloseFormula = document.getElementById('btn-close-formula');
+    const formulaBtnText = document.getElementById('formula-btn-text');
+
+    function toggleFormula(show) {
+      if (!formulaPanel) return;
+      const isVisible = show !== undefined ? show : formulaPanel.classList.contains('hidden');
+      if (isVisible) {
+        formulaPanel.classList.remove('hidden');
+        if (formulaBtnText) formulaBtnText.textContent = '公式を隠す';
+      } else {
+        formulaPanel.classList.add('hidden');
+        if (formulaBtnText) formulaBtnText.textContent = '公式を表示';
+      }
+    }
+
+    if (btnToggleFormula) {
+      btnToggleFormula.addEventListener('click', () => {
+        playSound('click');
+        toggleFormula();
+      });
+    }
+    if (btnCloseFormula) {
+      btnCloseFormula.addEventListener('click', () => {
+        playSound('click');
+        toggleFormula(false);
+      });
+    }
+
     // 方眼トグル
     const btnGridToggle = document.getElementById('btn-grid-toggle');
     const gridDot = document.getElementById('grid-dot');
@@ -2253,6 +2400,8 @@
       } else if (e.key === 'r' || e.key === 'R') {
         playSound('click');
         setCoordMode('random');
+      } else if (e.key === 'g' || e.key === 'G') {
+        if (btnGraphToggle) btnGraphToggle.click();
       } else if (e.key === 'm' || e.key === 'M') {
         btnGridToggle.click();
       } else if (e.key === 'a' || e.key === 'A') {
