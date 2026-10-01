@@ -352,20 +352,20 @@
   </div>
 
   <!-- 内分の公式ポップアップモーダル（大画面ポップアップ） -->
-  <div id="formula-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
-    <div id="formula-card" class="relative bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border-2 border-indigo-400/80 rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl shadow-indigo-500/30 transform scale-90 transition-transform duration-300 flex flex-col">
+  <div id="formula-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+    <div id="formula-card" class="relative bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border-2 border-indigo-400/80 rounded-3xl p-5 sm:p-7 max-w-2xl w-full max-h-[92vh] overflow-y-auto shadow-2xl shadow-indigo-500/30 transform scale-90 transition-transform duration-300 flex flex-col space-y-4">
       
       <!-- ヘッダー -->
-      <div class="flex items-center justify-between pb-3.5 mb-4 border-b border-indigo-500/30">
+      <div class="flex items-center justify-between pb-3 border-b border-indigo-500/30">
         <div class="flex items-center gap-3">
           <span class="w-10 h-10 rounded-2xl bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 flex items-center justify-center text-xl shadow-sm">
             📐
           </span>
           <div>
             <h3 class="text-xl sm:text-2xl font-black text-white tracking-wide">
-              線分の内分点の公式
+              内分点（ないぶんてん）の求め方
             </h3>
-            <p class="text-xs text-indigo-300 font-medium">点A, 点B を m : n に内分する点Pの求め方</p>
+            <p class="text-xs text-indigo-300 font-medium">点A と 点B を <span class="text-amber-300 font-bold">m : n</span> に分ける点 P の公式 & コツ</p>
           </div>
         </div>
         <button id="btn-close-formula-modal" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-sm font-bold border border-slate-700 transition cursor-pointer" title="閉じる (Esc)">
@@ -373,66 +373,194 @@
         </button>
       </div>
 
-      <!-- メイン公式ボックス（特大表示） -->
-      <div class="bg-slate-950/90 border-2 border-indigo-500/40 rounded-2xl p-5 mb-5 text-center shadow-inner">
-        <p class="text-xs sm:text-sm text-slate-300 font-mono mb-3">
-          2点 <span class="text-rose-400 font-bold">A(x_A, y_A)</span>, <span class="text-cyan-400 font-bold">B(x_B, y_B)</span> を <span class="text-amber-300 font-bold">m : n</span> に内分する点 P:
-        </p>
+      <!-- ① 直感図解：たすき掛けのビジュアル -->
+      <div class="bg-slate-950/90 border border-indigo-500/40 rounded-2xl p-4">
+        <div class="text-xs font-bold text-amber-300 mb-2 flex items-center gap-1.5">
+          <span>⚡</span>
+          <span>イメージで覚える！「たすき掛け」の図解</span>
+        </div>
         
-        <div class="py-2.5 flex items-center justify-center gap-2 text-xl sm:text-2xl font-bold font-mono tracking-wide text-white">
-          <span class="text-emerald-400 font-black text-2xl sm:text-3xl">P</span>
-          <span class="text-3xl text-slate-400">(</span>
+        <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 flex flex-col items-center">
+          <svg class="w-full max-w-lg h-36 select-none" viewBox="0 0 460 140" fill="none">
+            <defs>
+              <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-angle">
+                <path d="M 0 1 L 9 5 L 0 9 z" fill="#f59e0b"/>
+              </marker>
+              <marker id="arrow-emerald" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-angle">
+                <path d="M 0 1 L 9 5 L 0 9 z" fill="#10b981"/>
+              </marker>
+            </defs>
+
+            <!-- 線分AB -->
+            <line x1="60" y1="42" x2="400" y2="42" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+            <line x1="60" y1="42" x2="190" y2="42" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+            <line x1="190" y1="42" x2="400" y2="42" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+            
+            <!-- 点A -->
+            <circle cx="60" cy="42" r="8" fill="#f43f5e" stroke="#fff" stroke-width="2"/>
+            <text x="60" y="24" text-anchor="middle" fill="#fda4af" font-weight="bold" font-size="13">点 A</text>
+            <text x="60" y="60" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="monospace">(x_A, y_A)</text>
+            
+            <!-- 比m -->
+            <rect x="110" y="28" width="34" height="22" rx="11" fill="#78350f" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="127" y="44" text-anchor="middle" fill="#fef08a" font-weight="bold" font-size="13">m</text>
+            
+            <!-- 内分点P -->
+            <circle cx="190" cy="42" r="9" fill="#38bdf8" stroke="#fff" stroke-width="2.5"/>
+            <text x="190" y="22" text-anchor="middle" fill="#7dd3fc" font-weight="black" font-size="14">点 P</text>
+            
+            <!-- 比n -->
+            <rect x="280" y="28" width="34" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
+            <text x="297" y="44" text-anchor="middle" fill="#a7f3d0" font-weight="bold" font-size="13">n</text>
+            
+            <!-- 点B -->
+            <circle cx="400" cy="42" r="8" fill="#06b6d4" stroke="#fff" stroke-width="2"/>
+            <text x="400" y="24" text-anchor="middle" fill="#67e8f9" font-weight="bold" font-size="13">点 B</text>
+            <text x="400" y="60" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="monospace">(x_B, y_B)</text>
+            
+            <!-- たすき掛け交差矢印 -->
+            <!-- 比m から 点B への矢印 -->
+            <path d="M 135 53 Q 230 115 385 68" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="5 3" marker-end="url(#arrow-amber)"/>
+            <!-- 比n から 点A への矢印 -->
+            <path d="M 285 53 Q 190 120 75 68" fill="none" stroke="#10b981" stroke-width="2.5" stroke-dasharray="5 3" marker-end="url(#arrow-emerald)"/>
+
+            <!-- 説明テキスト -->
+            <text x="230" y="126" text-anchor="middle" fill="#f1f5f9" font-size="12" font-weight="bold">
+              ★ 比を「反対側の点」へクロスして掛ける！
+            </text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- ② 公式カード（x座標とy座標を2枚のカードに分割してゆったり表示） -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- x座標カード -->
+        <div class="bg-slate-950/90 border border-sky-500/40 rounded-2xl p-4 text-center">
+          <div class="text-xs font-bold text-sky-400 mb-2 flex items-center justify-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            <span>x 座標の求め方</span>
+          </div>
           
-          <!-- x座標 -->
-          <div class="inline-flex flex-col items-center mx-1.5">
-            <span class="text-[11px] text-sky-400 font-sans font-bold mb-1">x座標</span>
-            <span class="fraction text-xl sm:text-2xl text-sky-300 font-extrabold">
-              <span class="numerator pb-1">
-                <span class="text-amber-300">n</span>·<span class="text-rose-400">x_A</span> + <span class="text-amber-300">m</span>·<span class="text-cyan-400">x_B</span>
+          <div class="py-2.5 inline-flex items-center justify-center whitespace-nowrap font-mono">
+            <span class="text-sky-300 font-black text-xl mr-2">x =</span>
+            <div class="inline-flex flex-col items-center">
+              <!-- 分子 -->
+              <span class="border-b-2 border-slate-300 pb-1 px-3 text-base sm:text-lg font-bold">
+                <span class="text-emerald-400 font-extrabold">n</span>·<span class="text-rose-400">x<sub class="text-xs font-sans">A</sub></span>
+                <span class="text-slate-300 mx-1.5">+</span>
+                <span class="text-amber-400 font-extrabold">m</span>·<span class="text-cyan-400">x<sub class="text-xs font-sans">B</sub></span>
               </span>
-              <span class="denominator pt-1 text-amber-300">m + n</span>
-            </span>
+              <!-- 分母 -->
+              <span class="pt-1 text-amber-300 font-extrabold text-base sm:text-lg">
+                <span class="text-amber-400">m</span> + <span class="text-emerald-400">n</span>
+              </span>
+            </div>
           </div>
 
-          <span class="text-2xl text-slate-500 font-sans mx-1">,</span>
+          <p class="text-[11px] text-slate-400 mt-2 font-medium">
+            分母は <span class="text-amber-300 font-bold">比の和</span>、分子は <span class="text-white font-bold">クロス掛け</span>
+          </p>
+        </div>
 
-          <!-- y座標 -->
-          <div class="inline-flex flex-col items-center mx-1.5">
-            <span class="text-[11px] text-emerald-400 font-sans font-bold mb-1">y座標</span>
-            <span class="fraction text-xl sm:text-2xl text-emerald-300 font-extrabold">
-              <span class="numerator pb-1">
-                <span class="text-amber-300">n</span>·<span class="text-rose-400">y_A</span> + <span class="text-amber-300">m</span>·<span class="text-cyan-400">y_B</span>
+        <!-- y座標カード -->
+        <div class="bg-slate-950/90 border border-emerald-500/40 rounded-2xl p-4 text-center">
+          <div class="text-xs font-bold text-emerald-400 mb-2 flex items-center justify-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>y 座標の求め方</span>
+          </div>
+          
+          <div class="py-2.5 inline-flex items-center justify-center whitespace-nowrap font-mono">
+            <span class="text-emerald-300 font-black text-xl mr-2">y =</span>
+            <div class="inline-flex flex-col items-center">
+              <!-- 分子 -->
+              <span class="border-b-2 border-slate-300 pb-1 px-3 text-base sm:text-lg font-bold">
+                <span class="text-emerald-400 font-extrabold">n</span>·<span class="text-rose-400">y<sub class="text-xs font-sans">A</sub></span>
+                <span class="text-slate-300 mx-1.5">+</span>
+                <span class="text-amber-400 font-extrabold">m</span>·<span class="text-cyan-400">y<sub class="text-xs font-sans">B</sub></span>
               </span>
-              <span class="denominator pt-1 text-amber-300">m + n</span>
-            </span>
+              <!-- 分母 -->
+              <span class="pt-1 text-amber-300 font-extrabold text-base sm:text-lg">
+                <span class="text-amber-400">m</span> + <span class="text-emerald-400">n</span>
+              </span>
+            </div>
           </div>
 
-          <span class="text-3xl text-slate-400">)</span>
+          <p class="text-[11px] text-slate-400 mt-2 font-medium">
+            x座標とまったく同じ計算！
+          </p>
         </div>
       </div>
 
-      <!-- 覚え方のコツ & たすき掛け解説 -->
-      <div class="space-y-3 mb-6 text-xs text-slate-200">
-        <div class="bg-indigo-950/50 border border-indigo-500/30 p-4 rounded-2xl flex items-start gap-3">
-          <span class="text-2xl flex-shrink-0">💡</span>
-          <div class="space-y-2 leading-relaxed">
-            <p class="font-bold text-amber-300 text-sm">公式の覚え方（たすき掛けの法則）：</p>
-            <p>① <span class="font-bold text-white text-sm">分母は比の足し算！</span> ＝ <span class="text-amber-300 font-bold font-mono">m + n</span></p>
-            <p>② <span class="font-bold text-white text-sm">分子はクロスして掛ける！</span><br>
-              左の比 <span class="text-amber-300 font-bold">m</span> は右の点 <span class="text-cyan-400 font-bold">B</span> に、右の比 <span class="text-amber-300 font-bold">n</span> は左の点 <span class="text-rose-400 font-bold">A</span> に掛けて足す！<br>
-              <span class="text-slate-300 font-mono">→ （<span class="text-amber-300 font-bold">n</span> × 点A ＋ <span class="text-amber-300 font-bold">m</span> × 点B）</span>
-            </p>
-            <p>③ <span class="font-bold text-white">x座標もy座標もまったく同じ計算です！</span></p>
-          </div>
+      <!-- ③ 具体的な計算例（ステップ解説） -->
+      <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-4 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs sm:text-sm font-bold text-amber-300 flex items-center gap-1.5">
+            <span>📝</span>
+            <span>具体例でわかる！実際の計算手順</span>
+          </span>
+          <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">例題</span>
         </div>
 
-        <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-2xl flex items-center justify-between">
-          <span class="font-bold text-sky-300">※ 中点 (1 : 1) の場合：</span>
-          <span class="font-mono text-emerald-300 font-bold text-xs sm:text-sm">M = ( (x_A + x_B)/2 , (y_A + y_B)/2 )</span>
+        <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 text-xs sm:text-sm text-slate-200 space-y-2.5">
+          <p class="font-bold text-white text-xs sm:text-sm">
+            【例題】点 <span class="text-rose-400 font-bold">A(1, 2)</span> と 点 <span class="text-cyan-400 font-bold">B(7, 8)</span> を <span class="text-amber-300 font-bold">1 : 2</span> に内分する点 P
+          </p>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-0.5">
+            <!-- xの計算 -->
+            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+              <span class="font-bold text-sky-400 block mb-1.5">【x座標の計算】</span>
+              <div class="font-mono text-xs text-slate-300 space-y-1">
+                <div>① 分母（比の和）： 1 + 2 = <span class="text-amber-300 font-bold">3</span></div>
+                <div>② 分子（クロス）： <span class="text-emerald-400 font-bold">2</span>×<span class="text-rose-400">1</span> + <span class="text-amber-400 font-bold">1</span>×<span class="text-cyan-400">7</span> = 2 + 7 = <span class="text-sky-300 font-bold">9</span></div>
+                <div class="pt-1.5 text-white font-bold flex items-center gap-1 border-t border-slate-800/80 mt-1">
+                  <span>x = 9 ÷ 3 =</span>
+                  <span class="text-base text-sky-400 font-black">3</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- yの計算 -->
+            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+              <span class="font-bold text-emerald-400 block mb-1.5">【y座標の計算】</span>
+              <div class="font-mono text-xs text-slate-300 space-y-1">
+                <div>① 分母（比の和）： 1 + 2 = <span class="text-amber-300 font-bold">3</span></div>
+                <div>② 分子（クロス）： <span class="text-emerald-400 font-bold">2</span>×<span class="text-rose-400">2</span> + <span class="text-amber-400 font-bold">1</span>×<span class="text-cyan-400">8</span> = 4 + 8 = <span class="text-emerald-300 font-bold">12</span></div>
+                <div class="pt-1.5 text-white font-bold flex items-center gap-1 border-t border-slate-800/80 mt-1">
+                  <span>y = 12 ÷ 3 =</span>
+                  <span class="text-base text-emerald-400 font-black">4</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-right text-xs pt-1 font-bold">
+            👉 答え： 点 <span class="text-amber-300 font-mono text-sm">P(3, 4)</span>
+          </div>
         </div>
       </div>
 
-      <!-- アクションボタン -->
+      <!-- ④ 直感派・中学生向けの別解（増加量での求め方） -->
+      <div class="bg-slate-950/80 border border-slate-800 p-3.5 rounded-2xl text-xs text-slate-300 space-y-1.5">
+        <div class="font-bold text-amber-300 flex items-center gap-1.5">
+          <span>💡</span>
+          <span>公式を使わない直感的な解き方（横・縦の増加量）</span>
+        </div>
+        <p class="leading-relaxed text-slate-300">
+          A(1) から B(7) まで全体の差は <span class="font-mono text-white font-bold">7 - 1 = 6</span>。<br>
+          比が <span class="text-amber-300 font-bold">1 : 2</span> なので、全体 3 のうち <span class="font-bold text-white">1つ分</span> 進みます。<br>
+          <span class="font-mono text-sky-300">6 × (1/3) = 2</span> 進むので、Aの座標に足して <span class="font-mono font-bold text-amber-300">1 + 2 = 3</span>！<br>
+          <span class="text-slate-400 text-[11px]">※ 公式でもこの増加量の方法でも、自分が解きやすい方法で解いてOKです！</span>
+        </p>
+      </div>
+
+      <!-- ⑤ 中点（1 : 1）のミニヒント -->
+      <div class="bg-slate-950/60 border border-slate-800/80 px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs text-slate-300">
+        <span class="text-slate-400">🎯 <strong>中点（1 : 1）</strong> の場合：</span>
+        <span class="font-mono text-emerald-300 font-bold">足して 2 で割るだけ！ ((x_A + x_B)/2 , (y_A + y_B)/2)</span>
+      </div>
+
+      <!-- 閉じるボタン -->
       <button id="btn-close-formula-modal-bottom" class="w-full py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white shadow-lg shadow-indigo-600/30 transition cursor-pointer">
         閉じる
       </button>
