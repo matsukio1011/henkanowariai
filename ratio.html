@@ -269,37 +269,10 @@
           </div>
         </div>
 
-        <p id="question-text" class="text-base font-bold text-slate-100 leading-snug mb-1">
+        <p id="question-text" class="text-base font-bold text-slate-100 leading-snug">
           直線上の4点 <span class="text-rose-400">A</span>, <span class="text-amber-400">B</span>, <span class="text-emerald-400">C</span>, <span class="text-cyan-400">D</span> について、<br>
           線分比 <span class="text-amber-300 font-black text-lg">AB : BC : CD</span> を最も簡単な整数の比で求めなさい。
         </p>
-
-        <!-- 内分の公式パネル（トグル開閉式） -->
-        <div id="formula-panel" class="hidden my-2.5 p-3 rounded-xl bg-indigo-950/70 border border-indigo-500/40 text-xs text-slate-200 space-y-2 transition-all">
-          <div class="flex items-center justify-between border-b border-indigo-500/30 pb-1.5">
-            <span class="font-bold text-amber-300 flex items-center gap-1">
-              <span>📐</span> 内分点の公式 ($m : n$)
-            </span>
-            <button id="btn-close-formula" class="text-slate-400 hover:text-white text-[10px] px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700 cursor-pointer">閉じる</button>
-          </div>
-          
-          <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800/90 text-center font-mono">
-            <div class="text-slate-400 text-[10px] mb-1">点A($x_A, y_A$), 点B($x_B, y_B$) を $m : n$ に内分する点P:</div>
-            <div class="text-emerald-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-1">
-              <span>P (</span>
-              <span class="fraction"><span class="numerator text-xs">n·x_A + m·x_B</span><span class="denominator text-xs">m + n</span></span>
-              <span>,</span>
-              <span class="fraction"><span class="numerator text-xs">n·y_A + m·y_B</span><span class="denominator text-xs">m + n</span></span>
-              <span>)</span>
-            </div>
-          </div>
-
-          <div class="text-[10px] text-slate-300 space-y-0.5 leading-relaxed bg-slate-900/60 p-1.5 rounded-lg">
-            <p class="font-bold text-sky-300">💡 覚え方のコツ：</p>
-            <p>・分母は「比の足し算 <span class="text-amber-300 font-bold">m + n</span>」</p>
-            <p>・分子は「たすき掛け」：比 <span class="text-amber-300 font-bold">n</span> × 点A ＋ 比 <span class="text-amber-300 font-bold">m</span> × 点B</p>
-          </div>
-        </div>
       </div>
 
       <!-- 4択ボタンリスト -->
@@ -375,6 +348,95 @@
           閉じる
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- 内分の公式ポップアップモーダル（大画面ポップアップ） -->
+  <div id="formula-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+    <div id="formula-card" class="relative bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border-2 border-indigo-400/80 rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl shadow-indigo-500/30 transform scale-90 transition-transform duration-300 flex flex-col">
+      
+      <!-- ヘッダー -->
+      <div class="flex items-center justify-between pb-3.5 mb-4 border-b border-indigo-500/30">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-2xl bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 flex items-center justify-center text-xl shadow-sm">
+            📐
+          </span>
+          <div>
+            <h3 class="text-xl sm:text-2xl font-black text-white tracking-wide">
+              線分の内分点の公式
+            </h3>
+            <p class="text-xs text-indigo-300 font-medium">点A, 点B を m : n に内分する点Pの求め方</p>
+          </div>
+        </div>
+        <button id="btn-close-formula-modal" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-sm font-bold border border-slate-700 transition cursor-pointer" title="閉じる (Esc)">
+          ✕
+        </button>
+      </div>
+
+      <!-- メイン公式ボックス（特大表示） -->
+      <div class="bg-slate-950/90 border-2 border-indigo-500/40 rounded-2xl p-5 mb-5 text-center shadow-inner">
+        <p class="text-xs sm:text-sm text-slate-300 font-mono mb-3">
+          2点 <span class="text-rose-400 font-bold">A(x_A, y_A)</span>, <span class="text-cyan-400 font-bold">B(x_B, y_B)</span> を <span class="text-amber-300 font-bold">m : n</span> に内分する点 P:
+        </p>
+        
+        <div class="py-2.5 flex items-center justify-center gap-2 text-xl sm:text-2xl font-bold font-mono tracking-wide text-white">
+          <span class="text-emerald-400 font-black text-2xl sm:text-3xl">P</span>
+          <span class="text-3xl text-slate-400">(</span>
+          
+          <!-- x座標 -->
+          <div class="inline-flex flex-col items-center mx-1.5">
+            <span class="text-[11px] text-sky-400 font-sans font-bold mb-1">x座標</span>
+            <span class="fraction text-xl sm:text-2xl text-sky-300 font-extrabold">
+              <span class="numerator pb-1">
+                <span class="text-amber-300">n</span>·<span class="text-rose-400">x_A</span> + <span class="text-amber-300">m</span>·<span class="text-cyan-400">x_B</span>
+              </span>
+              <span class="denominator pt-1 text-amber-300">m + n</span>
+            </span>
+          </div>
+
+          <span class="text-2xl text-slate-500 font-sans mx-1">,</span>
+
+          <!-- y座標 -->
+          <div class="inline-flex flex-col items-center mx-1.5">
+            <span class="text-[11px] text-emerald-400 font-sans font-bold mb-1">y座標</span>
+            <span class="fraction text-xl sm:text-2xl text-emerald-300 font-extrabold">
+              <span class="numerator pb-1">
+                <span class="text-amber-300">n</span>·<span class="text-rose-400">y_A</span> + <span class="text-amber-300">m</span>·<span class="text-cyan-400">y_B</span>
+              </span>
+              <span class="denominator pt-1 text-amber-300">m + n</span>
+            </span>
+          </div>
+
+          <span class="text-3xl text-slate-400">)</span>
+        </div>
+      </div>
+
+      <!-- 覚え方のコツ & たすき掛け解説 -->
+      <div class="space-y-3 mb-6 text-xs text-slate-200">
+        <div class="bg-indigo-950/50 border border-indigo-500/30 p-4 rounded-2xl flex items-start gap-3">
+          <span class="text-2xl flex-shrink-0">💡</span>
+          <div class="space-y-2 leading-relaxed">
+            <p class="font-bold text-amber-300 text-sm">公式の覚え方（たすき掛けの法則）：</p>
+            <p>① <span class="font-bold text-white text-sm">分母は比の足し算！</span> ＝ <span class="text-amber-300 font-bold font-mono">m + n</span></p>
+            <p>② <span class="font-bold text-white text-sm">分子はクロスして掛ける！</span><br>
+              左の比 <span class="text-amber-300 font-bold">m</span> は右の点 <span class="text-cyan-400 font-bold">B</span> に、右の比 <span class="text-amber-300 font-bold">n</span> は左の点 <span class="text-rose-400 font-bold">A</span> に掛けて足す！<br>
+              <span class="text-slate-300 font-mono">→ （<span class="text-amber-300 font-bold">n</span> × 点A ＋ <span class="text-amber-300 font-bold">m</span> × 点B）</span>
+            </p>
+            <p>③ <span class="font-bold text-white">x座標もy座標もまったく同じ計算です！</span></p>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-2xl flex items-center justify-between">
+          <span class="font-bold text-sky-300">※ 中点 (1 : 1) の場合：</span>
+          <span class="font-mono text-emerald-300 font-bold text-xs sm:text-sm">M = ( (x_A + x_B)/2 , (y_A + y_B)/2 )</span>
+        </div>
+      </div>
+
+      <!-- アクションボタン -->
+      <button id="btn-close-formula-modal-bottom" class="w-full py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white shadow-lg shadow-indigo-600/30 transition cursor-pointer">
+        閉じる
+      </button>
+
     </div>
   </div>
 
@@ -1817,12 +1879,13 @@
 
         // 公式ボタンを非表示
         const btnToggleFormulaEl = document.getElementById('btn-toggle-formula');
-        const formulaPanelEl = document.getElementById('formula-panel');
         if (btnToggleFormulaEl) {
           btnToggleFormulaEl.classList.add('hidden');
           btnToggleFormulaEl.classList.remove('inline-flex');
         }
-        if (formulaPanelEl) formulaPanelEl.classList.add('hidden');
+        if (typeof hideFormulaModal === 'function') {
+          hideFormulaModal();
+        }
       }
 
       // 4択ボタンの描画
@@ -2212,34 +2275,41 @@
       });
     }
 
-    // 内分の公式表示トグル
+    // 内分の公式ポップアップモーダル管理
     const btnToggleFormula = document.getElementById('btn-toggle-formula');
-    const formulaPanel = document.getElementById('formula-panel');
-    const btnCloseFormula = document.getElementById('btn-close-formula');
-    const formulaBtnText = document.getElementById('formula-btn-text');
+    const formulaModal = document.getElementById('formula-modal');
+    const formulaCard = document.getElementById('formula-card');
+    const btnCloseFormulaModal = document.getElementById('btn-close-formula-modal');
+    const btnCloseFormulaModalBottom = document.getElementById('btn-close-formula-modal-bottom');
 
-    function toggleFormula(show) {
-      if (!formulaPanel) return;
-      const isVisible = show !== undefined ? show : formulaPanel.classList.contains('hidden');
-      if (isVisible) {
-        formulaPanel.classList.remove('hidden');
-        if (formulaBtnText) formulaBtnText.textContent = '公式を隠す';
-      } else {
-        formulaPanel.classList.add('hidden');
-        if (formulaBtnText) formulaBtnText.textContent = '公式を表示';
-      }
+    function showFormulaModal() {
+      playSound('click');
+      formulaModal.classList.remove('hidden');
+      setTimeout(() => {
+        formulaModal.classList.remove('opacity-0');
+        formulaCard.classList.remove('scale-90');
+        formulaCard.classList.add('scale-100');
+      }, 10);
     }
 
-    if (btnToggleFormula) {
-      btnToggleFormula.addEventListener('click', () => {
-        playSound('click');
-        toggleFormula();
-      });
+    function hideFormulaModal() {
+      formulaModal.classList.add('opacity-0');
+      formulaCard.classList.add('scale-90');
+      formulaCard.classList.remove('scale-100');
+      setTimeout(() => {
+        formulaModal.classList.add('hidden');
+      }, 300);
     }
-    if (btnCloseFormula) {
-      btnCloseFormula.addEventListener('click', () => {
-        playSound('click');
-        toggleFormula(false);
+
+    if (btnToggleFormula) btnToggleFormula.addEventListener('click', showFormulaModal);
+    if (btnCloseFormulaModal) btnCloseFormulaModal.addEventListener('click', hideFormulaModal);
+    if (btnCloseFormulaModalBottom) btnCloseFormulaModalBottom.addEventListener('click', hideFormulaModal);
+
+    if (formulaModal) {
+      formulaModal.addEventListener('click', (e) => {
+        if (e.target === formulaModal) {
+          hideFormulaModal();
+        }
       });
     }
 
@@ -2385,6 +2455,13 @@
       if ((e.key === 'Enter' || e.key === ' ') && state.answered) {
         e.preventDefault();
         goToNextQuestion();
+      }
+
+      // Escape: 公式モーダルを閉じる
+      if (e.key === 'Escape') {
+        if (formulaModal && !formulaModal.classList.contains('hidden')) {
+          hideFormulaModal();
+        }
       }
 
       // 座標モード切替
